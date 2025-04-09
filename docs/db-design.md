@@ -25,6 +25,7 @@ Stores user information and their roles.
 |---------------|----------|--------------------------------------|---------------|
 | user_id       | String   | Unique user ID                       | "user123" |
 | role          | String   | User's role in the system            | "ADMIN" |
+| password      | String   | User's password                      | "password123" |
 
 ### Ideas Collection
 
