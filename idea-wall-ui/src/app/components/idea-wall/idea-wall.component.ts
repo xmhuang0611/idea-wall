@@ -110,7 +110,7 @@ import { Idea } from '../../models/idea.model';
       <div class="mt-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
         <div class="flex items-center space-x-4">
           <div class="text-sm text-gray-500">
-            每页显示
+            Show
             <select [(ngModel)]="pageSize"
                     (change)="onPageSizeChange()"
                     class="mx-2 px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -120,10 +120,10 @@ import { Idea } from '../../models/idea.model';
               <option value="50">50</option>
               <option value="100">100</option>
             </select>
-            条
+            items per page
           </div>
           <div class="text-sm text-gray-500">
-            显示 {{(currentPage - 1) * pageSize + 1}} - {{Math.min(currentPage * pageSize, totalItems)}} 条，共 {{totalItems}} 条
+            Showing {{(currentPage - 1) * pageSize + 1}} - {{Math.min(currentPage * pageSize, totalItems)}} of {{totalItems}} items
           </div>
         </div>
         <div class="flex items-center space-x-2">
@@ -131,13 +131,13 @@ import { Idea } from '../../models/idea.model';
                   [disabled]="currentPage === 1"
                   class="px-3 py-1 border rounded-md text-sm"
                   [class.opacity-50]="currentPage === 1">
-            首页
+            First
           </button>
           <button (click)="onPageChange(currentPage - 1)"
                   [disabled]="currentPage === 1"
                   class="px-3 py-1 border rounded-md text-sm"
                   [class.opacity-50]="currentPage === 1">
-            上一页
+            Previous
           </button>
           <div class="flex space-x-1">
             <ng-container *ngFor="let page of getPageNumbers()">
@@ -155,13 +155,13 @@ import { Idea } from '../../models/idea.model';
                   [disabled]="currentPage * pageSize >= totalItems"
                   class="px-3 py-1 border rounded-md text-sm"
                   [class.opacity-50]="currentPage * pageSize >= totalItems">
-            下一页
+            Next
           </button>
           <button (click)="onPageChange(getTotalPages())"
                   [disabled]="currentPage === getTotalPages()"
                   class="px-3 py-1 border rounded-md text-sm"
                   [class.opacity-50]="currentPage === getTotalPages()">
-            末页
+            Last
           </button>
         </div>
       </div>
@@ -188,19 +188,19 @@ import { Idea } from '../../models/idea.model';
 export class IdeaWallComponent implements OnInit {
   ideas: Idea[] = [];
   
-  // 搜索和筛选条件
+  // Search and filter conditions
   searchQuery = '';
   selectedCategory = 'Idea';
   sortBy = 'created_at';
   sortOrder: 'asc' | 'desc' = 'desc';
 
-  // 分页
+  // Pagination
   currentPage = 1;
   pageSize = 20;
   totalItems = 0;
   pageSizeOptions = [5, 10, 20, 50, 100];
 
-  // 类别选项
+  // Category options
   categories = ['Idea', 'Pain', 'Thought'];
 
   constructor(private ideaService: IdeaService) {}
@@ -302,14 +302,14 @@ export class IdeaWallComponent implements OnInit {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    // 总是显示第一页
+    // Always show first page
     pages.push(1);
     
     if (current > 3) {
       pages.push('...');
     }
 
-    // 当前页附近的页码
+    // Page numbers around current page
     for (let i = Math.max(2, current - 1); i <= Math.min(current + 1, totalPages - 1); i++) {
       pages.push(i);
     }
@@ -318,7 +318,7 @@ export class IdeaWallComponent implements OnInit {
       pages.push('...');
     }
 
-    // 总是显示最后一页
+    // Always show last page
     if (totalPages > 1) {
       pages.push(totalPages);
     }

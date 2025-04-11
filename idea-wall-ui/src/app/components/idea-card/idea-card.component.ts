@@ -47,7 +47,7 @@ import { IdeaService } from '../../services/idea.service';
 
     <p-dialog 
       [(visible)]="displayCommentDialog" 
-      header="评论" 
+      header="Comments" 
       [modal]="true"
       [style]="{width: '50vw'}"
     >
@@ -57,14 +57,14 @@ import { IdeaService } from '../../services/idea.service';
             pInputTextarea 
             [(ngModel)]="newComment" 
             rows="3" 
-            placeholder="写下你的评论..."
+            placeholder="Write your comment..."
           ></textarea>
         </div>
       </div>
       <ng-template pTemplate="footer">
         <button 
           pButton 
-          label="提交" 
+          label="Submit" 
           (click)="submitComment()"
           [disabled]="!newComment.trim()"
         ></button>
@@ -95,7 +95,7 @@ export class IdeaCardComponent {
         this.idea.total_votes += this.hasVoted ? 1 : -1;
       },
       error: (error) => {
-        console.error('投票失败', error);
+        console.error('Vote failed', error);
       }
     });
   }
@@ -112,7 +112,7 @@ export class IdeaCardComponent {
           this.newComment = '';
         },
         error: (error) => {
-          console.error('评论失败', error);
+          console.error('Comment failed', error);
         }
       });
     }
