@@ -9,6 +9,10 @@ class IdeaService:
     def __init__(self):
         self.collection_name = "ideas"
 
+    async def get_total_ideas(self) -> int:
+        db = await get_database()
+        return await db[self.collection_name].count_documents({})
+
     async def get_ideas(self, skip: int = 0, limit: int = 20) -> List[Idea]:
         db = await get_database()
         cursor = db[self.collection_name].find().skip(skip).limit(limit)

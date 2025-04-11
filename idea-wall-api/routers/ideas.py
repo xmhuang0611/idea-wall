@@ -2,62 +2,77 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List
 from core.deps import get_current_active_user
 from services.idea_service import idea_service
-from models.idea import Idea, IdeaCreate
+from models.idea import Idea, IdeaCreate, StandardResponse, ResponseMeta, ErrorDetail
 from models.user import User
 
 router = APIRouter()
 
-@router.get("", response_model=List[Idea])
+@router.get("", response_model=StandardResponse[List[Idea]])
 async def get_ideas(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_active_user)
 ):
-    return await idea_service.get_ideas(skip=skip, limit=limit)
+    skip = (page - 1) * page_size
+    ideas = await idea_service.get_ideas(skip=skip, limit=page_size)
+    total = await idea_service.get_total_ideas()
+    
+    return StandardResponse(
+        status="success",
+        data=ideas,
+        meta=ResponseMeta(
+            page=page,
+            page_size=page_size,
+            total=total
+        )
+    )
 
-@router.get("/{idea_id}", response_model=Idea)
+@router.get("/{idea_id}", response_model=StandardResponse[Idea])
 async def get_idea(
     idea_id: str,
     current_user: User = Depends(get_current_active_user)
 ):
     idea = await idea_service.get_idea(idea_id)
-    if idea is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Idea not found"
+    if not idea:
+        return StandardResponse(
+            status="error",
+            error=ErrorDetail(
+                code="NOT_FOUND",
+                message="Idea not found"
+            )
         )
-    return idea
+    return StandardResponse(
+        status="success",
+        data=idea
+    )
 
-@router.post("", response_model=Idea)
+@router.post("", response_model=StandardResponse[Idea])
 async def create_idea(
     idea: IdeaCreate,
     current_user: User = Depends(get_current_active_user)
 ):
-    return await idea_service.create_idea(idea, current_user.user_id)
+    created_idea = await idea_service.create_idea(idea, current_user.id)
+    return StandardResponse(
+        status="success",
+        data=created_idea
+    )
 
-@router.put("/{idea_id}", response_model=Idea)
+@router.put("/{idea_id}", response_model=StandardResponse[Idea])
 async def update_idea(
     idea_id: str,
     idea_update: IdeaCreate,
     current_user: User = Depends(get_current_active_user)
 ):
-    idea = await idea_service.get_idea(idea_id)
-    if idea is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Idea not found"
+    updated_idea = await idea_service.update_idea(idea_id, idea_update, current_user.id)
+    if not updated_idea:
+        return StandardResponse(
+            status="error",
+            error=ErrorDetail(
+                code="NOT_FOUND",
+                message="Idea not found"
+            )
         )
-    
-    if idea.created_by != current_user.user_id and current_user.role != "ADMIN":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
-    
-    updated_idea = await idea_service.update_idea(
-        idea_id=idea_id,
-        idea_update=idea_update,
-        updated_by=current_user.user_id
-    )
-    
-    return updated_idea 
+    return StandardResponse(
+        status="success",
+        data=updated_idea
+    ) 

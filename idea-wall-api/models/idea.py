@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, TypeVar, Generic, Dict, Any
 from datetime import datetime
 from enum import Enum
 
@@ -30,4 +30,21 @@ class Idea(IdeaBase):
     created_at: datetime
     created_by: str
     updated_at: datetime
-    total_votes: int 
+    total_votes: int
+
+T = TypeVar('T')
+
+class ResponseMeta(BaseModel):
+    page: int
+    page_size: int
+    total: int
+
+class ErrorDetail(BaseModel):
+    code: str
+    message: str
+
+class StandardResponse(BaseModel, Generic[T]):
+    status: str
+    data: Optional[T] = None
+    meta: Optional[ResponseMeta] = None
+    error: Optional[ErrorDetail] = None 
