@@ -1,33 +1,66 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
+  standalone: true,
+  imports: [RouterModule, CommonModule],
   template: `
-    <header class="surface-0 shadow-1 px-4 py-3 flex justify-content-between align-items-center">
-      <div class="text-2xl font-bold">
-        <a routerLink="/" class="text-900 no-underline">Idea Wall</a>
-      </div>
-      <nav>
-        <ng-container *ngIf="!(authService.getCurrentUser() | async); else loggedIn">
-          <button pButton routerLink="/login" label="登录" class="p-button-text"></button>
-        </ng-container>
-        <ng-template #loggedIn>
-          <button pButton (click)="logout()" label="退出" class="p-button-text"></button>
-        </ng-template>
+    <header class="bg-white shadow-sm">
+      <nav class="container mx-auto px-4 py-3">
+        <div class="flex items-center justify-between">
+          <!-- Logo and Brand -->
+          <div class="flex items-center space-x-4">
+            <a routerLink="/" class="flex items-center space-x-2">
+              <span class="text-xl font-bold text-blue-600">Tech Compass</span>
+            </a>
+            
+            <!-- Navigation Links -->
+            <div class="hidden md:flex space-x-6">
+              <a routerLink="/" class="text-gray-600 hover:text-blue-600">Home</a>
+              <a routerLink="/ideas" class="text-gray-600 hover:text-blue-600">Ideas</a>
+              <div class="relative group">
+                <button class="text-gray-600 hover:text-blue-600">
+                  Useful Links
+                </button>
+              </div>
+              <a routerLink="/about" class="text-gray-600 hover:text-blue-600">About</a>
+            </div>
+          </div>
+
+          <!-- Right Side -->
+          <div class="flex items-center space-x-4">
+            <button *ngIf="!isLoggedIn" 
+                    routerLink="/login"
+                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+              Login
+            </button>
+            <button *ngIf="isLoggedIn" 
+                    (click)="logout()"
+                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+              Logout
+            </button>
+          </div>
+        </div>
       </nav>
     </header>
   `,
-  standalone: true,
-  imports: [CommonModule, RouterModule, ButtonModule]
+  styles: [`
+    :host {
+      display: block;
+    }
+  `]
 })
 export class HeaderComponent {
-  constructor(public authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
-  logout() {
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  logout(): void {
     this.authService.logout();
   }
 } 

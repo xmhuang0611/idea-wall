@@ -1,7 +1,8 @@
-/* You can add global styles to this file, and also import other style files */
-// @import "primeng/resources/themes/lara-light-blue/theme.css";
-// @import "primeng/resources/primeng.min.css";
-// @import "primeicons/primeicons.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 您的自定义样式可以放在这下面 */
 
 body {
   margin: 0;
