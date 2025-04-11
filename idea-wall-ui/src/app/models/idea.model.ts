@@ -6,6 +6,8 @@ export interface Idea {
   feeling: number;
   tags: number[];
   total_votes: number;
+  user_vote?: number;
+  hasVoted?: boolean;
   created_at: Date;
   created_by: string;
   updated_at: Date;

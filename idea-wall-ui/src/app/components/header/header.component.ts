@@ -14,7 +14,7 @@ import { AuthService } from '../../services/auth.service';
           <!-- Logo and Brand -->
           <div class="flex items-center space-x-4">
             <a routerLink="/" class="flex items-center space-x-2">
-              <span class="text-xl font-bold text-blue-600">Tech Compass</span>
+              <span class="text-xl font-bold text-blue-600">Idea Wall</span>
             </a>
             
             <!-- Navigation Links -->

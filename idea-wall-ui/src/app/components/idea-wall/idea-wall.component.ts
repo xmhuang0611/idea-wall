@@ -77,43 +77,37 @@ import { Idea } from '../../models/idea.model';
         <div *ngFor="let idea of ideas"
              class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
           <div class="flex">
-            <!-- Vote Column -->
+            <!-- Like Column -->
             <div class="flex flex-col items-center mr-6 w-16">
-              <button (click)="onVote(idea, 1)"
+              <button (click)="onVote(idea, idea.hasVoted ? 0 : 1)"
                       class="text-gray-500 hover:text-blue-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                <svg class="w-6 h-6" [class.text-blue-600]="idea.hasVoted" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-6.5"/>
                 </svg>
               </button>
               <span class="text-lg font-semibold my-1">{{idea.total_votes}}</span>
-              <button (click)="onVote(idea, -1)"
-                      class="text-gray-500 hover:text-blue-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-              </button>
             </div>
 
             <!-- Content Column -->
             <div class="flex-1">
-              <div class="flex items-start justify-between mb-2">
+              <div class="flex items-center justify-between mb-2">
                 <h3 class="text-lg font-semibold text-gray-900">{{idea.title}}</h3>
-                <span class="px-3 py-1 rounded-full text-sm"
+                <span class="px-3 py-1 rounded-full text-sm ml-4"
                       [class]="getCategoryClass(idea.category)">
                   {{idea.category}}
                 </span>
               </div>
               <p class="text-gray-600 mb-3 line-clamp-2">{{idea.description}}</p>
-              <div class="flex items-center justify-between text-sm text-gray-500">
-                <div class="flex items-center space-x-4">
-                  <span>By {{idea.created_by}}</span>
-                  <span>{{idea.created_at | date:'medium'}}</span>
-                </div>
+              <div class="flex items-center justify-between text-sm text-gray-500 mt-2 pt-3">
                 <div class="flex items-center space-x-2">
                   <span *ngFor="let tag of idea.tags" 
-                        class="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                        class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
                     {{tag}}
                   </span>
+                </div>
+                <div class="flex items-center space-x-4 text-gray-500">
+                  <span>By {{idea.created_by}}</span>
+                  <span>{{idea.created_at | date:'medium'}}</span>
                 </div>
               </div>
             </div>
@@ -194,15 +188,16 @@ export class IdeaWallComponent implements OnInit {
       sort_order: this.sortOrder
     }).subscribe({
       next: (response) => {
-        console.log(response);
-        this.ideas = response.data;
+        this.ideas = response.data.map(idea => ({
+          ...idea,
+          hasVoted: idea.user_vote ? idea.user_vote > 0 : false
+        }));
         if (response.meta) {
           this.totalItems = response.meta.total;
         }
       },
       error: (error) => {
         console.error('Failed to load ideas', error);
-        // TODO: 添加错误提示
       }
     });
   }
@@ -229,11 +224,12 @@ export class IdeaWallComponent implements OnInit {
   onVote(idea: Idea, voteStatus: number): void {
     this.ideaService.voteIdea(idea._id, voteStatus).subscribe({
       next: () => {
-        this.loadIdeas(); // 重新加载以获取最新投票数
+        idea.hasVoted = voteStatus > 0;
+        idea.total_votes += voteStatus - (idea.user_vote || 0);
+        idea.user_vote = voteStatus;
       },
       error: (error) => {
         console.error('Failed to vote', error);
-        // TODO: 添加错误提示
       }
     });
   }
