@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Idea } from '../models/idea.model';
 
@@ -7,7 +7,7 @@ import { Idea } from '../models/idea.model';
   providedIn: 'root'
 })
 export class IdeaService {
-  private apiUrl = 'http://localhost:8000/api/ideas';
+  private apiUrl = '/api/ideas';
 
   constructor(private http: HttpClient) {}
 
