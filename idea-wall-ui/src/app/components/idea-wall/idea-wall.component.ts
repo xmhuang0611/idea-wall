@@ -11,64 +11,59 @@ import { Idea } from '../../models/idea.model';
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="bg-white rounded-lg shadow-sm p-6">
-      <!-- Breadcrumb -->
-      <div class="mb-6 flex items-center text-gray-600">
-        <a routerLink="/" class="hover:text-blue-600">Home</a>
-        <span class="mx-2">></span>
-        <span>Idea Wall</span>
-      </div>
-
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">Idea Wall</h1>
-        <button routerLink="/submit-idea"
-                class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 flex items-center">
-          <span class="text-xl mr-2">+</span>
-          Submit Your Idea
-        </button>
-      </div>
-
-      <!-- Filters -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <!-- Search -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-          <div class="relative">
-            <input type="text"
-                   [(ngModel)]="searchQuery"
-                   (input)="onSearch()"
-                   placeholder="Search ideas..."
-                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            <span class="absolute right-3 top-2.5 text-gray-400">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-            </span>
+      <!-- Header with Tabs -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center space-x-1">
+            <div class="flex rounded-lg bg-gray-100 p-1">
+              <button *ngFor="let cat of categories"
+                      (click)="onCategorySelect(cat)"
+                      class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                      [class.bg-blue-500]="selectedCategory === cat"
+                      [class.shadow-sm]="selectedCategory === cat"
+                      [class.text-white]="selectedCategory === cat"
+                      [class.text-gray-900]="selectedCategory === cat"
+                      [class.text-gray-600]="selectedCategory !== cat">
+                {{cat}}
+              </button>
+            </div>
           </div>
+          <button routerLink="/submit-idea"
+                  class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 flex items-center">
+            <span class="text-xl mr-2">+</span>
+            Submit Your Idea
+          </button>
         </div>
 
-        <!-- Category -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-          <select [(ngModel)]="selectedCategory"
-                  (change)="onFilterChange()"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            <option value="">All Categories</option>
-            <option *ngFor="let category of categories" [value]="category">
-              {{category}}
-            </option>
-          </select>
-        </div>
+        <!-- Filters -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Search -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <div class="relative">
+              <input type="text"
+                     [(ngModel)]="searchQuery"
+                     (input)="onSearch()"
+                     placeholder="Search ideas..."
+                     class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <span class="absolute right-3 top-2.5 text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </span>
+            </div>
+          </div>
 
-        <!-- Sort -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-          <select [(ngModel)]="sortBy"
-                  (change)="onSortChange()"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            <option value="created_at">Latest Created</option>
-            <option value="total_votes">Most Upvoted</option>
-          </select>
+          <!-- Sort -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+            <select [(ngModel)]="sortBy"
+                    (change)="onSortChange()"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="created_at">Latest Created</option>
+              <option value="total_votes">Most Upvoted</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -92,13 +87,9 @@ import { Idea } from '../../models/idea.model';
             <div class="flex-1">
               <div class="flex items-center justify-between mb-2">
                 <h3 class="text-lg font-semibold text-gray-900">{{idea.title}}</h3>
-                <span class="px-3 py-1 rounded-full text-sm ml-4"
-                      [class]="getCategoryClass(idea.category)">
-                  {{idea.category}}
-                </span>
               </div>
               <p class="text-gray-600 mb-3 line-clamp-2">{{idea.description}}</p>
-              <div class="flex items-center justify-between text-sm text-gray-500 mt-2 pt-3">
+              <div class="flex items-center justify-between text-sm text-gray-500 mt-4 pt-3 border-t border-gray-100">
                 <div class="flex items-center space-x-2">
                   <span *ngFor="let tag of idea.tags" 
                         class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
@@ -160,7 +151,7 @@ export class IdeaWallComponent implements OnInit {
   
   // 搜索和筛选条件
   searchQuery = '';
-  selectedCategory = '';
+  selectedCategory = 'Idea';
   sortBy = 'created_at';
   sortOrder: 'asc' | 'desc' = 'desc';
 
@@ -245,6 +236,12 @@ export class IdeaWallComponent implements OnInit {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  }
+
+  onCategorySelect(category: string): void {
+    this.selectedCategory = category;
+    this.currentPage = 1;
+    this.loadIdeas();
   }
 
   protected readonly Math = Math;
