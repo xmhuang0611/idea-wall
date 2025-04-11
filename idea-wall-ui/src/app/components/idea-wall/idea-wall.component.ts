@@ -61,7 +61,7 @@ import { Idea } from '../../models/idea.model';
                     (change)="onSortChange()"
                     class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="created_at">Latest Created</option>
-              <option value="total_votes">Most Upvoted</option>
+              <option value="total_votes">Most Popular</option>
             </select>
           </div>
         </div>
@@ -107,22 +107,61 @@ import { Idea } from '../../models/idea.model';
       </div>
 
       <!-- Pagination -->
-      <div class="mt-6 flex justify-between items-center">
-        <div class="text-sm text-gray-500">
-          Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, totalItems)}} of {{totalItems}} ideas
+      <div class="mt-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div class="flex items-center space-x-4">
+          <div class="text-sm text-gray-500">
+            每页显示
+            <select [(ngModel)]="pageSize"
+                    (change)="onPageSizeChange()"
+                    class="mx-2 px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            条
+          </div>
+          <div class="text-sm text-gray-500">
+            显示 {{(currentPage - 1) * pageSize + 1}} - {{Math.min(currentPage * pageSize, totalItems)}} 条，共 {{totalItems}} 条
+          </div>
         </div>
-        <div class="flex space-x-2">
+        <div class="flex items-center space-x-2">
+          <button (click)="onPageChange(1)"
+                  [disabled]="currentPage === 1"
+                  class="px-3 py-1 border rounded-md text-sm"
+                  [class.opacity-50]="currentPage === 1">
+            首页
+          </button>
           <button (click)="onPageChange(currentPage - 1)"
                   [disabled]="currentPage === 1"
-                  class="px-4 py-2 border rounded-md"
+                  class="px-3 py-1 border rounded-md text-sm"
                   [class.opacity-50]="currentPage === 1">
-            Previous
+            上一页
           </button>
+          <div class="flex space-x-1">
+            <ng-container *ngFor="let page of getPageNumbers()">
+              <button *ngIf="page !== '...'"
+                      (click)="onPageChange(+page)"
+                      class="px-3 py-1 border rounded-md text-sm"
+                      [class.bg-blue-500]="currentPage === +page"
+                      [class.text-white]="currentPage === +page">
+                {{page}}
+              </button>
+              <span *ngIf="page === '...'" class="px-2">...</span>
+            </ng-container>
+          </div>
           <button (click)="onPageChange(currentPage + 1)"
                   [disabled]="currentPage * pageSize >= totalItems"
-                  class="px-4 py-2 border rounded-md"
+                  class="px-3 py-1 border rounded-md text-sm"
                   [class.opacity-50]="currentPage * pageSize >= totalItems">
-            Next
+            下一页
+          </button>
+          <button (click)="onPageChange(getTotalPages())"
+                  [disabled]="currentPage === getTotalPages()"
+                  class="px-3 py-1 border rounded-md text-sm"
+                  [class.opacity-50]="currentPage === getTotalPages()">
+            末页
           </button>
         </div>
       </div>
@@ -159,6 +198,7 @@ export class IdeaWallComponent implements OnInit {
   currentPage = 1;
   pageSize = 20;
   totalItems = 0;
+  pageSizeOptions = [5, 10, 20, 50, 100];
 
   // 类别选项
   categories = ['Idea', 'Pain', 'Thought'];
@@ -242,6 +282,48 @@ export class IdeaWallComponent implements OnInit {
     this.selectedCategory = category;
     this.currentPage = 1;
     this.loadIdeas();
+  }
+
+  onPageSizeChange(): void {
+    this.currentPage = 1;
+    this.loadIdeas();
+  }
+
+  getTotalPages(): number {
+    return Math.ceil(this.totalItems / this.pageSize);
+  }
+
+  getPageNumbers(): (string | number)[] {
+    const totalPages = this.getTotalPages();
+    const current = this.currentPage;
+    const pages: (string | number)[] = [];
+    
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    // 总是显示第一页
+    pages.push(1);
+    
+    if (current > 3) {
+      pages.push('...');
+    }
+
+    // 当前页附近的页码
+    for (let i = Math.max(2, current - 1); i <= Math.min(current + 1, totalPages - 1); i++) {
+      pages.push(i);
+    }
+
+    if (current < totalPages - 2) {
+      pages.push('...');
+    }
+
+    // 总是显示最后一页
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+
+    return pages;
   }
 
   protected readonly Math = Math;

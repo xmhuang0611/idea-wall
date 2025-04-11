@@ -86,7 +86,6 @@ export class IdeaCardComponent {
   displayCommentDialog = false;
   newComment = '';
   hasVoted = false;
-
   constructor(private ideaService: IdeaService) {}
 
   onVote() {
