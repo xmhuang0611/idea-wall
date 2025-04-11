@@ -24,3 +24,7 @@ uvicorn main:app --reload
 # 访问API文档
 
 http://127.0.0.1:8000/docs
+
+# 生成测试数据
+
+python scripts/generate_test_data.py
