@@ -1,21 +1,78 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import HTTPException, status
 from core.database import get_database
-from models.idea import IdeaCreate, IdeaInDB, Idea
+from models.idea import IdeaCreate, IdeaInDB, Idea, IdeaCategory
 from bson import ObjectId
 
 class IdeaService:
     def __init__(self):
         self.collection_name = "ideas"
 
-    async def get_total_ideas(self) -> int:
-        db = await get_database()
-        return await db[self.collection_name].count_documents({})
+    def _build_filter_query(
+        self,
+        category: Optional[IdeaCategory] = None,
+        search: Optional[str] = None,
+        tags: Optional[List[int]] = None
+    ) -> Dict[str, Any]:
+        filter_query = {}
+        
+        # 分类过滤
+        if category:
+            filter_query["category"] = category
+            
+        # 标签过滤
+        if tags:
+            filter_query["tags"] = {"$all": tags}
+            
+        # 搜索过滤
+        if search:
+            filter_query["$or"] = [
+                {"title": {"$regex": search, "$options": "i"}},
+                {"description": {"$regex": search, "$options": "i"}}
+            ]
+            
+        return filter_query
 
-    async def get_ideas(self, skip: int = 0, limit: int = 20) -> List[Idea]:
+    async def get_total_ideas(
+        self,
+        category: Optional[IdeaCategory] = None,
+        search: Optional[str] = None,
+        tags: Optional[List[int]] = None
+    ) -> int:
         db = await get_database()
-        cursor = db[self.collection_name].find().skip(skip).limit(limit)
+        filter_query = self._build_filter_query(category, search, tags)
+        return await db[self.collection_name].count_documents(filter_query)
+
+    async def get_ideas(
+        self,
+        skip: int = 0,
+        limit: int = 20,
+        category: Optional[IdeaCategory] = None,
+        sort_by: Optional[str] = None,
+        sort_order: Optional[str] = None,
+        search: Optional[str] = None,
+        tags: Optional[List[int]] = None
+    ) -> List[Idea]:
+        db = await get_database()
+        
+        # 构建过滤条件
+        filter_query = self._build_filter_query(category, search, tags)
+            
+        # 构建排序条件
+        sort_options = {}
+        if sort_by:
+            sort_options[sort_by] = -1 if sort_order == "desc" else 1
+        
+        cursor = db[self.collection_name].find(filter_query)
+        
+        # 应用排序
+        if sort_options:
+            cursor = cursor.sort(list(sort_options.items()))
+            
+        # 应用分页
+        cursor = cursor.skip(skip).limit(limit)
+        
         ideas = []
         async for idea_dict in cursor:
             idea_dict["id"] = str(idea_dict.pop("_id"))

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from typing import List
+from typing import List, Optional
 from core.deps import get_current_active_user
 from services.idea_service import idea_service
-from models.idea import Idea, IdeaCreate, StandardResponse, ResponseMeta, ErrorDetail
+from models.idea import Idea, IdeaCreate, StandardResponse, ResponseMeta, ErrorDetail, IdeaCategory
 from models.user import User
 
 router = APIRouter()
@@ -11,11 +11,28 @@ router = APIRouter()
 async def get_ideas(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    category: Optional[IdeaCategory] = None,
+    sort_by: Optional[str] = Query(None, regex="^(created_at|title|feeling|total_votes)$"),
+    sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
+    search: Optional[str] = None,
+    tags: Optional[List[int]] = Query(None),
     current_user: User = Depends(get_current_active_user)
 ):
     skip = (page - 1) * page_size
-    ideas = await idea_service.get_ideas(skip=skip, limit=page_size)
-    total = await idea_service.get_total_ideas()
+    ideas = await idea_service.get_ideas(
+        skip=skip,
+        limit=page_size,
+        category=category,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        search=search,
+        tags=tags
+    )
+    total = await idea_service.get_total_ideas(
+        category=category,
+        search=search,
+        tags=tags
+    )
     
     return StandardResponse(
         status="success",
