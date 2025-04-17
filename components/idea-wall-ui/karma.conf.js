@@ -12,8 +12,23 @@ module.exports = function (config) {
       require('karma-coverage'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
+    files: [{ pattern: 'src/**/*.spec.ts', type: 'js' }],
+    exclude: ['karma.conf.js'],
     client: {
+      jasmine: {
+        random: false,
+      },
       clearContext: false
+    },
+    coveraageIstanbulReporter: {
+      dir: require('path').join(__dirname, './coverage/idea-wall-ui'),
+      reports: ['html', 'lcovonly', 'text-summary', 'cobertura'],
+      'report-config': {
+        cobertura: {
+          file: 'cobertura.xml'
+        }
+      },
+      fixWebpackSourcePaths: true
     },
     jasmineHtmlReporter: {
       suppressAll: true
@@ -22,17 +37,27 @@ module.exports = function (config) {
       dir: require('path').join(__dirname, './coverage/idea-wall-ui'),
       subdir: '.',
       reporters: [
-        { type: 'html' },
+        { type: 'lcov' },
         { type: 'text-summary' }
       ]
     },
-    reporters: ['coverage'],
+    reporters: ['progress', 'coverage', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: false,
-    browsers: ['ChromeHeadless'],
+    autoWatch: true,
+    browsers: ['ChromeHeadlessNoSandbox'],
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--disable-gpu', '--no-sandbox']
+      }
+    },
     singleRun: true,
-    restartOnFileChange: false
+    restartOnFileChange: true,
+    captureTimeout: 600000,
+    browserDisconnectTimeout: 600000,
+    browserDisconnectTolerance: 1,
+    browserNoActivityTimeout: 600000
   });
 }; 
