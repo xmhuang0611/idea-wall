@@ -18,6 +18,7 @@ build/
 # Angular
 node_modules/
 dist/
+coverage/
 .angular/
 *.ngfactory.ts
 *.ngsummary.json

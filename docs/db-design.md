@@ -8,11 +8,11 @@ This document details the MongoDB collections and their schemas for the Idea Wal
 
 All collections include the following audit fields for tracking purposes:
 
-| Field      | Type     | Description                   | Example Value |
-| ---------- | -------- | ----------------------------- | ------------- |
-| created_at | DateTime | When the record was created   | 2024-03-20T10:30:00Z |
+| Field      | Type     | Description                   | Example Value            |
+|------------|----------| ------------------------------|--------------------------|
+| created_at | DateTime | When the record was created   | 2024-03-20T10:30:00Z     |
 | created_by | ObjectId | Who created the record        | 507f1f77bcf86cd799439011 |
-| updated_at | DateTime | When last updated             | 2024-03-21T15:45:00Z |
+| updated_at | DateTime | When last updated             | 2024-03-21T15:45:00Z     |
 | updated_by | ObjectId | Who performed the last update | 507f1f77bcf86cd799439012 |
 
 ## Collections
@@ -23,42 +23,51 @@ Stores user information and their roles.
 
 | Field         | Type     | Description                          | Example Value |
 |---------------|----------|--------------------------------------|---------------|
-| user_id       | String   | Unique user ID                       | "user123" |
-| role          | String   | User's role in the system            | "ADMIN" |
+| user_id       | String   | Unique user ID                       | "user123"     |
+| roles         | Array    | Array of tag IDs                     | [1,2]         |
+
+### Roles Collection
+
+Stores roles for users.
+
+| Field       | Type   | Description                  | Example Value |
+|-------------|--------|------------------------------|---------------|
+| role_id     | number | Role id                      | 1             |
+| role        | String | Role name                    | "Admin"       |
 
 ### Ideas Collection
 
 Stores all ideas submitted to the platform.
 
-| Field          | Type     | Description                           | Example Value |
-|----------------|----------|---------------------------------------|---------------|
-| title          | String   | Idea title                            | "Improve User Experience" |
-| description    | String   | Detailed description                  | "We should optimize the login flow..." |
-| category       | String   | Idea category                        | "Idea" |
-| feeling        | Number   | Feeling score                        | 8 |
-| tags           | Array    | Array of tag IDs                     | [1,2] |
-| total_votes    | Number   | Total number of votes                | 42 |
+| Field          | Type     | Description                          | Example Value                          |
+|----------------|----------|--------------------------------------|----------------------------------------|
+| title          | String   | Idea title                           | "Improve User Experience"              |
+| description    | String   | Detailed description                 | "We should optimize the login flow..." |
+| category       | String   | Idea category                        | "Idea"                                 |
+| feeling        | Number   | Feeling score                        | 8                                      |
+| tags           | Array    | Array of tag IDs                     | [1,2]                                  |
+| total_votes    | Number   | Total number of votes                | 42                                     |
 
 ### Comments Collection
 
 Stores comments on ideas.
 
-| Field    | Type     | Description                    | Example Value |
-|----------|----------|--------------------------------|---------------|
-| idea_id  | ObjectId | Reference to the idea          | "507f1f77bcf86cd799439013" |
+| Field         | Type     | Description                    | Example Value |
+|---------------|----------|--------------------------------|---------------|
+| idea_id       | ObjectId | Reference to the idea          | "507f1f77bcf86cd799439013" |
 | description   | String   | Comment content                | "This is a great idea!" |
-| parent_id| ObjectId | Parent comment for replies     | "507f1f77bcf86cd799439014" |
-| votes    | Number   | Number of votes on comment     | 5 |
+| parent_id     | ObjectId | Parent comment for replies     | "507f1f77bcf86cd799439014" |
+| votes         | Number   | Number of votes on comment     | 5                          |
 
 ### Votes Collection
 
 Stores user votes on ideas and comments.
 
-| Field       | Type     | Description                  | Example Value |
-|-------------|----------|------------------------------|---------------|
-| vote_status | Number   | Vote status (0 or 1)         | 1 |
-| target_id   | ObjectId | ID of idea/comment          | "507f1f77bcf86cd799439015" |
-| target_type | String   | "Idea" or "Comment"         | "Idea" |
+| Field       | Type     | Description                  | Example Value              |
+|-------------|----------|------------------------------|----------------------------|
+| vote_status | Number   | Vote status (0 or 1)         | 1                          |
+| target_id   | ObjectId | ID of idea/comment           | "507f1f77bcf86cd799439015" |
+| target_type | String   | "Idea" or "Comment"          | "Idea"                     |
 
 ### Tags Collection
 
@@ -66,9 +75,20 @@ Stores tags for categorizing ideas.
 
 | Field       | Type   | Description                  | Example Value |
 |-------------|--------|------------------------------|---------------|
-| tag_id     | number | Tag id                     | 1 |
-| tag       | String | Tag name                     | "Innovation" |
-| parent_id | number | Parent tag for nested tags   | 0 |
+| tag_id      | number | Tag id                       | 1             |
+| tag         | String | Tag name                     | "Innovation"  |
+| parent_id   | number | Parent tag for nested tags   | 0             |
+
+### Logs
+
+Stores operation logs for all system operations.
+
+| Field       | Type     | Description                  | Example Value                |
+|-------------|----------|------------------------------|------------------------------|
+| log_id      | ObjectId | Reference to the log         | "507f1f77bcf86cd799439013"   |
+| object      | String   | Operating object             | "Idea", "Comments", ...      |
+| object_id   | String   | Operating object id          | ObjectId or Number           |
+| object_data | String   | Operating object json        | { id: 1, tag: "Innovation" } |
 
 ## Indexes
 
