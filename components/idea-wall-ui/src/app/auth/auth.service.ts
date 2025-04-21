@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, filter } from 'rxjs';
 import { authConfig } from './auth.config';
 
 @Injectable({
@@ -16,9 +16,29 @@ export class AuthService {
 
   private configureOAuth(): void {
     this.oauthService.configure(authConfig);
+    
+    // Setup automatic token refresh
+    this.oauthService.setupAutomaticSilentRefresh();
+    
+    // Load discovery document and try to login
     this.oauthService.loadDiscoveryDocumentAndTryLogin().then(() => {
-      this.isAuthenticatedSubject.next(this.oauthService.hasValidAccessToken());
+      if (this.oauthService.hasValidAccessToken()) {
+        this.isAuthenticatedSubject.next(true);
+      }
     });
+
+    // Subscribe to token events
+    this.oauthService.events
+      .pipe(filter(e => e.type === 'token_received'))
+      .subscribe(_ => {
+        this.isAuthenticatedSubject.next(true);
+      });
+
+    this.oauthService.events
+      .pipe(filter(e => e.type === 'token_expires'))
+      .subscribe(_ => {
+        this.isAuthenticatedSubject.next(false);
+      });
   }
 
   public login(): void {
@@ -40,5 +60,9 @@ export class AuthService {
 
   public hasValidAccessToken(): boolean {
     return this.oauthService.hasValidAccessToken();
+  }
+
+  public getTokenExpiration(): Date {
+    return new Date(this.oauthService.getAccessTokenExpiration());
   }
 } 
