@@ -1,72 +1,54 @@
 import { Injectable } from '@angular/core';
+import { JwtHelperService } from '@auth0/angular-jwt';
 import { OAuthService } from 'angular-oauth2-oidc';
-import { BehaviorSubject, Observable, filter } from 'rxjs';
+import { JwksValidationHandler } from 'angular-oauth2-oidc-jwks'
 import { authConfig } from './auth.config';
-import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  private jwtHelper: JwtHelperService = new JwtHelperService();
+  private decodedAccessToken: any;
 
   constructor(
-    private oauthService: OAuthService,
-    private tokenService: TokenService
+    private oauthService: OAuthService
   ) {
     this.configureOAuth();
   }
 
   private configureOAuth(): void {
     this.oauthService.configure(authConfig);
-    
-    // Setup automatic token refresh
-    this.oauthService.setupAutomaticSilentRefresh();
-    
-    // Load discovery document and try to login
-    this.oauthService.loadDiscoveryDocumentAndTryLogin().then(() => {
-      if (this.oauthService.hasValidAccessToken()) {
-        this.isAuthenticatedSubject.next(true);
-      }
-    });
-
-    // Subscribe to token events
-    this.oauthService.events
-      .pipe(filter(e => e.type === 'token_received'))
-      .subscribe(_ => {
-        this.isAuthenticatedSubject.next(true);
-      });
-
-    this.oauthService.events
-      .pipe(filter(e => e.type === 'token_expires'))
-      .subscribe(_ => {
-        this.isAuthenticatedSubject.next(false);
-      });
+    this.oauthService.setStorage(localStorage);
+    this.oauthService.tokenValidationHandler = new JwksValidationHandler();
+    this.oauthService.tryLogin({ disableOAuth2StateCheck: true });
+     this.handleNewToken();
   }
 
   public login(): void {
-    this.oauthService.initCodeFlow();
+    this.oauthService.initImplicitFlow();
   }
 
   public logout(): void {
-    this.tokenService.logout();
-    this.isAuthenticatedSubject.next(false);
+    this.oauthService.logOut();
   }
 
-  public getAccessToken(): string {
+  public getToken(): string {
     return this.oauthService.getAccessToken();
   }
 
-  public getIdentityClaims(): any {
-    return this.oauthService.getIdentityClaims();
+  public getId(): any {
+    return this.decodedAccessToken && this.decodedAccessToken.userid;
   }
 
-  public hasValidAccessToken(): boolean {
+  public isLoggedIn(): boolean {
     return this.oauthService.hasValidAccessToken();
   }
 
-  public getTokenExpiration(): Date {
-    return new Date(this.oauthService.getAccessTokenExpiration());
+
+  private handleNewToken():void{
+const token = this.oauthService.getAccessToken();
+localStorage.setItem('id_token', token);
+this.decodedAccessToken = this.jwtHelper.decodeToken(token);
   }
 } 

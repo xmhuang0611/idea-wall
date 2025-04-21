@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -33,7 +33,7 @@ import { AuthService } from '../../services/auth.service';
           <!-- Right Side -->
           <div class="flex items-center space-x-4">
             <button *ngIf="!isLoggedIn" 
-                    routerLink="/login"
+                    (click)="login()"
                     class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
               Login
             </button>
@@ -54,10 +54,13 @@ import { AuthService } from '../../services/auth.service';
   `]
 })
 export class HeaderComponent {
-  constructor(private authService: AuthService) {}
+  isLoggedIn = false;
+  constructor(private authService: AuthService) {
+    this.isLoggedIn = this.authService.isLoggedIn();
+  }
 
-  get isLoggedIn(): boolean {
-    return this.authService.isLoggedIn();
+  login(): void {
+    this.authService.login();
   }
 
   logout(): void {
