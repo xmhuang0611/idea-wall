@@ -22,6 +22,7 @@
     "@angular/router": "^17.0.8",
     "@auth0/angular-jwt": "^5.2.0",
     "angular-oauth2-oidc": "^17.0.0",
+    "angular-oauth2-oidc-jwks": "^17.0.0",
     "autoprefixer": "^10.4.21",
     "marked": "^9.1.6",
     "ngx-markdown": "^17.2.1",
