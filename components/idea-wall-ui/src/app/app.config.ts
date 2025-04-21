@@ -1,6 +1,5 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { appRoutes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { OAuthModuleConfig, provideOAuthClient } from 'angular-oauth2-oidc';
@@ -16,7 +15,7 @@ export const oauthModuleConfig: OAuthModuleConfig = {
 
 export const applicationConfig: ApplicationConfig = {
   providers: [
-    provideRouter(appRoutes),
+    provideRouter(routes),
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
