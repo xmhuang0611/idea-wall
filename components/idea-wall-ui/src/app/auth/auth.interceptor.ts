@@ -1,12 +1,12 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { AuthService } from './auth.service';
+import { TokenService } from './token.service';
 import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(AuthService);
-  const token = authService.getAccessToken();
+  const tokenService = inject(TokenService);
+  const token = tokenService.getAccessToken();
   
   if (token) {
     req = req.clone({
@@ -20,7 +20,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
         // Token expired or invalid, redirect to login
-        authService.logout();
+        tokenService.logout();
       }
       return throwError(() => error);
     })

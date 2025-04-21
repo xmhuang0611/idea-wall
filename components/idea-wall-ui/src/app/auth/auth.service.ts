@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { BehaviorSubject, Observable, filter } from 'rxjs';
 import { authConfig } from './auth.config';
+import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,10 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(private oauthService: OAuthService) {
+  constructor(
+    private oauthService: OAuthService,
+    private tokenService: TokenService
+  ) {
     this.configureOAuth();
   }
 
@@ -46,7 +50,7 @@ export class AuthService {
   }
 
   public logout(): void {
-    this.oauthService.logOut();
+    this.tokenService.logout();
     this.isAuthenticatedSubject.next(false);
   }
 
