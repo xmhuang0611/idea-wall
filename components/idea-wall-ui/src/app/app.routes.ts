@@ -1,10 +1,14 @@
 import { Routes } from '@angular/router';
-import { IdeaWallComponent } from './components/idea-wall/idea-wall.component';
-import { LoginComponent } from './components/login/login.component';
+import { AuthGuard } from './auth/auth.guard';
 
-export const appRoutes: Routes = [
-    { path: '', component: IdeaWallComponent },
-    { path: 'ideas', component: IdeaWallComponent },
-    { path: 'login', component: LoginComponent },
-    { path: '**', redirectTo: '' }
-  ];
+export const routes: Routes = [
+  {
+    path: '',
+    // canActivate: [AuthGuard],
+    loadComponent: () => import('./components/idea-wall/idea-wall.component').then(m => m.IdeaWallComponent)
+  },
+  {
+    path: '**',
+    redirectTo: ''
+  }
+];
