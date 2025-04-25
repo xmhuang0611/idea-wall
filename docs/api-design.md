@@ -11,27 +11,7 @@ This document details the API design for the Idea Wall platform. The API follows
 - Development: `http://localhost:8000/api`
 - Production: `https://idea.wall.com/api`
 
-### 1.2 Standard Response Format
-
-```json
-{
-  "status": "success|error",
-  "data": {
-    // Response data
-  },
-  "meta": {
-    "page": 1,
-    "page_size": 20,
-    "total": 100
-  },
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Error message"
-  }
-}
-```
-
-### 1.3 HTTP Status Codes
+### 1.2 HTTP Status Codes
 
 Common HTTP status codes used in the API:
 
@@ -47,22 +27,33 @@ Common HTTP status codes used in the API:
 - 429: Too Many Requests - Rate limit exceeded
 - 500: Internal Server Error - Server error
 
-### 1.4 Error Response Format
+```python
+status_code = 200 | 201 | 204 | 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500
+```
+
+### 1.3 Standard Response Format
 
 ```json
 {
-  "status": "error",
+  "success": true|false,
+  "data": {
+    // Response data
+  },
+  // optional, only for list response
+  "meta": {
+    "page": 1,
+    "page_size": 20,
+    "total": 100
+  },
+  // optional, only for error response
   "error": {
-    "code": "ERROR_CODE",
-    "message": "Human readable error message",
-    "details": {
-      // Additional error details if available
-    }
+    "status_code": status_code,
+    "message": "Error message"
   }
 }
 ```
 
-### 1.5 Authentication
+### 1.4 Authentication
 
 - JWT-based authentication
 - Token included in Authorization header: `Authorization: Bearer <token>`
@@ -73,7 +64,7 @@ Common HTTP status codes used in the API:
   - POST /api/auth/refresh
   - POST /api/auth/logout
 
-### 1.6 Rate Limiting
+### 1.5 Rate Limiting
 
 - Basic rate limiting: 100 requests per minute per IP
 - Authenticated users: 1000 requests per minute
@@ -87,41 +78,78 @@ Common HTTP status codes used in the API:
 
 ### User Endpoints
 
-#### Get User Information
+#### Get User Information and Roles
 
 ```http
 GET /api/users/{user_id}
 ```
 
-#### Create User
+#### Get All Users with Roles
 
 ```http
-POST /api/users
+GET /api/users/with-roles
+```
+
+Query Parameters:
+
+```
+page=1
+page_size=20
+role=ADMIN  // optional, filter by role
+```
+
+Response Body:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "user_id": "user123",
+      "roles": ["ADMIN", "IDEA_INCUBATOR_REVIEWER"],
+    },
+    // more users...
+  ],
+  "meta": {
+    "page": 1,
+    "page_size": 20,
+    "total": 100
+  }
+}
+```
+
+#### Add User Roles
+
+```http
+POST /api/users/{user_id}/roles
 ```
 
 Request Body:
 
 ```json
 {
-  "user_id": "user123",
-  "role": "ADMIN",
-  "password": "password123"
+  "roles": ["ADMIN", "IDEA_INCUBATOR_REVIEWER"]
 }
 ```
 
-#### Update User Information
+#### Update User Roles
 
 ```http
-PUT /api/users/{user_id}
+PUT /api/users/{user_id}/roles
 ```
 
 Request Body:
 
 ```json
 {
-  "role": "ADMIN",
-  "password": "newpassword123"
+  "roles": ["ADMIN", "IDEA_INCUBATOR_REVIEWER"]
 }
+```
+
+#### Delete User Roles
+
+```http
+DELETE /api/users/{user_id}/roles
 ```
 
 ### Idea Endpoints
@@ -230,6 +258,94 @@ Request Body:
   "tag_id": 1,
   "tag": "Innovation",
   "parent_id": 0
+}
+```
+
+### Log Endpoints
+
+#### Get All Logs
+
+```http
+GET /api/logs
+```
+
+Query Parameters:
+
+```
+page=1
+page_size=20
+object=Idea  // optional, filter by object type
+object_id=507f1f77bcf86cd799439015  // optional, filter by object id
+start_date=2023-01-01  // optional, filter by date range
+end_date=2023-12-31  // optional, filter by date range
+```
+
+Response Body:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "log_id": "507f1f77bcf86cd799439013",
+      "object": "Idea",
+      "object_id": "507f1f77bcf86cd799439015",
+      "object_data": "{\"id\":\"507f1f77bcf86cd799439015\",\"title\":\"Improve User Experience\"}",
+    },
+    // more logs...
+  ],
+  "meta": {
+    "page": 1,
+    "page_size": 20,
+    "total": 100
+  }
+}
+```
+
+#### Get Log by ID
+
+```http
+GET /api/logs/{log_id}
+```
+
+Response Body:
+
+```json
+{
+  "success": true,
+  "data": {
+    "log_id": "507f1f77bcf86cd799439013",
+    "object": "Idea",
+    "object_id": "507f1f77bcf86cd799439015",
+    "object_data": "{\"id\":\"507f1f77bcf86cd799439015\",\"title\":\"Improve User Experience\"}",
+  }
+}
+```
+
+#### Create Log
+
+```http
+POST /api/logs
+```
+
+Request Body:
+
+```json
+{
+  "object": "Idea",
+  "object_id": "507f1f77bcf86cd799439015",
+  "object_data": "{\"id\":\"507f1f77bcf86cd799439015\",\"title\":\"Improve User Experience\"}",
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "log_id": "507f1f77bcf86cd799439013"
+  }
 }
 ```
 
