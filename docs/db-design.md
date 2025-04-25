@@ -8,12 +8,14 @@ This document details the MongoDB collections and their schemas for the Idea Wal
 
 All collections include the following audit fields for tracking purposes:
 
-| Field      | Type     | Description                   | Example Value            |
-|------------|----------| ------------------------------|--------------------------|
-| created_at | DateTime | When the record was created   | 2024-03-20T10:30:00Z     |
-| created_by | ObjectId | Who created the record        | 507f1f77bcf86cd799439011 |
-| updated_at | DateTime | When last updated             | 2024-03-21T15:45:00Z     |
-| updated_by | ObjectId | Who performed the last update | 507f1f77bcf86cd799439012 |
+| Field             | Type     | Description                   | Example Value            |
+|-------------------|----------|-------------------------------|--------------------------|
+| created_at        | DateTime | When the record was created   | 2024-03-20T10:30:00Z     |
+| created_by_id     | ObjectId | Who created the record        | "user123"                |
+| created_by_name   | String   | Who created the record        | "John Doe"               |
+| updated_at        | DateTime | When last updated             | 2024-03-21T15:45:00Z     |
+| updated_by_id     | ObjectId | Who performed the last update | "user123"                |
+| updated_by_name   | String   | Who performed the last update | "John Doe"               |
 
 ## Collections
 
@@ -21,19 +23,10 @@ All collections include the following audit fields for tracking purposes:
 
 Stores user information and their roles.
 
-| Field         | Type     | Description                          | Example Value |
-|---------------|----------|--------------------------------------|---------------|
-| user_id       | String   | Unique user ID                       | "user123"     |
-| roles         | Array    | Array of tag IDs                     | [1,2]         |
-
-### Roles Collection
-
-Stores roles for users.
-
-| Field       | Type   | Description                  | Example Value |
-|-------------|--------|------------------------------|---------------|
-| role_id     | number | Role id                      | 1             |
-| role        | String | Role name                    | "Admin"       |
+| Field         | Type     | Description                          | Example Value                        |
+|---------------|----------|--------------------------------------|------------------------------------- |
+| user_id       | String   | Unique user ID                       | "user123"                            |
+| roles         | Array    | Array of user roles                  | ["ADMIN", "IDEA_INCUBATOR_REVIEWER"] |
 
 ### Ideas Collection
 
@@ -83,12 +76,12 @@ Stores tags for categorizing ideas.
 
 Stores operation logs for all system operations.
 
-| Field       | Type     | Description                  | Example Value                |
-|-------------|----------|------------------------------|------------------------------|
-| log_id      | ObjectId | Reference to the log         | "507f1f77bcf86cd799439013"   |
-| object      | String   | Operating object             | "Idea", "Comments", ...      |
-| object_id   | String   | Operating object id          | ObjectId or Number           |
-| object_data | String   | Operating object json        | { id: 1, tag: "Innovation" } |
+| Field       | Type        | Description                  | Example Value                |
+|-------------|-------------|------------------------------|------------------------------|
+| log_id      | ObjectId    | Reference to the log         | "507f1f77bcf86cd799439013"   |
+| object      | ObjectType  | Operating object             | "Idea", "Comments", ...      |
+| object_id   | String      | Operating object id          | ObjectId or Number           |
+| object_data | String      | Operating object json        | { id: 1, tag: "Innovation" } |
 
 ## Indexes
 
@@ -148,3 +141,11 @@ Stores operation logs for all system operations.
 
 - Idea
 - Comment
+
+### Object Types
+
+- Idea
+- Comment
+- Vote
+- Tag
+- User
