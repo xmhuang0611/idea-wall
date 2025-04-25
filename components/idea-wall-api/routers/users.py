@@ -1,68 +1,228 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from typing import List, Optional
 from core.deps import get_current_active_user
 from services.user_service import user_service
-from models.user import User, UserCreate
+from models.user import User, UserInDB, UserRole
+from pydantic import BaseModel
 
 router = APIRouter()
 
-@router.get("/me", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
-    return current_user
+class RoleUpdate(BaseModel):
+    roles: List[str]
 
-@router.get("/{user_id}", response_model=User)
-async def read_user(
-    user_id: str,
-    current_user: User = Depends(get_current_active_user)
-):
-    user = await user_service.get_user(user_id)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-    return User(
-        user_id=user.user_id,
-        role=user.role,
-        created_at=user.created_at,
-        updated_at=user.updated_at
+class StandardResponse(BaseModel):
+    success: bool
+    data: Optional[dict] = None
+    meta: Optional[dict] = None
+    error: Optional[dict] = None
+
+@router.get("/me", response_model=StandardResponse)
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    """Get current user information"""
+    return StandardResponse(
+        success=True,
+        data=current_user.dict()
     )
 
-@router.post("", response_model=User)
-async def create_user(
-    user: UserCreate,
+@router.get("/with-roles", response_model=StandardResponse)
+async def get_users_with_roles(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    role: Optional[str] = None,
     current_user: User = Depends(get_current_active_user)
 ):
-    if current_user.role != "ADMIN":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
-    return await user_service.create_user(user, current_user.user_id)
-
-@router.put("/{user_id}", response_model=User)
-async def update_user(
-    user_id: str,
-    user_update: UserCreate,
-    current_user: User = Depends(get_current_active_user)
-):
-    if current_user.role != "ADMIN" and current_user.user_id != user_id:
+    """
+    Get all users with roles with pagination and optional role filtering
+    Only admins can access this endpoint
+    """
+    # Check if user is admin
+    if "ADMIN" not in current_user.roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     
-    updated_user = await user_service.update_user(
+    result = await user_service.get_all_users(page=page, page_size=page_size, role=role)
+    
+    return StandardResponse(
+        success=True,
+        data=[user.dict() for user in result["users"]],
+        meta=result["meta"]
+    )
+
+@router.get("/{user_id}", response_model=StandardResponse)
+async def get_user(
+    user_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Get a specific user by ID
+    Users can view their own information, admins can view any user
+    """
+    # Check if user is admin or requesting their own info
+    if "ADMIN" not in current_user.roles and current_user.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    user = await user_service.get_user(user_id)
+    if not user:
+        return StandardResponse(
+            success=False,
+            error={
+                "status_code": status.HTTP_404_NOT_FOUND,
+                "message": "User not found"
+            }
+        )
+    
+    return StandardResponse(
+        success=True,
+        data=user.dict()
+    )
+
+@router.post("/{user_id}/roles", response_model=StandardResponse)
+async def add_user_roles(
+    user_id: str,
+    role_update: RoleUpdate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Add roles to a user
+    Only admins can assign roles
+    """
+    # Check if current user is admin
+    if "ADMIN" not in current_user.roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    # Validate roles
+    for role in role_update.roles:
+        try:
+            UserRole(role)
+        except ValueError:
+            return StandardResponse(
+                success=False,
+                error={
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": f"Invalid role: {role}"
+                }
+            )
+    
+    # Get existing user if available
+    existing_user = await user_service.get_user(user_id)
+    
+    # Combine existing and new roles
+    combined_roles = list(set((existing_user.roles if existing_user else []) + role_update.roles))
+    
+    # Update user roles
+    updated_user = await user_service.update_user_roles(
         user_id=user_id,
-        updated_by=current_user.user_id,
-        role=user_update.role,
-        password=user_update.password
+        roles=combined_roles,
+        admin_user_id=current_user.user_id,
+        admin_user_name=current_user.user_id  # Ideally would be user's name
     )
     
     if not updated_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+        return StandardResponse(
+            success=False,
+            error={
+                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Failed to update user roles"
+            }
         )
     
-    return updated_user 
+    return StandardResponse(
+        success=True,
+        data=updated_user.dict()
+    )
+
+@router.put("/{user_id}/roles", response_model=StandardResponse)
+async def update_user_roles(
+    user_id: str,
+    role_update: RoleUpdate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Replace all roles for a user
+    Only admins can update roles
+    """
+    # Check if current user is admin
+    if "ADMIN" not in current_user.roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    # Validate roles
+    for role in role_update.roles:
+        try:
+            UserRole(role)
+        except ValueError:
+            return StandardResponse(
+                success=False,
+                error={
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": f"Invalid role: {role}"
+                }
+            )
+    
+    # Update user roles (complete replacement)
+    updated_user = await user_service.update_user_roles(
+        user_id=user_id,
+        roles=role_update.roles,
+        admin_user_id=current_user.user_id,
+        admin_user_name=current_user.user_id  # Ideally would be user's name
+    )
+    
+    if not updated_user:
+        return StandardResponse(
+            success=False,
+            error={
+                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Failed to update user roles"
+            }
+        )
+    
+    return StandardResponse(
+        success=True,
+        data=updated_user.dict()
+    )
+
+@router.delete("/{user_id}/roles", response_model=StandardResponse)
+async def delete_user_roles(
+    user_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Delete all roles from a user
+    Only admins can delete roles
+    """
+    # Check if current user is admin
+    if "ADMIN" not in current_user.roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    success = await user_service.delete_user_roles(
+        user_id=user_id,
+        admin_user_id=current_user.user_id,
+        admin_user_name=current_user.user_id  # Ideally would be user's name
+    )
+    
+    if not success:
+        return StandardResponse(
+            success=False,
+            error={
+                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Failed to delete user roles"
+            }
+        )
+    
+    return StandardResponse(
+        success=True,
+        data={"message": "All roles removed successfully"}
+    ) 

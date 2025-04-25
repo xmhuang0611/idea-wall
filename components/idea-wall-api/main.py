@@ -1,8 +1,49 @@
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from core.database import connect_to_mongo, close_mongo_connection
+from core.oauth2_config import get_oauth2_settings
 from routers import users, ideas, comments, votes, tags, auth
 
+oauth2_settings = get_oauth2_settings()
+
 app = FastAPI(title="Idea Wall API")
+
+# Custom OpenAPI documentation to support OAuth2 Implicit flow
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    openapi_schema = get_openapi(
+        title="Idea Wall API",
+        version="1.0.0",
+        description="Idea Wall API with OAuth2 Implicit Flow support",
+        routes=app.routes,
+    )
+    
+    # Add OAuth2 Implicit flow
+    openapi_schema["components"] = openapi_schema.get("components", {})
+    openapi_schema["components"]["securitySchemes"] = {
+        "oauth2": {
+            "type": "oauth2",
+            "flows": {
+                "implicit": {
+                    "authorizationUrl": "/api/auth/authorize",
+                    "scopes": {
+                        "read": "Read access",
+                        "write": "Write access"
+                    }
+                }
+            }
+        }
+    }
+    
+    # Set global security configuration
+    openapi_schema["security"] = [{"oauth2": ["read", "write"]}]
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 # Event handlers
 @app.on_event("startup")
