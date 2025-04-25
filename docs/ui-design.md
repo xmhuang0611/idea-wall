@@ -16,10 +16,44 @@ Idea Wall is an enterprise-grade web application focused on idea management and 
 
 ## URL Structure
 
-### Idea Pages
+### Home Page
 
-- Idea List: `/ideas`
-- Idea Detail: `/ideas/{idea-id}`
+- Main Feed: `/`
+  - Primary content area showing idea cards in a grid/list layout
+  - Each card displays:
+    - Idea title
+    - Brief description
+    - Author info
+    - Vote count
+    - Comment count
+    - Tags
+  - Infinite scroll pagination
+  - Filter options:
+    - Most Recent
+    - Most Voted
+    - My Following
+
+- Popular Ideas Sidebar
+  - Fixed position on right side
+  - Shows top 5 trending ideas based on:
+    - Recent votes
+    - Comment activity
+    - View count
+  - Quick links to full idea details
+
+### Idea Details
+
+- Full View: `/ideas/{idea-id}`
+  - Complete idea description
+  - Rich media attachments
+  - Author profile
+  - Voting controls
+  - Comment section:
+    - Threaded discussions
+    - Rich text formatting
+    - @mentions support
+  - Related ideas
+  - Share functionality
 
 ### Profile Center
 
