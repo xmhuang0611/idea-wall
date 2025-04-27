@@ -62,6 +62,15 @@ Stores user votes on ideas and comments.
 | target_id   | ObjectId | ID of idea/comment           | "507f1f77bcf86cd799439015" |
 | target_type | String   | "Idea" or "Comment"          | "Idea"                     |
 
+### Favorites Collection
+
+Stores user's favorite ideas.
+
+| Field           | Type     | Description                  | Example Value              |
+|-----------------|----------|------------------------------|----------------------------|
+| favorite_status | Number   | Favorite status (0 or 1)     | 1                          |
+| target_id       | ObjectId | ID of idea                   | "507f1f77bcf86cd799439015" |
+
 ### Tags Collection
 
 Stores tags for categorizing ideas.
