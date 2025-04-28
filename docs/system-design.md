@@ -1,3 +1,14 @@
+### 技术栈
+- **前端技术栈**：Angular + PrimeNG，实现在 idea-wall-ui
+- **后端技术栈**：Python FastAPI，实现在 idea-wall-api
+- **数据库**：MongoDB
+
+
+### 登录系统
+1. 只需提供user_id即可登录系统。
+2. 如果系统中不存在该user_id则报错。
+
+
 ### 系统首页
 1. 系统首页展示Ideas列表，分页展示，用户可选择每页展示多少条。
 2. 列表上方有一个Button Group，有Idea、Pain、Thought三个快速Categories Filter Button，点击只展示该类型的Ideas。
@@ -7,7 +18,6 @@
 6. Ideas列表右上方有一个发布按钮。如果用户已登录该用户为enabled，点击弹出模态框发表Idea，否则为disabled。
 7. 每条Idea前面有一个按钮展示该Idea的点赞数。如果当前用户已点赞该Idea，则这个按钮是高亮的，点击取消点赞；否认为正常状态，点击点赞该Idea。
 8. 每条Idea下面有评论、收藏按钮，评论按钮上同时展示当前Idea的总评论数，收藏按钮上同时展示当前Idea的收藏总数。如果当前用户已收藏该Idea，则收藏按钮为高亮状态，点击取消收藏；否则收藏按钮为正常状态，点击收藏。
-
 
 
 ### 发表Idea功能
@@ -29,7 +39,15 @@
 ### 发表评论功能
 1. 如果已经登录系统，点击Idea列表页面每条Idea下面的评论按钮，弹出模态框分页展示该Idea的所有评论。最上方还有一个富文本编辑器可以对Idea进行评论，评论保存在Comments Collection中，idea_id为评论的Idea Id，parent_id为空。
 2. 也可以对某一条评论进行评论，idea_id为评论的Idea Id，parent_id为被评论的评论Id。
+3. 用户也可以编辑自己发表过的评论，编辑评论时也要记录Log。
 
+
+### 我发布的Ideas
+1. 从我的头像下拉菜单中选择“我发布的Idea”，Ideas列表只过滤出我发布的Ideas。其他操作与Ideas列表一致。
+
+
+### 我收藏的Ideas
+1. 从我的头像下拉菜单中选择“我收藏的Idea”，Ideas列表只过滤出我收藏的Ideas。其他操作与Ideas列表一致。
 
 
 ### Audit字段填充及系统日志记录
