@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { AuthService } from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -22,4 +23,11 @@ import { FooterComponent } from './components/footer/footer.component';
     }
   `]
 })
-export class AppComponent {} 
+export class AppComponent implements OnInit {
+  constructor(private authService: AuthService) {}
+
+  ngOnInit() {
+    // Initialize the authentication service
+    this.authService.isLoggedIn();
+  }
+} 
