@@ -6,7 +6,13 @@ from routers import users, ideas, comments, votes, tags
 
 oauth2_settings = get_oauth2_settings()
 
-app = FastAPI(title="Idea Wall API")
+app = FastAPI(
+    title="Idea Wall API",
+    swagger_ui_init_oauth={
+        "clientId": oauth2_settings.client_id,
+        "usePkceWithAuthorizationCodeGrant": False
+    }
+)
 
 # Custom OpenAPI documentation to support OAuth2 Implicit flow
 def custom_openapi():
@@ -28,10 +34,6 @@ def custom_openapi():
             "flows": {
                 "implicit": {
                     "authorizationUrl": "/api/auth/authorize",
-                    "scopes": {
-                        "read": "Read access",
-                        "write": "Write access"
-                    }
                 }
             }
         }
