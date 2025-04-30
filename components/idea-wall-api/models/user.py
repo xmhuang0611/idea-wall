@@ -11,6 +11,7 @@ class UserRole(str, Enum):
 # Standard user model
 class User(BaseModel):
     user_id: str
+    user_name: str
     roles: List[str] = []
 
 # Database user model with additional fields

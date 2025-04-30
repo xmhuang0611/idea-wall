@@ -40,9 +40,9 @@ oauth2_implicit = OAuth2ImplicitBearer(auto_error=True)
 
 async def get_current_user(
     token: str = Depends(oauth2_implicit)
-) -> str:
+) -> User:
     """
-    Get current user ID from token, requiring valid token
+    Get current user ID and name  from token, requiring valid token
     """
     try:
         # Parse the JWT token
@@ -51,6 +51,7 @@ async def get_current_user(
         # User ID may be stored in different fields depending on the OAuth provider
         # sub is the standard field in JWT for user ID
         user_id: str = payload.get("sub") or payload.get("user_id") or payload.get("userid")
+        user_name: str = payload.get("name") or payload.get("username") or payload.get("user_name")
         if user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -58,7 +59,7 @@ async def get_current_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
             
-        return user_id
+        return User(user_id=user_id, user_name=user_name)
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -68,9 +69,9 @@ async def get_current_user(
 
 # Role-based access control dependency
 def has_role(required_role: str):
-    async def role_checker(user_id: str = Depends(get_current_user)):
+    async def role_checker(user_info: User = Depends(get_current_user)):
         # Get user roles from database
-        user = await user_service.get_user(user_id)
+        user = await user_service.get_user(user_info.user_id)
         
         # Check if user exists and has required role
         if not user or (required_role not in user.roles and "ADMIN" not in user.roles):
@@ -78,8 +79,5 @@ def has_role(required_role: str):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Role {required_role} required"
             )
-        return User(
-            user_id=user.user_id,
-            roles=user.roles
-        )
+        return user
     return role_checker 
