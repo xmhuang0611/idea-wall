@@ -3,11 +3,19 @@ import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { AuthService } from './auth/auth.service';
+import { LoginDialogComponent } from './auth/login-dialog/login-dialog.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterModule, HeaderComponent, FooterComponent],
+  imports: [
+    RouterModule, 
+    HeaderComponent, 
+    FooterComponent,
+    CommonModule,
+    LoginDialogComponent
+  ],
   template: `
     <div class="min-h-screen flex flex-col bg-gray-50">
       <app-header></app-header>

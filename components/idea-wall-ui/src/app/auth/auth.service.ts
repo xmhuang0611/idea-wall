@@ -4,6 +4,8 @@ import { OAuthService } from 'angular-oauth2-oidc';
 import { JwksValidationHandler } from 'angular-oauth2-oidc-jwks'
 import { authConfig } from './auth.config';
 import { Observable, of, Subject } from 'rxjs';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -14,9 +16,11 @@ export class AuthService {
   private useOauth = false;
   private localToken: string | null = null;
   private loginSubject = new Subject<boolean>();
+  private dialogRef: DynamicDialogRef | null = null;
 
   constructor(
-    private oauthService: OAuthService
+    private oauthService: OAuthService,
+    private dialogService: DialogService
   ) {
     if (this.useOauth) {
       this.configureOAuth();
@@ -45,15 +49,27 @@ export class AuthService {
     if (this.useOauth) {
       this.oauthService.initImplicitFlow();
     } else {
-      // 简单的提示用户输入 ID 和用户名
-      const userId = prompt('请输入用户ID') || '';
-      const userName = prompt('请输入用户名') || '';
-      
-      if (userId && userName) {
-        this.createLocalToken(userId, userName);
-        this.loginSubject.next(true);
-      }
+      this.dialogRef = this.dialogService.open(LoginDialogComponent, {
+        header: 'Login',
+        width: '350px',
+        contentStyle: { overflow: 'hidden' },
+        dismissableMask: true,
+        baseZIndex: 1000,
+        styleClass: 'login-dialog-container'
+      });
+
+      this.dialogRef.onClose.subscribe(result => {
+        if (result && result.userId && result.userName) {
+          this.createLocalToken(result.userId, result.userName);
+          this.loginSubject.next(true);
+          window.location.reload();
+        }
+      });
     }
+  }
+
+  public getLoginStatus(): Observable<boolean> {
+    return this.loginSubject.asObservable();
   }
 
   public logout(): void {
@@ -65,6 +81,7 @@ export class AuthService {
       this.decodedAccessToken = null;
       this.loginSubject.next(false);
     }
+    window.location.reload();
   }
 
   public getToken(): string {
@@ -80,7 +97,7 @@ export class AuthService {
   }
 
   public getUserName(): string {
-    return this.decodedAccessToken && this.decodedAccessToken.user_name || '';
+    return this.decodedAccessToken && (this.decodedAccessToken.user_name || '') || '';
   }
 
   public isLoggedIn(): boolean {
@@ -98,29 +115,29 @@ export class AuthService {
   }
 
   private createLocalToken(userId: string, userName: string): void {
-    // 创建一个符合后端解析要求的 JWT 格式 token
+    // Create a JWT format token
     const header = {
       alg: "HS256",
       typ: "JWT"
     };
     
-    // 添加必要的字段，确保 userid 和 sub 都存在（sub 是标准的 JWT 用户标识字段）
+    // Add required fields
     const payload = {
-      sub: userId,  // 标准 JWT 中的用户标识字段
+      sub: userId,
       userid: userId,
       user_name: userName,
-      iat: Math.floor(Date.now() / 1000),  // 签发时间
-      exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60  // 24小时过期（秒级时间戳）
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60
     };
     
-    // 编码 header 和 payload
+    // Encode header and payload
     const encodedHeader = btoa(JSON.stringify(header));
     const encodedPayload = btoa(JSON.stringify(payload));
     
-    // 简单的签名（不需要真实验证，但保持格式一致）
+    // Simple signature
     const signature = btoa(userId + userName);
     
-    // 创建标准 JWT 格式: header.payload.signature
+    // Create JWT format: header.payload.signature
     const token = `${encodedHeader}.${encodedPayload}.${signature}`;
     
     localStorage.setItem('local_token', token);
@@ -130,12 +147,12 @@ export class AuthService {
 
   private decodeLocalToken(token: string): any {
     try {
-      // 分割 JWT
+      // Split JWT
       const parts = token.split('.');
       if (parts.length < 2) {
         return null;
       }
-      // 只需要解码 payload 部分
+      // Decode payload part
       return JSON.parse(atob(parts[1]));
     } catch (e) {
       return null;

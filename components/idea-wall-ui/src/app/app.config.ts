@@ -4,6 +4,12 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { OAuthModuleConfig, provideOAuthClient } from 'angular-oauth2-oidc';
 import { routes } from './app.routes';
 import { authInterceptor } from './auth/auth.interceptor';
+import { provideAnimations } from '@angular/platform-browser/animations';
+
+// PrimeNG imports
+import { DialogService } from 'primeng/dynamicdialog';
+import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 export const oauthModuleConfig: OAuthModuleConfig = {
   resourceServer: {
@@ -19,6 +25,12 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([authInterceptor])
     ),
     provideOAuthClient(),
-    { provide: OAuthModuleConfig, useValue: oauthModuleConfig }
+    { provide: OAuthModuleConfig, useValue: oauthModuleConfig },
+    DialogService,
+    DynamicDialogRef,
+    DynamicDialogConfig,
+    MessageService,
+    ConfirmationService,
+    provideAnimations()
   ]
 };

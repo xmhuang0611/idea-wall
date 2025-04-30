@@ -1,0 +1,16 @@
+<div class="login-dialog">
+    <div class="dialog-content">
+        <div class="input-field">
+            <label for="userId">User ID</label>
+            <input id="userId" type="text" pInputText [(ngModel)]="userId" placeholder="Enter your user ID">
+        </div>
+        <div class="input-field">
+            <label for="userName">User Name</label>
+            <input id="userName" type="text" pInputText [(ngModel)]="userName" placeholder="Enter your user name">
+        </div>
+        <div class="dialog-actions">
+            <button pButton label="Cancel" class="p-button-outlined" (click)="onCancel()"></button>
+            <button pButton label="Login" class="p-button-primary" (click)="onLogin()" [disabled]="!userId || !userName"></button>
+        </div>
+    </div>
+</div> 

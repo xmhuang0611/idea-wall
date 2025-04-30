@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/auth.service';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterModule, CommonModule],
+  imports: [RouterModule, CommonModule, OverlayPanelModule],
   template: `
     <header class="bg-white shadow-sm">
       <nav class="container mx-auto px-4 py-3">
@@ -37,11 +38,26 @@ import { AuthService } from '../../auth/auth.service';
                     class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
               Login
             </button>
-            <button *ngIf="isLoggedIn" 
-                    (click)="logout()"
-                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-              Logout
-            </button>
+            
+            <!-- User Avatar with Dropdown -->
+            <div *ngIf="isLoggedIn" class="relative user-avatar">
+              <div class="avatar-circle" (click)="op.toggle($event)">
+                {{ getUserInitials() }}
+              </div>
+              
+              <p-overlayPanel #op [showCloseIcon]="false" [style]="{width: '220px'}" styleClass="user-dropdown">
+                <div class="user-dropdown-content">
+                  <div class="user-info">
+                    <span class="user-name">{{ userName }}</span>
+                  </div>
+                  <div class="dropdown-divider"></div>
+                  <button class="logout-button" (click)="logout()">
+                    <i class="logout-icon"></i>
+                    Logout
+                  </button>
+                </div>
+              </p-overlayPanel>
+            </div>
           </div>
         </div>
       </nav>
@@ -51,12 +67,108 @@ import { AuthService } from '../../auth/auth.service';
     :host {
       display: block;
     }
+    
+    .user-avatar {
+      position: relative;
+    }
+    
+    .avatar-circle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #3b82f6;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      
+      &:hover {
+        background-color: #2563eb;
+      }
+    }
+    
+    :host ::ng-deep .user-dropdown {
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 0;
+      
+      .p-overlaypanel-content {
+        padding: 0;
+      }
+    }
+    
+    .user-dropdown-content {
+      display: flex;
+      flex-direction: column;
+      
+      .user-info {
+        padding: 16px;
+        
+        .user-name {
+          font-weight: 500;
+          font-size: 16px;
+          color: #1f2937;
+        }
+      }
+      
+      .dropdown-divider {
+        height: 1px;
+        background-color: #e5e7eb;
+        margin: 0;
+      }
+      
+      .logout-button {
+        display: flex;
+        align-items: center;
+        background: none;
+        border: none;
+        padding: 12px 16px;
+        cursor: pointer;
+        color: #4b5563;
+        font-size: 14px;
+        text-align: left;
+        transition: background-color 0.2s;
+        
+        &:hover {
+          background-color: #f3f4f6;
+          color: #1f2937;
+        }
+        
+        .logout-icon {
+          display: inline-block;
+          margin-right: 8px;
+          width: 20px;
+          height: 20px;
+          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V9.414a1 1 0 00-.293-.707L11.414 4.414A1 1 0 0010.707 4H4a1 1 0 00-1 1z" clip-rule="evenodd" /><path d="M14 7V5a1 1 0 00-1-1H9.414l-1-1H3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V9.414l-3-3H14z" /></svg>');
+        }
+      }
+    }
   `]
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   isLoggedIn = false;
-  constructor(private authService: AuthService) {
+  userName = '';
+  
+  constructor(private authService: AuthService) {}
+  
+  ngOnInit() {
+    this.updateLoginStatus();
+  }
+  
+  updateLoginStatus() {
     this.isLoggedIn = this.authService.isLoggedIn();
+    if (this.isLoggedIn) {
+      this.userName = this.authService.getUserName();
+    }
+  }
+  
+  getUserInitials(): string {
+    if (!this.userName) return '?';
+    
+    return this.userName.charAt(0).toUpperCase();
   }
 
   login(): void {
