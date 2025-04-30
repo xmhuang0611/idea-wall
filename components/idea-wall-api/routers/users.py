@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Optional
-from core.deps import get_current_active_user
+from core.deps import get_current_user, has_role
 from services.user_service import user_service
 from models.user import User, UserInDB, UserRole
 from pydantic import BaseModel
@@ -16,12 +16,20 @@ class StandardResponse(BaseModel):
     meta: Optional[dict] = None
     error: Optional[dict] = None
 
+# Helper function to get a User model from user_id
+async def get_user_model(user_id: str) -> User:
+    user = await user_service.get_user(user_id)
+    if not user:
+        return User(user_id=user_id, roles=[])
+    return User(user_id=user.user_id, roles=user.roles)
+
 @router.get("/me", response_model=StandardResponse)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
+async def read_users_me(user_id: str = Depends(get_current_user)):
     """Get current user information"""
+    user = await get_user_model(user_id)
     return StandardResponse(
         success=True,
-        data=current_user.dict()
+        data=user.dict()
     )
 
 @router.get("/with-roles", response_model=StandardResponse)
@@ -29,7 +37,7 @@ async def get_users_with_roles(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     role: Optional[str] = None,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get all users with roles with pagination and optional role filtering
@@ -53,7 +61,7 @@ async def get_users_with_roles(
 @router.get("/{user_id}", response_model=StandardResponse)
 async def get_user(
     user_id: str,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get a specific user by ID
@@ -66,7 +74,7 @@ async def get_user(
             detail="Not enough permissions"
         )
     
-    user = await user_service.get_user(user_id)
+    user = await get_user_model(user_id)
     if not user:
         return StandardResponse(
             success=False,
@@ -85,7 +93,7 @@ async def get_user(
 async def add_user_roles(
     user_id: str,
     role_update: RoleUpdate,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Add roles to a user
@@ -112,7 +120,7 @@ async def add_user_roles(
             )
     
     # Get existing user if available
-    existing_user = await user_service.get_user(user_id)
+    existing_user = await get_user_model(user_id)
     
     # Combine existing and new roles
     combined_roles = list(set((existing_user.roles if existing_user else []) + role_update.roles))
@@ -143,7 +151,7 @@ async def add_user_roles(
 async def update_user_roles(
     user_id: str,
     role_update: RoleUpdate,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Replace all roles for a user
@@ -194,7 +202,7 @@ async def update_user_roles(
 @router.delete("/{user_id}/roles", response_model=StandardResponse)
 async def delete_user_roles(
     user_id: str,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Delete all roles from a user

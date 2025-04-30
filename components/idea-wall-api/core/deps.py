@@ -68,9 +68,9 @@ async def get_current_user(
 
 # Role-based access control dependency
 def has_role(required_role: str):
-    async def role_checker(user_id: str = Depends(get_current_user_id)):
+    async def role_checker(user_id: str = Depends(get_current_user)):
         # Get user roles from database
-        user = await user_service.get_user_by_id(user_id)
+        user = await user_service.get_user(user_id)
         
         # Check if user exists and has required role
         if not user or (required_role not in user.roles and "ADMIN" not in user.roles):

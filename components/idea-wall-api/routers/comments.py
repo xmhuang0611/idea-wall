@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Optional
-from core.deps import get_current_active_user, get_current_user_optional
+from core.deps import get_current_user
 from services.comment_service import comment_service
 from services.idea_service import idea_service
 from models.comment import Comment, CommentCreate
@@ -13,7 +13,7 @@ async def get_comments(
     idea_id: str,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    current_user: Optional[User] = Depends(get_current_user_optional)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
     idea = await idea_service.get_idea(idea_id)
     if not idea:
@@ -27,7 +27,7 @@ async def get_comments(
 async def create_comment(
     idea_id: str,
     comment: CommentCreate,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     idea = await idea_service.get_idea(idea_id)
     if not idea:
@@ -54,7 +54,7 @@ async def create_comment(
 async def delete_comment(
     idea_id: str,
     comment_id: str,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     comment = await comment_service.get_comment(comment_id)
     if not comment:

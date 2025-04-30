@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from core.database import connect_to_mongo, close_mongo_connection
 from core.oauth2_config import get_oauth2_settings
-from routers import users, ideas, comments, votes, tags, auth
+from routers import users, ideas, comments, votes, tags
 
 oauth2_settings = get_oauth2_settings()
 
@@ -55,7 +55,6 @@ async def shutdown_event():
     await close_mongo_connection()
 
 # Include routers
-app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(ideas.router, prefix="/api/ideas", tags=["ideas"])
 app.include_router(comments.router, prefix="/api/ideas/{idea_id}/comments", tags=["comments"])
