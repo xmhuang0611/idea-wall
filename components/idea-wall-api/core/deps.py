@@ -1,10 +1,10 @@
-from typing import Optional, Union
+from typing import Optional, Dict, Any
 from fastapi import Depends, HTTPException, status, Request
 from jose import JWTError
 from .config import get_settings
 from .security import decode_oauth2_token
 from services.user_service import user_service
-from models.user import User, UserInDB
+from models.user import User
 
 settings = get_settings()
 
@@ -36,17 +36,14 @@ class OAuth2ImplicitBearer:
         return token
 
 # For Implicit flow
-oauth2_implicit = OAuth2ImplicitBearer(auto_error=False)
+oauth2_implicit = OAuth2ImplicitBearer(auto_error=True)
 
-async def get_current_user_optional(
-    token: Optional[str] = Depends(oauth2_implicit)
-) -> Optional[UserInDB]:
+async def get_current_user(
+    token: str = Depends(oauth2_implicit)
+) -> str:
     """
-    Get current user without requiring authentication
+    Get current user ID from token, requiring valid token
     """
-    if not token:
-        return None
-        
     try:
         # Parse the JWT token
         payload = decode_oauth2_token(token)
@@ -55,45 +52,34 @@ async def get_current_user_optional(
         # sub is the standard field in JWT for user ID
         user_id: str = payload.get("sub") or payload.get("user_id") or payload.get("userid")
         if user_id is None:
-            return None
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token: user ID not found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
             
-        # Process OAuth user and return it
-        return await user_service.process_oauth_user(user_id, payload)
+        return user_id
     except JWTError:
-        return None
-
-async def get_current_user(
-    current_user: Optional[UserInDB] = Depends(get_current_user_optional)
-) -> UserInDB:
-    """
-    Get current user, requiring authentication
-    """
-    if current_user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return current_user
-
-async def get_current_active_user(
-    current_user: UserInDB = Depends(get_current_user)
-) -> User:
-    """
-    Get current active user
-    """
-    return User(
-        user_id=current_user.user_id,
-        roles=current_user.roles
-    )
 
 # Role-based access control dependency
 def has_role(required_role: str):
-    async def role_checker(current_user: User = Depends(get_current_active_user)):
-        if required_role not in current_user.roles and "ADMIN" not in current_user.roles:
+    async def role_checker(user_id: str = Depends(get_current_user_id)):
+        # Get user roles from database
+        user = await user_service.get_user_by_id(user_id)
+        
+        # Check if user exists and has required role
+        if not user or (required_role not in user.roles and "ADMIN" not in user.roles):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Role {required_role} required"
             )
-        return current_user
+        return User(
+            user_id=user.user_id,
+            roles=user.roles
+        )
     return role_checker 
