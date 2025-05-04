@@ -15,7 +15,9 @@ import { IdeaService } from '../../services/idea.service';
       <ng-template pTemplate="header">
         <div class="flex align-items-center justify-content-between p-2">
           <span class="p-tag">{{ idea.category }}</span>
-          <span class="text-sm text-500">{{ idea.created_at | date }}</span>
+          <span class="text-sm text-500">
+            {{ idea.created_at | date }} by {{ idea.creator_name }}
+          </span>
         </div>
       </ng-template>
 

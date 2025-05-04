@@ -97,7 +97,7 @@ import { Idea } from '../../models/idea.model';
                   </span>
                 </div>
                 <div class="flex items-center space-x-4 text-gray-500">
-                  <span>By {{idea.created_by}}</span>
+                  <span>By {{idea.creator_name}}</span>
                   <span>{{idea.created_at | date:'medium'}}</span>
                 </div>
               </div>

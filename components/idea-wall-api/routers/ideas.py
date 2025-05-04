@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
 from core.deps import get_current_user
 from services.idea_service import idea_service
@@ -68,7 +68,11 @@ async def create_idea(
     idea: IdeaCreate,
     current_user: User = Depends(get_current_user)
 ):
-    created_idea = await idea_service.create_idea(idea, current_user.user_id)
+    created_idea = await idea_service.create_idea(
+        idea, 
+        created_by=current_user.user_id,
+        created_by_name=current_user.user_name
+    )
     return StandardResponse(
         status="success",
         data=created_idea
@@ -80,7 +84,12 @@ async def update_idea(
     idea_update: IdeaCreate,
     current_user: User = Depends(get_current_user)
 ):
-    updated_idea = await idea_service.update_idea(idea_id, idea_update, current_user.user_id)
+    updated_idea = await idea_service.update_idea(
+        idea_id, 
+        idea_update, 
+        updated_by=current_user.user_id, 
+        updated_by_name=current_user.user_name
+    )
     if not updated_idea:
         return StandardResponse(
             status="error",

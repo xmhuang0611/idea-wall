@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from core.database import get_database
 from models.comment import CommentCreate, CommentInDB, Comment
 from bson import ObjectId

@@ -1,39 +1,16 @@
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from .config import get_settings
 from .oauth2_config import get_oauth2_settings
 import requests
-import json
 
 settings = get_settings()
 oauth2_settings = get_oauth2_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Cache for JWKS keys
 _jwks_cache = None
 _jwks_cache_timestamp = None
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """
-    Create internal access token, only used in special cases
-    Typically we use third-party OAuth provider tokens
-    """
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
-    return encoded_jwt
 
 def get_jwks() -> Dict[str, Any]:
     """Get and cache JWKS keys"""
@@ -111,19 +88,6 @@ def decode_oauth2_token(token: str) -> Dict[str, Any]:
             
             # If no matching key found, try fallback verification
             return fallback_token_verification(token, unverified_claims)
-        else:
-            # Symmetric encryption algorithm (HS256, etc)
-            # Verify with configured secret key
-            try:
-                payload = jwt.decode(
-                    token, 
-                    settings.jwt_secret_key, 
-                    algorithms=[settings.jwt_algorithm]
-                )
-                return payload
-            except Exception:
-                # If verification fails, try without signature verification
-                return fallback_token_verification(token, unverified_claims)
     except Exception as e:
         # If parsing fails, might be incompatible token format
         # Return a dictionary with error info

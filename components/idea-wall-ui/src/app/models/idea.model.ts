@@ -9,7 +9,9 @@ export interface Idea {
   user_vote?: number;
   hasVoted?: boolean;
   created_at: Date;
-  created_by: string;
+  creator_id: string;
+  creator_name: string;
   updated_at: Date;
-  updated_by: string;
+  updater_id: string;
+  updater_name: string;
 } 

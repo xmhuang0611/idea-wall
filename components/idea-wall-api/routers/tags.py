@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List
 from core.deps import get_current_user
 from services.tag_service import tag_service

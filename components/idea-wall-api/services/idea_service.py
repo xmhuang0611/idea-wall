@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional, Dict, Any
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from core.database import get_database
 from models.idea import IdeaCreate, IdeaInDB, Idea, IdeaCategory
 from bson import ObjectId
@@ -76,6 +76,21 @@ class IdeaService:
         ideas = []
         async for idea_dict in cursor:
             idea_dict["id"] = str(idea_dict.pop("_id"))
+            
+            # 确保所有必要字段都存在，按照新的数据库设计
+            if "creator_id" not in idea_dict:
+                idea_dict["creator_id"] = "anonymous"
+            if "creator_name" not in idea_dict:
+                idea_dict["creator_name"] = "Anonymous User"
+            if "updater_id" not in idea_dict:
+                idea_dict["updater_id"] = idea_dict.get("creator_id", "anonymous")
+            if "updater_name" not in idea_dict:
+                idea_dict["updater_name"] = idea_dict.get("creator_name", "Anonymous User")
+            if "updated_at" not in idea_dict:
+                idea_dict["updated_at"] = idea_dict.get("created_at", datetime.utcnow())
+            if "total_votes" not in idea_dict:
+                idea_dict["total_votes"] = 0
+                
             ideas.append(Idea(**idea_dict))
         return ideas
 
@@ -84,16 +99,33 @@ class IdeaService:
         idea_dict = await db[self.collection_name].find_one({"_id": ObjectId(idea_id)})
         if idea_dict:
             idea_dict["id"] = str(idea_dict.pop("_id"))
+            
+            # 确保所有必要字段都存在，按照新的数据库设计
+            if "creator_id" not in idea_dict:
+                idea_dict["creator_id"] = "anonymous"
+            if "creator_name" not in idea_dict:
+                idea_dict["creator_name"] = "Anonymous User"
+            if "updater_id" not in idea_dict:
+                idea_dict["updater_id"] = idea_dict.get("creator_id", "anonymous")
+            if "updater_name" not in idea_dict:
+                idea_dict["updater_name"] = idea_dict.get("creator_name", "Anonymous User")
+            if "updated_at" not in idea_dict:
+                idea_dict["updated_at"] = idea_dict.get("created_at", datetime.utcnow())
+            if "total_votes" not in idea_dict:
+                idea_dict["total_votes"] = 0
+                
             return Idea(**idea_dict)
         return None
 
-    async def create_idea(self, idea: IdeaCreate, created_by: str) -> Idea:
+    async def create_idea(self, idea: IdeaCreate, created_by: str, created_by_name: str = "Anonymous User") -> Idea:
         db = await get_database()
         idea_dict = idea.model_dump()
         idea_in_db = IdeaInDB(
             **idea_dict,
-            created_by=created_by,
-            updated_by=created_by
+            creator_id=created_by,
+            creator_name=created_by_name,
+            updater_id=created_by,
+            updater_name=created_by_name
         )
         
         result = await db[self.collection_name].insert_one(idea_in_db.model_dump())
@@ -102,8 +134,11 @@ class IdeaService:
             id=str(result.inserted_id),
             **idea_dict,
             created_at=idea_in_db.created_at,
-            created_by=created_by,
+            creator_id=created_by,
+            creator_name=created_by_name,
             updated_at=idea_in_db.updated_at,
+            updater_id=created_by,
+            updater_name=created_by_name,
             total_votes=0
         )
 
@@ -111,13 +146,15 @@ class IdeaService:
         self,
         idea_id: str,
         idea_update: IdeaCreate,
-        updated_by: str
+        updated_by: str,
+        updated_by_name: str = "Anonymous User"
     ) -> Optional[Idea]:
         db = await get_database()
         update_data = idea_update.model_dump()
         update_data.update({
             "updated_at": datetime.utcnow(),
-            "updated_by": updated_by
+            "updater_id": updated_by,
+            "updater_name": updated_by_name
         })
         
         result = await db[self.collection_name].update_one(

@@ -5,5 +5,6 @@ export interface Comment {
   parent_id?: string;
   votes: number;
   created_at: Date;
-  created_by: string;
+  creator_id: string;
+  creator_name: string;
 } 

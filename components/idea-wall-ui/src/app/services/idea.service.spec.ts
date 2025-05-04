@@ -18,9 +18,11 @@ describe('IdeaService', () => {
       user_vote: 1,
       hasVoted: true,
       created_at: new Date(),
-      created_by: 'user1',
+      creator_id: 'user1',
+      creator_name: 'User One',
       updated_at: new Date(),
-      updated_by: 'user1'
+      updater_id: 'user1',
+      updater_name: 'User One'
     },
     {
       _id: '2',
@@ -33,9 +35,11 @@ describe('IdeaService', () => {
       user_vote: -1,
       hasVoted: true,
       created_at: new Date(),
-      created_by: 'user2',
+      creator_id: 'user2',
+      creator_name: 'User Two',
       updated_at: new Date(),
-      updated_by: 'user2'
+      updater_id: 'user2',
+      updater_name: 'User Two'
     }
   ];
 

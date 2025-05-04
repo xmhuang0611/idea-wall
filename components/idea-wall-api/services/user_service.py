@@ -1,7 +1,5 @@
 from core.database import get_database
-from core.security import verify_password, get_password_hash
 from typing import Optional, List, Dict
-from bson import ObjectId
 from datetime import datetime
 from models.user import User, UserInDB, UserRole
 

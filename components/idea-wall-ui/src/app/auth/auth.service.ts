@@ -117,7 +117,7 @@ export class AuthService {
   private createLocalToken(userId: string, userName: string): void {
     // Create a JWT format token
     const header = {
-      alg: "HS256",
+      alg: "RS256",
       typ: "JWT"
     };
     
