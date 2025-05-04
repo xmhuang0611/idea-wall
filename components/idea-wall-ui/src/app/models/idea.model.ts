@@ -1,3 +1,5 @@
+import { Tag } from './tag.model';
+
 export interface Idea {
   _id: string;
   title: string;
@@ -5,6 +7,7 @@ export interface Idea {
   category: 'Idea' | 'Pain' | 'Thought';
   feeling: number;
   tags: number[];
+  tag_details?: Tag[];
   total_votes: number;
   user_vote?: number;
   hasVoted?: boolean;

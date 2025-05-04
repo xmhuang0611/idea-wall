@@ -16,7 +16,6 @@ async def get_ideas(
     sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
     search: Optional[str] = None,
     tags: Optional[List[int]] = Query(None),
-    current_user: Optional[User] = Depends(get_current_user)
 ):
     skip = (page - 1) * page_size
     ideas = await idea_service.get_ideas(

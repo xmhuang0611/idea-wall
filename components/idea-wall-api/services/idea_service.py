@@ -2,8 +2,9 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 from fastapi import HTTPException
 from core.database import get_database
-from models.idea import IdeaCreate, IdeaInDB, Idea, IdeaCategory
+from models.idea import IdeaCreate, IdeaInDB, Idea, IdeaCategory, IdeaTag
 from bson import ObjectId
+from services.tag_service import tag_service
 
 class IdeaService:
     def __init__(self):
@@ -91,6 +92,16 @@ class IdeaService:
             if "total_votes" not in idea_dict:
                 idea_dict["total_votes"] = 0
                 
+            # 获取标签详情
+            if "tags" in idea_dict and idea_dict["tags"]:
+                tag_details = []
+                for tag_id in idea_dict["tags"]:
+                    tag = await tag_service.get_tag(tag_id)
+                    if tag:
+                        tag_details.append(IdeaTag(tag_id=tag.tag_id, tag=tag.tag))
+                if tag_details:
+                    idea_dict["tag_details"] = tag_details
+                
             ideas.append(Idea(**idea_dict))
         return ideas
 
@@ -113,6 +124,16 @@ class IdeaService:
                 idea_dict["updated_at"] = idea_dict.get("created_at", datetime.utcnow())
             if "total_votes" not in idea_dict:
                 idea_dict["total_votes"] = 0
+                
+            # 获取标签详情
+            if "tags" in idea_dict and idea_dict["tags"]:
+                tag_details = []
+                for tag_id in idea_dict["tags"]:
+                    tag = await tag_service.get_tag(tag_id)
+                    if tag:
+                        tag_details.append(IdeaTag(tag_id=tag.tag_id, tag=tag.tag))
+                if tag_details:
+                    idea_dict["tag_details"] = tag_details
                 
             return Idea(**idea_dict)
         return None

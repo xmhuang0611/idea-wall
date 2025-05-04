@@ -24,7 +24,7 @@ import { IdeaService } from '../../services/idea.service';
       <p>{{ idea.description }}</p>
 
       <div class="flex gap-2">
-        <p-chip *ngFor="let tag of idea.tags" [label]="tag"></p-chip>
+        <p-chip *ngFor="let tag of idea.tag_details" [label]="tag.tag"></p-chip>
       </div>
 
       <ng-template pTemplate="footer">

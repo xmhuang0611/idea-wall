@@ -8,6 +8,10 @@ class IdeaCategory(str, Enum):
     PAIN = "Pain"
     THOUGHT = "Thought"
 
+class IdeaTag(BaseModel):
+    tag_id: int
+    tag: str
+
 class IdeaBase(BaseModel):
     title: str
     description: str
@@ -36,6 +40,7 @@ class Idea(IdeaBase):
     updater_id: str
     updater_name: str
     total_votes: int
+    tag_details: Optional[List[IdeaTag]] = None
 
 T = TypeVar('T')
 

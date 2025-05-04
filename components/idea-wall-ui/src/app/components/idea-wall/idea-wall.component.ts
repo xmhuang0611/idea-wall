@@ -91,9 +91,9 @@ import { Idea } from '../../models/idea.model';
               <p class="text-gray-600 mb-3 line-clamp-2">{{idea.description}}</p>
               <div class="flex items-center justify-between text-sm text-gray-500 mt-4 pt-3 border-t border-gray-100">
                 <div class="flex items-center space-x-2">
-                  <span *ngFor="let tag of idea.tags" 
+                  <span *ngFor="let tag of idea.tag_details" 
                         class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
-                    {{tag}}
+                    {{tag.tag}}
                   </span>
                 </div>
                 <div class="flex items-center space-x-4 text-gray-500">
