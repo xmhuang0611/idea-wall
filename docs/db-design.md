@@ -11,11 +11,11 @@ All collections include the following audit fields for tracking purposes:
 | Field             | Type     | Description                   | Example Value            |
 |-------------------|----------|-------------------------------|--------------------------|
 | created_at        | DateTime | When the record was created   | 2024-03-20T10:30:00Z     |
-| created_by_id     | ObjectId | Who created the record        | "user123"                |
-| created_by_name   | String   | Who created the record        | "John Doe"               |
+| creator_id        | ObjectId | Who created the record        | "user123"                |
+| creator_name      | String   | Who created the record        | "John Doe"               |
 | updated_at        | DateTime | When last updated             | 2024-03-21T15:45:00Z     |
-| updated_by_id     | ObjectId | Who performed the last update | "user123"                |
-| updated_by_name   | String   | Who performed the last update | "John Doe"               |
+| updater_id        | ObjectId | Who performed the last update | "user123"                |
+| updater_name      | String   | Who performed the last update | "John Doe"               |
 
 ## Collections
 
@@ -69,7 +69,7 @@ Stores user's favorite ideas.
 | Field           | Type     | Description                  | Example Value              |
 |-----------------|----------|------------------------------|----------------------------|
 | favorite_status | Number   | Favorite status (0 or 1)     | 1                          |
-| target_id       | ObjectId | ID of idea                   | "507f1f77bcf86cd799439015" |
+| idea_id         | ObjectId | ID of idea                   | "507f1f77bcf86cd799439015" |
 
 ### Tags Collection
 
@@ -87,8 +87,7 @@ Stores operation logs for all system operations.
 
 | Field       | Type        | Description                  | Example Value                |
 |-------------|-------------|------------------------------|------------------------------|
-| log_id      | ObjectId    | Reference to the log         | "507f1f77bcf86cd799439013"   |
-| object      | ObjectType  | Operating object             | "Idea", "Comments", ...      |
+| object_type | String      | Operating object             | "Idea", "Comments", ...      |
 | object_id   | String      | Operating object id          | ObjectId or Number           |
 | object_data | String      | Operating object json        | { id: 1, tag: "Innovation" } |
 
@@ -97,13 +96,13 @@ Stores operation logs for all system operations.
 ### Users Collection
 
 - `user_id`: Unique index
-- `role`: Index for role-based queries
+- `roles`: Index for role-based queries
 
 ### Ideas Collection
 
 - `category`: Index for category-based queries
 - `tags`: Index for tag-based queries
-- `created_by`: Index for user's ideas
+- `creator_id`: Index for user's ideas
 - `total_votes`: Index for sorting
 - Compound index: `[category, total_votes]` for filtered searches and sorting
 
@@ -115,8 +114,13 @@ Stores operation logs for all system operations.
 
 ### Votes Collection
 
-- Compound unique index: `[target_id, target_type, created_by]`
 - `target_id`: Index for vote counts
+- Compound index: `[target_id, target_type, creator_id]`
+
+### Favorites Collection
+
+- `idea_id`: Index for favorite counts
+- Compound index: `[idea_id, creator_id]`
 
 ### Tags Collection
 
@@ -156,5 +160,6 @@ Stores operation logs for all system operations.
 - Idea
 - Comment
 - Vote
+- Favorite
 - Tag
 - User
