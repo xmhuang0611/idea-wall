@@ -41,6 +41,7 @@ class Idea(IdeaBase):
     updater_name: str
     total_votes: int
     tag_details: Optional[List[IdeaTag]] = None
+    hasVoted: bool = False
 
 T = TypeVar('T')
 

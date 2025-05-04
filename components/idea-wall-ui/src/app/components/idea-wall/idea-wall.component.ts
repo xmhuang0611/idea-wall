@@ -74,9 +74,15 @@ import { Idea } from '../../models/idea.model';
           <div class="flex">
             <!-- Like Column -->
             <div class="flex flex-col items-center mr-6 w-16">
-              <button (click)="onVote(idea, idea.hasVoted ? 0 : 1)"
-                      class="text-gray-500 hover:text-blue-600">
-                <svg class="w-6 h-6" [class.text-blue-600]="idea.hasVoted" fill="currentColor" viewBox="0 0 24 24">
+              <button (click)="onVote(idea)"
+                      class="text-gray-500 hover:text-blue-600 transition-colors duration-300"
+                      title="{{idea.hasVoted ? '取消点赞' : '点赞'}}">
+                <svg class="w-6 h-6" 
+                     [class.text-blue-600]="idea.hasVoted" 
+                     [class.text-gray-500]="!idea.hasVoted"
+                     [class.fill-current]="idea.hasVoted"
+                     fill="currentColor" 
+                     viewBox="0 0 24 24">
                   <path d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-6.5"/>
                 </svg>
               </button>
@@ -219,16 +225,28 @@ export class IdeaWallComponent implements OnInit {
       sort_order: this.sortOrder
     }).subscribe({
       next: (response) => {
-        this.ideas = response.data.map(idea => ({
-          ...idea,
-          hasVoted: idea.user_vote ? idea.user_vote > 0 : false
-        }));
-        if (response.meta) {
-          this.totalItems = response.meta.total;
+        if (response.data) {
+          this.ideas = response.data;
+          
+          // 确保每个idea对象都有hasVoted属性（即使它在API中没有提供）
+          this.ideas.forEach(idea => {
+            if (idea.hasVoted === undefined) {
+              idea.hasVoted = false;
+            }
+          });
+          
+          if (response.meta) {
+            this.totalItems = response.meta.total;
+          }
+        } else {
+          this.ideas = [];
+          this.totalItems = 0;
         }
       },
       error: (error) => {
-        console.error('Failed to load ideas', error);
+        console.error('加载创意失败', error);
+        this.ideas = [];
+        this.totalItems = 0;
       }
     });
   }
@@ -252,15 +270,28 @@ export class IdeaWallComponent implements OnInit {
     this.loadIdeas();
   }
 
-  onVote(idea: Idea, voteStatus: number): void {
-    this.ideaService.voteIdea(idea._id, voteStatus).subscribe({
+  /**
+   * 处理点赞/取消点赞操作
+   * @param idea 要点赞的创意
+   */
+  onVote(idea: Idea): void {
+    // 点赞状态取反：如果已点赞则取消点赞(0)，否则点赞(1)
+    const voteStatus = idea.hasVoted ? 0 : 1;
+    
+    this.ideaService.voteIdea(idea.id, voteStatus).subscribe({
       next: () => {
-        idea.hasVoted = voteStatus > 0;
-        idea.total_votes += voteStatus - (idea.user_vote || 0);
-        idea.user_vote = voteStatus;
+        // 更新点赞状态
+        idea.hasVoted = !idea.hasVoted;
+        
+        // 更新点赞计数
+        if (idea.hasVoted) {
+          idea.total_votes += 1;
+        } else {
+          idea.total_votes -= 1;
+        }
       },
       error: (error) => {
-        console.error('Failed to vote', error);
+        console.error('点赞失败', error);
       }
     });
   }

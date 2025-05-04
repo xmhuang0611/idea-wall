@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
 from core.deps import get_current_user
 from services.idea_service import idea_service
+from services.vote_service import vote_service
 from models.idea import Idea, IdeaCreate, StandardResponse, ResponseMeta, ErrorDetail, IdeaCategory
 from models.user import User
 
@@ -16,6 +17,7 @@ async def get_ideas(
     sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
     search: Optional[str] = None,
     tags: Optional[List[int]] = Query(None),
+    current_user: Optional[User] = Depends(get_current_user)
 ):
     skip = (page - 1) * page_size
     ideas = await idea_service.get_ideas(
@@ -32,6 +34,16 @@ async def get_ideas(
         search=search,
         tags=tags
     )
+    
+    # 如果用户已登录，获取用户点赞状态
+    if current_user:
+        user_votes = await vote_service.get_votes_by_user(current_user.user_id, "Idea")
+        user_voted_ideas = {vote.target_id: vote.vote_status for vote in user_votes}
+        
+        # 为每个 idea 添加用户点赞状态
+        for idea in ideas:
+            if idea.id in user_voted_ideas:
+                idea.hasVoted = user_voted_ideas[idea.id] == 1
     
     return StandardResponse(
         status="success",
@@ -57,6 +69,17 @@ async def get_idea(
                 message="Idea not found"
             )
         )
+    
+    # 如果用户已登录，获取用户点赞状态
+    if current_user:
+        vote = await vote_service.get_vote(
+            target_id=idea_id, 
+            target_type="Idea",
+            user_id=current_user.user_id
+        )
+        if vote:
+            idea.hasVoted = vote.vote_status == 1
+    
     return StandardResponse(
         status="success",
         data=idea

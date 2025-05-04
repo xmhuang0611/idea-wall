@@ -1,7 +1,7 @@
 import { Tag } from './tag.model';
 
 export interface Idea {
-  _id: string;
+  id: string;
   title: string;
   description: string;
   category: 'Idea' | 'Pain' | 'Thought';
