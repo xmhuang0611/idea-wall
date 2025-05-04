@@ -67,6 +67,44 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+# Optional authentication dependency
+class OptionalOAuth2ImplicitBearer:
+    async def __call__(self, request: Request) -> Optional[str]:
+        authorization: str = request.headers.get("Authorization")
+        if not authorization:
+            return None
+            
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            return None
+        return token
+
+oauth2_implicit_optional = OptionalOAuth2ImplicitBearer()
+
+async def get_current_user_optional(
+    token: str = Depends(oauth2_implicit_optional)
+) -> Optional[User]:
+    """
+    Get current user from token if available, returns None if no valid token
+    """
+    if not token:
+        return None
+        
+    try:
+        # Parse the JWT token
+        payload = decode_oauth2_token(token)
+        
+        # User ID may be stored in different fields depending on the OAuth provider
+        user_id: str = payload.get("sub") or payload.get("user_id") or payload.get("userid")
+        user_name: str = payload.get("name") or payload.get("username") or payload.get("user_name")
+        
+        if user_id is None:
+            return None
+            
+        return User(user_id=user_id, user_name=user_name)
+    except JWTError:
+        return None
+
 # Role-based access control dependency
 def has_role(required_role: str):
     async def role_checker(user_info: User = Depends(get_current_user)):

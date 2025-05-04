@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
-from core.deps import get_current_user
+from core.deps import get_current_user, get_current_user_optional
 from services.idea_service import idea_service
 from services.vote_service import vote_service
 from models.idea import Idea, IdeaCreate, StandardResponse, ResponseMeta, ErrorDetail, IdeaCategory
@@ -17,7 +17,7 @@ async def get_ideas(
     sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
     search: Optional[str] = None,
     tags: Optional[List[int]] = Query(None),
-    current_user: Optional[User] = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     skip = (page - 1) * page_size
     ideas = await idea_service.get_ideas(
