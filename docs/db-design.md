@@ -11,10 +11,10 @@ All collections include the following audit fields for tracking purposes:
 | Field             | Type     | Description                   | Example Value            |
 |-------------------|----------|-------------------------------|--------------------------|
 | created_at        | DateTime | When the record was created   | 2024-03-20T10:30:00Z     |
-| creator_id        | ObjectId | Who created the record        | "user123"                |
+| creator_id        | String   | Who created the record        | "user123"                |
 | creator_name      | String   | Who created the record        | "John Doe"               |
 | updated_at        | DateTime | When last updated             | 2024-03-21T15:45:00Z     |
-| updater_id        | ObjectId | Who performed the last update | "user123"                |
+| updater_id        | String   | Who performed the last update | "user123"                |
 | updater_name      | String   | Who performed the last update | "John Doe"               |
 
 ## Collections
@@ -47,9 +47,9 @@ Stores comments on ideas.
 
 | Field         | Type     | Description                    | Example Value |
 |---------------|----------|--------------------------------|---------------|
-| idea_id       | ObjectId | Reference to the idea          | "507f1f77bcf86cd799439013" |
+| idea_id       | String   | Reference to the idea          | "507f1f77bcf86cd799439013" |
 | description   | String   | Comment content                | "This is a great idea!" |
-| parent_id     | ObjectId | Parent comment for replies     | "507f1f77bcf86cd799439014" |
+| parent_id     | String   | Parent comment for replies     | "507f1f77bcf86cd799439014" |
 | votes         | Number   | Number of votes on comment     | 5                          |
 
 ### Votes Collection
@@ -59,7 +59,7 @@ Stores user votes on ideas and comments.
 | Field       | Type     | Description                  | Example Value              |
 |-------------|----------|------------------------------|----------------------------|
 | vote_status | Number   | Vote status (0 or 1)         | 1                          |
-| target_id   | ObjectId | ID of idea/comment           | "507f1f77bcf86cd799439015" |
+| target_id   | String   | ID of idea/comment           | "507f1f77bcf86cd799439015" |
 | target_type | String   | "Idea" or "Comment"          | "Idea"                     |
 
 ### Favorites Collection
@@ -69,7 +69,7 @@ Stores user's favorite ideas.
 | Field           | Type     | Description                  | Example Value              |
 |-----------------|----------|------------------------------|----------------------------|
 | favorite_status | Number   | Favorite status (0 or 1)     | 1                          |
-| idea_id         | ObjectId | ID of idea                   | "507f1f77bcf86cd799439015" |
+| idea_id         | String   | ID of idea                   | "507f1f77bcf86cd799439015" |
 
 ### Tags Collection
 

@@ -138,15 +138,15 @@ class IdeaService:
             return Idea(**idea_dict)
         return None
 
-    async def create_idea(self, idea: IdeaCreate, created_by: str, created_by_name: str = "Anonymous User") -> Idea:
+    async def create_idea(self, idea: IdeaCreate, creator_id: str, creator_name: str = "Anonymous User") -> Idea:
         db = await get_database()
         idea_dict = idea.model_dump()
         idea_in_db = IdeaInDB(
             **idea_dict,
-            creator_id=created_by,
-            creator_name=created_by_name,
-            updater_id=created_by,
-            updater_name=created_by_name
+            creator_id=creator_id,
+            creator_name=creator_name,
+            updater_id=creator_id,
+            updater_name=creator_name
         )
         
         result = await db[self.collection_name].insert_one(idea_in_db.model_dump())
@@ -155,11 +155,11 @@ class IdeaService:
             id=str(result.inserted_id),
             **idea_dict,
             created_at=idea_in_db.created_at,
-            creator_id=created_by,
-            creator_name=created_by_name,
+            creator_id=creator_id,
+            creator_name=creator_name,
             updated_at=idea_in_db.updated_at,
-            updater_id=created_by,
-            updater_name=created_by_name,
+            updater_id=creator_id,
+            updater_name=creator_name,
             total_votes=0
         )
 
@@ -167,15 +167,15 @@ class IdeaService:
         self,
         idea_id: str,
         idea_update: IdeaCreate,
-        updated_by: str,
-        updated_by_name: str = "Anonymous User"
+        updater_id: str,
+        updater_name: str = "Anonymous User"
     ) -> Optional[Idea]:
         db = await get_database()
         update_data = idea_update.model_dump()
         update_data.update({
             "updated_at": datetime.utcnow(),
-            "updater_id": updated_by,
-            "updater_name": updated_by_name
+            "updater_id": updater_id,
+            "updater_name": updater_name
         })
         
         result = await db[self.collection_name].update_one(

@@ -92,8 +92,8 @@ async def create_idea(
 ):
     created_idea = await idea_service.create_idea(
         idea, 
-        created_by=current_user.user_id,
-        created_by_name=current_user.user_name
+        creator_id=current_user.user_id,
+        creator_name=current_user.user_name
     )
     return StandardResponse(
         status="success",
@@ -109,8 +109,8 @@ async def update_idea(
     updated_idea = await idea_service.update_idea(
         idea_id, 
         idea_update, 
-        updated_by=current_user.user_id, 
-        updated_by_name=current_user.user_name
+        updater_id=current_user.user_id, 
+        updater_name=current_user.user_name
     )
     if not updated_idea:
         return StandardResponse(

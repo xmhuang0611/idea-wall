@@ -47,7 +47,8 @@ async def create_comment(
     return await comment_service.create_comment(
         idea_id=idea_id,
         comment=comment,
-        created_by=current_user.user_id
+        creator_id=current_user.user_id,
+        creator_name=current_user.user_name
     )
 
 @router.delete("/{comment_id}", response_model=dict)

@@ -12,15 +12,20 @@ class CommentCreate(CommentBase):
 class CommentInDB(CommentBase):
     idea_id: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    created_by: str
+    creator_id: str
+    creator_name: str
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_by: str
+    updater_id: str
+    updater_name: str
     votes: int = 0
 
 class Comment(CommentBase):
     id: str
     idea_id: str
     created_at: datetime
-    created_by: str
+    creator_id: str
+    creator_name: str
     updated_at: datetime
+    updater_id: str
+    updater_name: str
     votes: int 

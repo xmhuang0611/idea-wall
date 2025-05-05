@@ -22,7 +22,7 @@ class VoteService:
             query = {
                 "target_id": target_id,
                 "target_type": target_type,
-                "created_by": user_id
+                "creator_id": user_id
             }
             
         vote_dict = await db[self.collection_name].find_one(query)
@@ -35,7 +35,7 @@ class VoteService:
         db = await get_database()
         votes = []
         cursor = db[self.collection_name].find({
-            "created_by": user_id,
+            "creator_id": user_id,
             "target_type": target_type
         })
         
@@ -45,7 +45,7 @@ class VoteService:
             
         return votes
 
-    async def create_vote(self, vote: VoteCreate, created_by: str) -> Vote:
+    async def create_vote(self, vote: VoteCreate, creator_id: str, creator_name: str = "Anonymous User") -> Vote:
         db = await get_database()
         
         # 检查目标是否存在
@@ -65,7 +65,7 @@ class VoteService:
                 )
 
         # 检查是否已经投票
-        existing_vote = await self.get_vote(target_id=vote.target_id, target_type=vote.target_type, user_id=created_by)
+        existing_vote = await self.get_vote(target_id=vote.target_id, target_type=vote.target_type, user_id=creator_id)
         
         # 如果是取消点赞（vote_status=0）且已有点赞记录
         if vote.vote_status == 0 and existing_vote:
@@ -85,8 +85,11 @@ class VoteService:
                 target_id=vote.target_id,
                 target_type=vote.target_type,
                 created_at=existing_vote.created_at,
-                created_by=created_by,
-                updated_at=datetime.utcnow()
+                creator_id=creator_id,
+                creator_name=creator_name,
+                updated_at=datetime.utcnow(),
+                updater_id=creator_id,
+                updater_name=creator_name
             )
                 
         # 如果有现有投票且状态相同，则返回错误
@@ -101,8 +104,10 @@ class VoteService:
             vote_dict = vote.model_dump()
             vote_in_db = VoteInDB(
                 **vote_dict,
-                created_by=created_by,
-                updated_by=created_by
+                creator_id=creator_id,
+                creator_name=creator_name,
+                updater_id=creator_id,
+                updater_name=creator_name
             )
             
             result = await db[self.collection_name].insert_one(vote_in_db.model_dump())
@@ -117,8 +122,11 @@ class VoteService:
                 id=str(result.inserted_id),
                 **vote_dict,
                 created_at=vote_in_db.created_at,
-                created_by=created_by,
-                updated_at=vote_in_db.updated_at
+                creator_id=creator_id,
+                creator_name=creator_name,
+                updated_at=vote_in_db.updated_at,
+                updater_id=creator_id,
+                updater_name=creator_name
             )
             
         # 其他情况（不应该到达这里）

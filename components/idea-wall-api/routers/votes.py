@@ -23,7 +23,11 @@ async def create_vote(
     current_user: User = Depends(get_current_user)
 ):
     # 写操作需要登录
-    return await vote_service.create_vote(vote, current_user.user_id)
+    return await vote_service.create_vote(
+        vote, 
+        creator_id=current_user.user_id, 
+        creator_name=current_user.user_name
+    )
 
 @router.delete("/{vote_id}", response_model=dict)
 async def delete_vote(
@@ -39,7 +43,7 @@ async def delete_vote(
         )
         
     # 只有投票作者才能删除投票
-    if vote.created_by != current_user.user_id:
+    if vote.creator_id != current_user.user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"

@@ -30,15 +30,18 @@ class CommentService:
         self,
         idea_id: str,
         comment: CommentCreate,
-        created_by: str
+        creator_id: str,
+        creator_name: str = "Anonymous User"
     ) -> Comment:
         db = await get_database()
         comment_dict = comment.model_dump()
         comment_in_db = CommentInDB(
             **comment_dict,
             idea_id=idea_id,
-            created_by=created_by,
-            updated_by=created_by
+            creator_id=creator_id,
+            creator_name=creator_name,
+            updater_id=creator_id,
+            updater_name=creator_name
         )
         
         result = await db[self.collection_name].insert_one(comment_in_db.model_dump())
@@ -48,8 +51,11 @@ class CommentService:
             **comment_dict,
             idea_id=idea_id,
             created_at=comment_in_db.created_at,
-            created_by=created_by,
+            creator_id=creator_id,
+            creator_name=creator_name,
             updated_at=comment_in_db.updated_at,
+            updater_id=creator_id,
+            updater_name=creator_name,
             votes=0
         )
 

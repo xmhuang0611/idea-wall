@@ -17,12 +17,17 @@ class VoteCreate(VoteBase):
 
 class VoteInDB(VoteBase):
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    created_by: str
+    creator_id: str
+    creator_name: str
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_by: str
+    updater_id: str
+    updater_name: str
 
 class Vote(VoteBase):
     id: str
     created_at: datetime
-    created_by: str
-    updated_at: datetime 
+    creator_id: str
+    creator_name: str
+    updated_at: datetime
+    updater_id: str
+    updater_name: str 

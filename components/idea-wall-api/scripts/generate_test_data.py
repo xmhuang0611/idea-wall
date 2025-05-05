@@ -247,7 +247,7 @@ async def insert_test_data():
                 commenter = random.choice(comment_users)
                 comment_date = generate_random_date(start_date, end_date)
                 test_comments.append({
-                    "idea_id": idea_id,
+                    "idea_id": str(idea_id),
                     "description": random.choice(comment_texts),
                     "parent_id": None,
                     "votes": 0,
@@ -272,7 +272,7 @@ async def insert_test_data():
                 vote_status = random.choice([0, 1])
                 test_votes.append({
                     "vote_status": vote_status,
-                    "target_id": idea_id,
+                    "target_id": str(idea_id),
                     "target_type": "Idea",
                     "created_at": vote_date,
                     "creator_id": voter,
@@ -282,7 +282,8 @@ async def insert_test_data():
                     "updater_name": user_name_map.get(voter, voter)
                 })
             # Update total_votes for the idea
-            total_votes = sum(v["vote_status"] for v in test_votes if v["target_id"] == idea_id)
+            idea_id_str = str(idea_id)
+            total_votes = sum(v["vote_status"] for v in test_votes if v["target_id"] == idea_id_str)
             await db.ideas.update_one({"_id": idea_id}, {"$set": {"total_votes": total_votes}})
         if test_votes:
             await db.votes.insert_many(test_votes)
