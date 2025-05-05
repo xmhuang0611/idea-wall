@@ -5,6 +5,7 @@ import { catchError, tap } from 'rxjs/operators';
 import { Idea } from '../models/idea.model';
 import { ApiResponse } from '../shared/models/api-response.model';
 import { ToastService } from '../shared/services/toast.service';
+import { Comment } from '../models/comment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -136,6 +137,11 @@ export class IdeaService {
         }),
         catchError(this.handleError)
       );
+  }
+
+  getComments(ideaId: string): Observable<ApiResponse<Comment[]>> {
+    return this.http.get<ApiResponse<Comment[]>>(`${this.apiUrl}/${ideaId}/comments`)
+      .pipe(catchError(this.handleError));
   }
 
   /**

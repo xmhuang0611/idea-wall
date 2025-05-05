@@ -37,7 +37,7 @@
 
 
 ### 发表评论功能
-1. 如果已经登录系统，点击Idea列表页面每条Idea下面的评论按钮，弹出模态框分页展示该Idea的所有评论。最上方还有一个富文本编辑器可以对Idea进行评论，评论保存在Comments Collection中，idea_id为评论的Idea Id，parent_id为空。
+1. 如果已经登录系统，点击Idea列表页面每条Idea下面的评论按钮，右侧弹出drawer分页展示该Idea的所有评论。最上方还有一个富文本编辑器可以对Idea进行评论，评论保存在Comments Collection中，idea_id为评论的Idea Id，parent_id为空。
 2. 也可以对某一条评论进行评论，idea_id为评论的Idea Id，parent_id为被评论的评论Id。
 3. 用户也可以编辑自己发表过的评论，编辑评论时也要记录Log。
 

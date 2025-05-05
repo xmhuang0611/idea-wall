@@ -4,11 +4,23 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IdeaService } from '../../services/idea.service';
 import { Idea } from '../../models/idea.model';
+import { TagModule } from 'primeng/tag';
+import { DividerModule } from 'primeng/divider';
+import { ButtonModule } from 'primeng/button';
+import { IdeaDetailsDrawerComponent } from '../comment-modal/idea-details-drawer.component';
 
 @Component({
   selector: 'app-idea-wall',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    RouterModule, 
+    TagModule, 
+    DividerModule, 
+    ButtonModule,
+    IdeaDetailsDrawerComponent
+  ],
   template: `
     <div class="bg-white rounded-lg shadow-sm p-6">
       <!-- Header with Tabs -->
@@ -72,39 +84,58 @@ import { Idea } from '../../models/idea.model';
         <div *ngFor="let idea of ideas"
              class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
           <div class="flex">
-            <!-- Like Column -->
+            <!-- Vote Column -->
             <div class="flex flex-col items-center mr-6 w-16">
               <button (click)="onVote(idea)"
-                      class="text-gray-500 hover:text-blue-600 transition-colors duration-300"
+                      class="hover:text-blue-600 transition-colors duration-300 flex flex-col items-center"
                       title="{{idea.hasVoted ? 'Unvote' : 'Vote'}}">
-                <svg class="w-6 h-6" 
-                     [class.text-blue-600]="idea.hasVoted" 
-                     [class.text-gray-500]="!idea.hasVoted"
-                     [class.fill-current]="idea.hasVoted"
-                     fill="currentColor" 
-                     viewBox="0 0 24 24">
-                  <path d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-6.5"/>
-                </svg>
+                <i class="{{idea.hasVoted ? 'pi pi-thumbs-up-fill' : 'pi pi-thumbs-up'}} text-xl flex justify-content-center"
+                   [class.text-blue-600]="idea.hasVoted" 
+                   [class.text-gray-500]="!idea.hasVoted"
+                   style="width: 24px; height: 24px; display: flex; align-items: center;"></i>
+                <span class="text-lg font-semibold mt-1">{{idea.total_votes}}</span>
               </button>
-              <span class="text-lg font-semibold my-1">{{idea.total_votes}}</span>
             </div>
 
             <!-- Content Column -->
             <div class="flex-1">
               <div class="flex items-center justify-between mb-2">
-                <h3 class="text-lg font-semibold text-gray-900">{{idea.title}}</h3>
+                <h3 class="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600" 
+                    (click)="openDetails(idea.id)">
+                  {{idea.title}}
+                </h3>
+                <button pButton 
+                        pRipple 
+                        icon="pi pi-info-circle"
+                        class="p-button-rounded p-button-text p-button-sm" 
+                        (click)="openDetails(idea.id)">
+                </button>
               </div>
               <p class="text-gray-600 mb-3 line-clamp-2">{{idea.description}}</p>
-              <div class="flex items-center justify-between text-sm text-gray-500 mt-4 pt-3 border-t border-gray-100">
-                <div class="flex items-center space-x-2">
-                  <span *ngFor="let tag of idea.tag_details" 
-                        class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
-                    {{tag.tag}}
-                  </span>
+              
+              <!-- Tags - Moved above the divider -->
+              <div class="flex flex-wrap gap-2 mb-3">
+                <p-tag *ngFor="let tag of idea.tag_details" 
+                      [value]="tag.tag"
+                      [severity]="getTagSeverity(tag.tag)">
+                </p-tag>
+              </div>
+              
+              <p-divider></p-divider>
+              
+              <div class="flex items-center justify-between text-sm text-gray-500">
+                <div class="flex items-center">
+                  <!-- 添加评论按钮到分割线下方左侧 -->
+                  <button (click)="openDetails(idea.id)" 
+                          class="inline-flex items-center text-gray-500 hover:text-gray-700">
+                    <i class="pi pi-comments mr-1"></i>
+                  </button>
                 </div>
-                <div class="flex items-center space-x-4 text-gray-500">
+                <div class="flex items-center space-x-2 text-gray-500">
                   <span>By {{idea.creator_name}}</span>
-                  <span>{{idea.created_at | date:'medium'}}</span>
+                  <span class="hidden sm:inline mx-1">•</span>
+                  <span class="hidden sm:inline">{{idea.created_at | date:'medium'}}</span>
+                  <span class="sm:hidden">{{idea.created_at | date:'short'}}</span>
                 </div>
               </div>
             </div>
@@ -178,6 +209,12 @@ import { Idea } from '../../models/idea.model';
         <p class="text-gray-500">No ideas found matching your criteria.</p>
       </div>
     </div>
+    
+    <!-- Idea Details Drawer -->
+    <app-idea-details-drawer
+      [(visible)]="ideaDetailsVisible" 
+      [ideaId]="selectedIdeaId">
+    </app-idea-details-drawer>
   `,
   styles: [`
     :host {
@@ -208,6 +245,10 @@ export class IdeaWallComponent implements OnInit {
 
   // Category options
   categories = ['Idea', 'Pain', 'Thought'];
+  
+  // Idea Details drawer
+  ideaDetailsVisible = false;
+  selectedIdeaId = '';
 
   constructor(private ideaService: IdeaService) {}
 
@@ -355,6 +396,37 @@ export class IdeaWallComponent implements OnInit {
     }
 
     return pages;
+  }
+
+  openDetails(ideaId: string): void {
+    this.selectedIdeaId = ideaId;
+    this.ideaDetailsVisible = false;
+    setTimeout(() => {
+      this.ideaDetailsVisible = true;
+    }, 10);
+  }
+  
+  getTagSeverity(tag: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {
+    // Return different severities based on tag content to achieve different colors
+    const tagMap: {[key: string]: 'success' | 'info' | 'warning' | 'danger' | 'secondary'} = {
+      'urgent': 'danger',
+      'important': 'warning',
+      'feature': 'info',
+      'enhancement': 'success',
+      'bug': 'danger',
+      'documentation': 'info',
+      'discussion': 'secondary'
+    };
+    
+    const lowerTag = tag.toLowerCase();
+    for (const key in tagMap) {
+      if (lowerTag.includes(key)) {
+        return tagMap[key];
+      }
+    }
+    
+    // Default color
+    return 'info';
   }
 
   protected readonly Math = Math;
