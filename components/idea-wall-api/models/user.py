@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
+from .audit import AuditModel
 
 class UserRole(str, Enum):
     ADMIN = "ADMIN"
@@ -15,10 +16,5 @@ class User(BaseModel):
     roles: List[str] = []
 
 # Database user model with additional fields
-class UserInDB(User):
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    created_by_id: Optional[str] = None
-    created_by_name: Optional[str] = None
-    updated_by_id: Optional[str] = None
-    updated_by_name: Optional[str] = None 
+class UserInDB(User, AuditModel):
+    pass 

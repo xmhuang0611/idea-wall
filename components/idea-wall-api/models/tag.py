@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
+from .audit import AuditModel
 
 class TagBase(BaseModel):
     tag_id: int
@@ -9,13 +10,8 @@ class TagBase(BaseModel):
 class TagCreate(TagBase):
     pass
 
-class TagInDB(TagBase):
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    creator_id: str
-    creator_name: str
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    updater_id: str
-    updater_name: str
+class TagInDB(TagBase, AuditModel):
+    pass
 
 class Tag(TagBase):
     created_at: datetime

@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, TypeVar, Generic, Dict, Any
 from datetime import datetime
 from enum import Enum
+from .audit import AuditModel
 
 class IdeaCategory(str, Enum):
     IDEA = "Idea"
@@ -22,13 +23,7 @@ class IdeaBase(BaseModel):
 class IdeaCreate(IdeaBase):
     pass
 
-class IdeaInDB(IdeaBase):
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    creator_id: str
-    creator_name: str
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    updater_id: str
-    updater_name: str
+class IdeaInDB(IdeaBase, AuditModel):
     total_votes: int = 0
 
 class Idea(IdeaBase):

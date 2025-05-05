@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
+from .audit import AuditModel
 
 class CommentBase(BaseModel):
     description: str
@@ -9,14 +10,8 @@ class CommentBase(BaseModel):
 class CommentCreate(CommentBase):
     pass
 
-class CommentInDB(CommentBase):
+class CommentInDB(CommentBase, AuditModel):
     idea_id: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    creator_id: str
-    creator_name: str
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    updater_id: str
-    updater_name: str
     votes: int = 0
 
 class Comment(CommentBase):

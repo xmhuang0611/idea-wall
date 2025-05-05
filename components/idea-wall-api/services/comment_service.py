@@ -67,4 +67,9 @@ class CommentService:
         )
         return result.modified_count > 0
 
+    async def delete_comment(self, comment_id: str) -> bool:
+        db = await get_database()
+        result = await db[self.collection_name].delete_one({"_id": ObjectId(comment_id)})
+        return result.deleted_count > 0
+
 comment_service = CommentService() 

@@ -194,5 +194,22 @@ class IdeaService:
             {"$inc": {"total_votes": vote_change}}
         )
         return result.modified_count > 0
+    
+    async def delete_idea(self, idea_id: str, user_id: str) -> bool:
+        db = await get_database()
+        # 获取idea信息
+        idea = await self.get_idea(idea_id)
+        if not idea:
+            return False
+            
+        # 只有创建者或管理员可以删除
+        result = await db[self.collection_name].delete_one({
+            "_id": ObjectId(idea_id),
+            "$or": [
+                {"creator_id": user_id},
+                # 注: 实际应用中可能需要检查用户角色是否为管理员
+            ]
+        })
+        return result.deleted_count > 0
 
 idea_service = IdeaService() 

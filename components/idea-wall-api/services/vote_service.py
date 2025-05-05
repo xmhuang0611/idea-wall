@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 from fastapi import HTTPException, status
 from core.database import get_database
-from models.vote import VoteCreate, VoteInDB, Vote
+from models.vote import VoteCreate, VoteInDB, Vote, TargetType
 from .idea_service import idea_service
 from .comment_service import comment_service
 from bson import ObjectId
@@ -28,6 +28,9 @@ class VoteService:
         vote_dict = await db[self.collection_name].find_one(query)
         if vote_dict:
             vote_dict["id"] = str(vote_dict.pop("_id"))
+            # 确保 target_id 是字符串，而不是 ObjectId
+            if isinstance(vote_dict.get("target_id"), ObjectId):
+                vote_dict["target_id"] = str(vote_dict["target_id"])
             return Vote(**vote_dict)
         return None
         
@@ -41,6 +44,26 @@ class VoteService:
         
         async for vote_dict in cursor:
             vote_dict["id"] = str(vote_dict.pop("_id"))
+            # 确保 target_id 是字符串，而不是 ObjectId
+            if isinstance(vote_dict.get("target_id"), ObjectId):
+                vote_dict["target_id"] = str(vote_dict["target_id"])
+            votes.append(Vote(**vote_dict))
+            
+        return votes
+    
+    async def get_votes(self, idea_id: str, skip: int = 0, limit: int = 20) -> List[Vote]:
+        db = await get_database()
+        votes = []
+        cursor = db[self.collection_name].find({
+            "target_id": idea_id,
+            "target_type": TargetType.IDEA
+        }).skip(skip).limit(limit)
+        
+        async for vote_dict in cursor:
+            vote_dict["id"] = str(vote_dict.pop("_id"))
+            # 确保 target_id 是字符串，而不是 ObjectId
+            if isinstance(vote_dict.get("target_id"), ObjectId):
+                vote_dict["target_id"] = str(vote_dict["target_id"])
             votes.append(Vote(**vote_dict))
             
         return votes
