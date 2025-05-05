@@ -26,6 +26,11 @@ class CommentService:
             return Comment(**comment_dict)
         return None
 
+    async def count_comments(self, idea_id: str) -> int:
+        """获取指定idea_id的评论总数"""
+        db = await get_database()
+        return await db[self.collection_name].count_documents({"idea_id": idea_id})
+
     async def create_comment(
         self,
         idea_id: str,
@@ -45,6 +50,12 @@ class CommentService:
         )
         
         result = await db[self.collection_name].insert_one(comment_in_db.model_dump())
+        
+        # 评论创建成功后，更新idea的评论数量
+        await db["ideas"].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$inc": {"comment_count": 1}}
+        )
         
         return Comment(
             id=str(result.inserted_id),
@@ -69,7 +80,18 @@ class CommentService:
 
     async def delete_comment(self, comment_id: str) -> bool:
         db = await get_database()
-        result = await db[self.collection_name].delete_one({"_id": ObjectId(comment_id)})
-        return result.deleted_count > 0
+        # 获取评论所属的idea_id
+        comment = await self.get_comment(comment_id)
+        if comment:
+            idea_id = comment.idea_id
+            result = await db[self.collection_name].delete_one({"_id": ObjectId(comment_id)})
+            if result.deleted_count > 0:
+                # 删除评论成功后，减少idea的评论数量
+                await db["ideas"].update_one(
+                    {"_id": ObjectId(idea_id)},
+                    {"$inc": {"comment_count": -1}}
+                )
+                return True
+        return False
 
 comment_service = CommentService() 

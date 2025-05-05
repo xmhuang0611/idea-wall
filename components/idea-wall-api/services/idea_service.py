@@ -53,7 +53,8 @@ class IdeaService:
         sort_by: Optional[str] = None,
         sort_order: Optional[str] = None,
         search: Optional[str] = None,
-        tags: Optional[List[int]] = None
+        tags: Optional[List[int]] = None,
+        refresh_comment_count: bool = True
     ) -> List[Idea]:
         db = await get_database()
         
@@ -75,9 +76,33 @@ class IdeaService:
         cursor = cursor.skip(skip).limit(limit)
         
         ideas = []
+        # 先获取所有idea对象，以便后续进行批量评论数更新
+        idea_dicts = []
         async for idea_dict in cursor:
             idea_dict["id"] = str(idea_dict.pop("_id"))
+            idea_dicts.append(idea_dict)
             
+        # 如果需要刷新评论数，对每个idea进行评论数更新
+        if refresh_comment_count:
+            from services.comment_service import comment_service
+            
+            for idea_dict in idea_dicts:
+                # 获取真实评论数量
+                real_comment_count = await comment_service.count_comments(idea_dict["id"])
+                
+                # 如果数据库中的评论数与实际不符，更新数据库
+                if "comment_count" not in idea_dict or idea_dict["comment_count"] != real_comment_count:
+                    # 更新内存中的评论数
+                    idea_dict["comment_count"] = real_comment_count
+                    
+                    # 更新数据库中的评论数
+                    await db[self.collection_name].update_one(
+                        {"_id": ObjectId(idea_dict["id"])},
+                        {"$set": {"comment_count": real_comment_count}}
+                    )
+        
+        # 处理每个idea对象
+        for idea_dict in idea_dicts:
             # 确保所有必要字段都存在，按照新的数据库设计
             if "creator_id" not in idea_dict:
                 idea_dict["creator_id"] = "anonymous"
@@ -91,6 +116,8 @@ class IdeaService:
                 idea_dict["updated_at"] = idea_dict.get("created_at", datetime.utcnow())
             if "total_votes" not in idea_dict:
                 idea_dict["total_votes"] = 0
+            if "comment_count" not in idea_dict:
+                idea_dict["comment_count"] = 0
                 
             # 获取标签详情
             if "tags" in idea_dict and idea_dict["tags"]:
@@ -105,11 +132,28 @@ class IdeaService:
             ideas.append(Idea(**idea_dict))
         return ideas
 
-    async def get_idea(self, idea_id: str) -> Optional[Idea]:
+    async def get_idea(self, idea_id: str, refresh_comment_count: bool = True) -> Optional[Idea]:
         db = await get_database()
         idea_dict = await db[self.collection_name].find_one({"_id": ObjectId(idea_id)})
         if idea_dict:
             idea_dict["id"] = str(idea_dict.pop("_id"))
+            
+            # 如果需要刷新评论数
+            if refresh_comment_count:
+                from services.comment_service import comment_service
+                # 获取真实评论数量
+                real_comment_count = await comment_service.count_comments(idea_id)
+                
+                # 如果数据库中的评论数与实际不符，更新数据库
+                if "comment_count" not in idea_dict or idea_dict["comment_count"] != real_comment_count:
+                    # 更新内存中的评论数
+                    idea_dict["comment_count"] = real_comment_count
+                    
+                    # 更新数据库中的评论数
+                    await db[self.collection_name].update_one(
+                        {"_id": ObjectId(idea_id)},
+                        {"$set": {"comment_count": real_comment_count}}
+                    )
             
             # 确保所有必要字段都存在，按照新的数据库设计
             if "creator_id" not in idea_dict:
@@ -124,6 +168,8 @@ class IdeaService:
                 idea_dict["updated_at"] = idea_dict.get("created_at", datetime.utcnow())
             if "total_votes" not in idea_dict:
                 idea_dict["total_votes"] = 0
+            if "comment_count" not in idea_dict:
+                idea_dict["comment_count"] = 0
                 
             # 获取标签详情
             if "tags" in idea_dict and idea_dict["tags"]:
@@ -146,7 +192,8 @@ class IdeaService:
             creator_id=creator_id,
             creator_name=creator_name,
             updater_id=creator_id,
-            updater_name=creator_name
+            updater_name=creator_name,
+            comment_count=0  # 初始化评论数为0
         )
         
         result = await db[self.collection_name].insert_one(idea_in_db.model_dump())
@@ -160,7 +207,8 @@ class IdeaService:
             updated_at=idea_in_db.updated_at,
             updater_id=creator_id,
             updater_name=creator_name,
-            total_votes=0
+            total_votes=0,
+            comment_count=0  # 初始化评论数为0
         )
 
     async def update_idea(

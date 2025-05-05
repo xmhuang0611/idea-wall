@@ -3,9 +3,12 @@ from typing import List, Optional
 from core.deps import get_current_user, get_current_user_optional
 from services.idea_service import idea_service
 from services.vote_service import vote_service
+from services.comment_service import comment_service
 from models.idea import Idea, IdeaCreate, IdeaCategory
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
+from core.database import get_database
+from bson import ObjectId
 
 router = APIRouter()
 
@@ -142,4 +145,38 @@ async def delete_idea(
         )
     return StandardResponse(
         success=True
+    )
+
+@router.get("/{idea_id}/refresh-comment-count", response_model=StandardResponse[int])
+async def refresh_comment_count(
+    idea_id: str,
+    current_user: Optional[User] = Depends(get_current_user_optional)
+):
+    """刷新指定idea的评论数并返回最新数量"""
+    # 验证idea是否存在
+    idea = await idea_service.get_idea(idea_id, refresh_comment_count=False)
+    if not idea:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=404,
+                message="Idea not found"
+            )
+        )
+    
+    # 获取真实评论数
+    real_comment_count = await comment_service.count_comments(idea_id)
+    
+    # 如果数据库中的评论数与实际不符，更新数据库
+    if idea.comment_count != real_comment_count:
+        # 更新数据库
+        db = await get_database()
+        await db["ideas"].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$set": {"comment_count": real_comment_count}}
+        )
+    
+    return StandardResponse(
+        success=True,
+        data=real_comment_count
     ) 

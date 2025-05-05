@@ -25,6 +25,7 @@ class IdeaCreate(IdeaBase):
 
 class IdeaInDB(IdeaBase, AuditModel):
     total_votes: int = 0
+    comment_count: int = 0
 
 class Idea(IdeaBase):
     id: str
@@ -35,5 +36,6 @@ class Idea(IdeaBase):
     updater_id: str
     updater_name: str
     total_votes: int
+    comment_count: int = 0
     tag_details: Optional[List[IdeaTag]] = None
     hasVoted: bool = False 

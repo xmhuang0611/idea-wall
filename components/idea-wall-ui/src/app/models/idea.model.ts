@@ -9,6 +9,7 @@ export interface Idea {
   tags: number[];
   tag_details?: Tag[];
   total_votes: number;
+  comment_count: number;
   user_vote?: number;
   hasVoted?: boolean;
   created_at: Date;

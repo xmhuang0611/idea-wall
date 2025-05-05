@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -9,6 +9,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { TagModule } from 'primeng/tag';
 import { BadgeModule } from 'primeng/badge';
+import { PaginatorModule } from 'primeng/paginator';
 import { IdeaService } from '../../services/idea.service';
 import { Comment } from '../../models/comment.model';
 import { Idea } from '../../models/idea.model';
@@ -28,13 +29,14 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
     AvatarModule,
     InputTextareaModule,
     TagModule,
-    BadgeModule
+    BadgeModule,
+    PaginatorModule
   ],
   template: `
     <p-sidebar 
       [(visible)]="visible" 
       position="right" 
-      [style]="{ width: '35rem' }"
+      [style]="{ width: sidebarWidth, maxWidth: '1000px' }"
       [baseZIndex]="10000"
       (onHide)="onSidebarHide()">
       <ng-template pTemplate="header">
@@ -43,9 +45,9 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
         </div>
       </ng-template>
       
-      <div class="p-fluid p-3">
+      <div class="p-fluid idea-container">
         <!-- Idea Details -->
-        <div *ngIf="isLoading" class="flex justify-content-center p-5">
+        <div *ngIf="isLoading" class="flex justify-content-center px-5">
           <i class="pi pi-spin pi-spinner text-3xl"></i>
         </div>
         
@@ -103,11 +105,11 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
           <div class="surface-card shadow-2 border-round p-4">
             <h3 class="text-lg font-medium mb-3">
               Comments
-              <span *ngIf="comments.length > 0" class="text-sm font-normal text-500">({{comments.length}})</span>
+              <span *ngIf="comments.length > 0" class="text-sm font-normal text-500 ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full">({{comments.length}})</span>
             </h3>
             
             <div class="comment-input-container mb-4">
-              <form [formGroup]="commentForm" (ngSubmit)="submitComment()">
+              <form [formGroup]="commentForm">
                 <div class="field mb-0">
                   <textarea 
                     id="comment"
@@ -123,11 +125,11 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
             </div>
             <div class="comment-actions">
               <button pButton 
-                      type="submit"
                       label="Submit" 
                       icon="pi pi-send"
                       [disabled]="!commentForm.valid"
-                      class="p-button-sm"
+                      class="p-button-primary p-button-sm"
+                      (click)="submitComment()"
                       style="width: 80px;">
               </button>
             </div>
@@ -136,32 +138,45 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
               <i class="pi pi-spin pi-spinner text-xl"></i>
             </div>
             
-            <div *ngIf="!commentsLoading && comments.length === 0" class="text-center p-3 surface-ground border-round">
+            <div *ngIf="!commentsLoading && (!comments || comments.length === 0)" class="text-center p-3 surface-ground border-round">
               <i class="pi pi-comments text-xl mb-2 text-500"></i>
               <p class="m-0">No comments yet. Be the first to comment!</p>
             </div>
             
-            <div *ngIf="!commentsLoading && comments.length > 0" class="comment-list">
-              <div *ngFor="let comment of comments; let last = last" 
-                   [class.mb-3]="!last" 
-                   class="border-bottom-1 surface-border pb-3">
-                <div class="flex mb-2">
-                  <div class="flex justify-content-center align-items-center mr-2" style="width: 32px; height: 32px">
-                    <p-avatar 
-                      icon="pi pi-user" 
-                      shape="circle" 
-                      styleClass="flex-shrink-0"
-                      [style]="{'width': '32px', 'height': '32px'}">
-                    </p-avatar>
-                  </div>
-                  <div>
-                    <div class="font-medium">{{ comment.creator_name }}</div>
-                    <div class="text-sm text-500">
-                      {{ comment.created_at | date:'medium' }}
+            <div *ngIf="!commentsLoading && comments && comments.length > 0" class="comment-list-container">
+              <!-- 评论列表 -->
+              <div class="comment-list">
+                <div *ngFor="let comment of displayedComments; let last = last" 
+                     [class.mb-3]="!last" 
+                     class="border-bottom-1 surface-border pb-3">
+                  <div class="flex mb-2">
+                    <div class="flex justify-content-center align-items-center mr-2" style="width: 32px; height: 32px">
+                      <p-avatar 
+                        icon="pi pi-user" 
+                        shape="circle" 
+                        styleClass="flex-shrink-0"
+                        [style]="{'width': '32px', 'height': '32px'}">
+                      </p-avatar>
+                    </div>
+                    <div>
+                      <div class="font-medium">{{ comment.creator_name }}</div>
+                      <div class="text-sm text-500">
+                        {{ comment.created_at | date:'medium' }}
+                      </div>
                     </div>
                   </div>
+                  <p class="m-0 line-height-3 p-2">{{ comment.description }}</p>
                 </div>
-                <p class="m-0 line-height-3 p-2">{{ comment.description }}</p>
+              </div>
+              
+              <!-- 分页控件 -->
+              <div class="flex justify-content-center mt-3">
+                <p-paginator 
+                  [rows]="commentPageSize" 
+                  [totalRecords]="comments.length"
+                  [rowsPerPageOptions]="[5, 10, 20]"
+                  (onPageChange)="onCommentPageChange($event)">
+                </p-paginator>
               </div>
             </div>
           </div>
@@ -174,9 +189,37 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       display: block;
     }
     
+    .idea-container {
+      padding: 1rem;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .comment-list-container {
+      display: flex;
+      flex-direction: column;
+    }
+    
     .comment-list {
-      max-height: 400px;
+      max-height: 350px;
       overflow-y: auto;
+    }
+    
+    @media (max-width: 768px) {
+      .idea-container {
+        padding: 0.5rem;
+      }
+      
+      .comment-list {
+        max-height: 250px;
+      }
+    }
+    
+    @media (min-width: 1600px) {
+      .comment-list {
+        max-height: 450px;
+      }
     }
     
     :host ::ng-deep .p-inputtextarea {
@@ -207,24 +250,9 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       background-color: #ffffff;
     }
     
-    :host ::ng-deep .submit-button {
-      border-radius: 4px;
-      padding: 0.4rem 1rem;
-      margin: 0 1rem 0.5rem 0;
-      background-color: #0288d1;
-      font-weight: 500;
-      font-size: 0.875rem;
-    }
-    
-    .submit-btn-container {
-      text-align: right;
-      margin-top: 0;
-    }
-    
     .idea-details {
-      max-height: calc(100vh - 100px);
+      flex: 1;
       overflow-y: auto;
-      padding-bottom: 3rem;
     }
     
     :host ::ng-deep .p-chip {
@@ -239,29 +267,34 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       display: flex;
       justify-content: flex-end;
       margin-top: 8px;
+      margin-bottom: 16px;
     }
     
-    .submit-btn {
-      border: 1px solid #1976d2;
-      background-color: #1976d2;
-      color: #fff;
-      padding: 8px 24px;
+    /* 自定义滚动条样式 */
+    :host ::ng-deep ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    :host ::ng-deep ::-webkit-scrollbar-track {
+      background: #f1f1f1;
       border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s, border 0.2s;
     }
     
-    .submit-btn:hover {
-      background-color: #1565c0;
-      border-color: #1565c0;
+    :host ::ng-deep ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    
+    :host ::ng-deep ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
     }
   `]
 })
-export class IdeaDetailsDrawerComponent implements OnInit, OnChanges {
+export class IdeaDetailsDrawerComponent implements OnInit, OnChanges, OnDestroy {
   @Input() ideaId: string = '';
   @Input() visible: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>();
+  @Output() commentCountChange = new EventEmitter<{ideaId: string, count: number}>();
   
   idea: Idea | null = null;
   comments: Comment[] = [];
@@ -269,6 +302,9 @@ export class IdeaDetailsDrawerComponent implements OnInit, OnChanges {
   isLoading: boolean = false;
   commentsLoading: boolean = false;
   isSubmitting: boolean = false;
+  commentPageSize: number = 5;
+  displayedComments: Comment[] = [];
+  sidebarWidth: string = '50vw';
   
   constructor(
     private ideaService: IdeaService,
@@ -277,25 +313,63 @@ export class IdeaDetailsDrawerComponent implements OnInit, OnChanges {
     this.commentForm = this.fb.group({
       comment: ['', Validators.required]
     });
+    this.setResponsiveWidth();
   }
   
   ngOnInit(): void {
     this.loadIdeaDetails();
+    // 监听窗口大小变化
+    window.addEventListener('resize', this.onResize.bind(this));
+  }
+  
+  ngOnDestroy(): void {
+    // 清理事件监听器
+    window.removeEventListener('resize', this.onResize.bind(this));
+  }
+  
+  // 窗口大小变化时调整抽屉宽度
+  onResize(): void {
+    this.setResponsiveWidth();
+  }
+  
+  // 根据屏幕宽度设置响应式宽度
+  setResponsiveWidth(): void {
+    const screenWidth = window.innerWidth;
+    
+    if (screenWidth < 768) {
+      // 移动设备上使用更大比例
+      this.sidebarWidth = '85vw';
+    } else if (screenWidth < 1200) {
+      // 平板上使用中等比例
+      this.sidebarWidth = '65vw';
+    } else {
+      // 桌面上使用一半宽度
+      this.sidebarWidth = '50vw';
+    }
   }
   
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['visible'] && changes['visible'].currentValue) || 
         (changes['ideaId'] && this.visible)) {
+      console.log('Data changed, loading idea details:', 
+        { visible: this.visible, ideaId: this.ideaId });
       this.loadIdeaDetails();
     }
   }
   
   loadIdeaDetails(): void {
-    if (!this.ideaId || !this.visible) return;
+    if (!this.ideaId || !this.visible) {
+      console.log('Skipping idea details load due to:', 
+        { ideaId: !this.ideaId ? 'missing' : 'present', visible: this.visible });
+      return;
+    }
     
     this.isLoading = true;
+    console.log('Loading idea details for ID:', this.ideaId);
+    
     this.ideaService.getIdeaById(this.ideaId).subscribe({
       next: (response: any) => {
+        console.log('Idea details response:', response);
         if (response.data) {
           this.idea = response.data;
           this.loadComments();
@@ -316,21 +390,114 @@ export class IdeaDetailsDrawerComponent implements OnInit, OnChanges {
     if (!this.ideaId) return;
     
     this.commentsLoading = true;
+    console.log('Loading comments for idea:', this.ideaId);
+    
     this.ideaService.getComments(this.ideaId).subscribe({
       next: (response: any) => {
-        if (response.data) {
-          this.comments = response.data;
-        } else {
-          this.comments = [];
+        console.log('Comments response structure:', response);
+        
+        // 初始化评论数组
+        this.comments = [];
+        
+        // 检查response及其data字段
+        if (!response) {
+          console.error('Empty response received');
+          this.commentsLoading = false;
+          this.commentCountChange.emit({ ideaId: this.ideaId, count: 0 });
+          return;
         }
+        
+        // 处理旧版API直接返回数组的情况
+        if (Array.isArray(response)) {
+          console.log('Direct array response detected');
+          this.processComments(response);
+        } 
+        // 处理新版API返回标准包装对象的情况
+        else if (response.success && response.data) {
+          console.log('Standard wrapped response detected');
+          if (Array.isArray(response.data)) {
+            this.processComments(response.data);
+          } else {
+            console.error('Response data is not an array:', response.data);
+          }
+        } 
+        // 处理异常情况
+        else {
+          console.error('Unexpected response format:', response);
+        }
+        
         this.commentsLoading = false;
+        this.commentCountChange.emit({
+          ideaId: this.ideaId,
+          count: this.comments.length
+        });
       },
       error: (error: any) => {
-        console.error('Failed to load comments', error);
+        console.error('Failed to load comments:', error);
         this.comments = [];
         this.commentsLoading = false;
+        
+        this.commentCountChange.emit({
+          ideaId: this.ideaId,
+          count: 0
+        });
       }
     });
+  }
+  
+  // 处理comments数据的辅助方法
+  private processComments(commentsData: any[]): void {
+    console.log('Processing comments data, count:', commentsData.length);
+    console.log('First item sample:', commentsData.length > 0 ? commentsData[0] : 'No comments');
+    
+    // 遍历并处理评论数据
+    this.comments = commentsData.map((comment: any) => {
+      console.log('Processing comment item:', comment);
+      
+      // 创建一个新对象确保结构符合前端模型
+      const processedComment: Comment = {
+        id: comment.id || (comment as any)._id || '',
+        idea_id: comment.idea_id || this.ideaId,
+        description: comment.description || '',
+        parent_id: comment.parent_id,
+        votes: comment.votes || 0,
+        created_at: typeof comment.created_at === 'string' ? new Date(comment.created_at) : comment.created_at,
+        creator_id: comment.creator_id || '',
+        creator_name: comment.creator_name || 'Anonymous User',
+        updated_at: typeof comment.updated_at === 'string' ? new Date(comment.updated_at) : comment.updated_at,
+        updater_id: comment.updater_id,
+        updater_name: comment.updater_name
+      };
+      
+      return processedComment;
+    });
+    
+    // 确保评论按时间倒序排列（最新的在最前面）
+    this.comments.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    
+    console.log('Processed comments successfully, count:', this.comments.length);
+    
+    // 更新分页显示
+    this.updateDisplayedComments();
+  }
+  
+  // 更新当前页显示的评论
+  private updateDisplayedComments(): void {
+    // 默认显示第一页
+    this.displayedComments = this.comments.slice(0, this.commentPageSize);
+  }
+  
+  // 处理分页变化
+  onCommentPageChange(event: any): void {
+    const pageIndex = event.page;
+    const pageSize = event.rows;
+    this.commentPageSize = pageSize;
+    
+    // 计算当前页的评论数据
+    const startIndex = pageIndex * pageSize;
+    this.displayedComments = this.comments.slice(startIndex, startIndex + pageSize);
   }
   
   submitComment(): void {
@@ -339,16 +506,28 @@ export class IdeaDetailsDrawerComponent implements OnInit, OnChanges {
     const commentText = this.commentForm.get('comment')?.value;
     this.isSubmitting = true;
     
+    console.log('Submitting comment:', commentText);
+    
     this.ideaService.addComment(this.ideaId, commentText).subscribe({
       next: (response) => {
+        console.log('Comment submission response:', response);
         if (response.success) {
           this.commentForm.reset();
-          this.loadComments();
+          // 确保评论框失去焦点
+          const textarea = document.getElementById('comment') as HTMLTextAreaElement;
+          if (textarea) {
+            textarea.blur();
+          }
+          
+          // 设置短暂延迟后再加载评论，确保后端数据已更新
+          setTimeout(() => {
+            this.loadComments();
+          }, 300);
         }
         this.isSubmitting = false;
       },
       error: (error) => {
-        console.error('Failed to post comment', error);
+        console.error('Failed to post comment:', error);
         this.isSubmitting = false;
       }
     });

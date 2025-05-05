@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Idea } from '../models/idea.model';
 import { ApiResponse } from '../shared/models/api-response.model';
@@ -128,9 +128,12 @@ export class IdeaService {
       parent_id: parentId
     };
 
+    console.log('Sending comment data:', commentData);
+
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/${ideaId}/comments`, commentData)
       .pipe(
         tap(response => {
+          console.log('Server response for comment:', response);
           if (response.success) {
             this.toastService.showSuccess('Comment published successfully');
           }
@@ -140,8 +143,109 @@ export class IdeaService {
   }
 
   getComments(ideaId: string): Observable<ApiResponse<Comment[]>> {
+    console.log('Getting comments for idea:', ideaId);
+    
+    if (!ideaId) {
+      console.error('Invalid idea ID for getComments');
+      return throwError(() => new Error('Invalid idea ID'));
+    }
+    
     return this.http.get<ApiResponse<Comment[]>>(`${this.apiUrl}/${ideaId}/comments`)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        tap(response => {
+          console.log('Raw comments response:', response);
+          
+          // 规范化响应格式
+          if (!response) {
+            console.error('Empty response received');
+            return;
+          }
+          
+          // 处理旧版API直接返回数组的情况
+          if (Array.isArray(response)) {
+            console.log('Direct array response, converting to standard format');
+            // 转换为标准响应格式
+            const standardResponse: ApiResponse<Comment[]> = {
+              success: true,
+              data: response
+            };
+            // @ts-ignore - 我们需要在运行时修改response的结构
+            response = standardResponse;
+          }
+          
+          // 检查success和data字段
+          if (!response.success) {
+            console.error('Comment fetch not successful:', response);
+            if (!response.data) {
+              // @ts-ignore
+              response.data = [];
+            }
+            return;
+          }
+          
+          // 检查data字段
+          if (!response.data) {
+            console.warn('No data field in response');
+            response.data = []; // 确保data字段至少是空数组
+            return;
+          }
+          
+          // 确保data是数组
+          if (!Array.isArray(response.data)) {
+            console.error('Response data is not an array:', response.data);
+            response.data = [];
+            return;
+          }
+          
+          // 确保dates字段被正确转换为Date对象
+          response.data.forEach(comment => {
+            if (typeof comment.created_at === 'string') {
+              comment.created_at = new Date(comment.created_at);
+            }
+            if (typeof comment.updated_at === 'string') {
+              comment.updated_at = new Date(comment.updated_at);
+            }
+            
+            // 确保id字段存在
+            if (!comment.id && (comment as any)._id) {
+              comment.id = (comment as any)._id;
+            }
+          });
+          
+          console.log('Processed comments count:', response.data.length);
+        }),
+        catchError(error => {
+          console.error('Error fetching comments:', error);
+          // 返回一个带有空数组的成功响应，而不是错误
+          // 这样UI层可以显示"没有评论"而不是错误状态
+          return of({
+            success: true,
+            data: []
+          });
+        })
+      );
+  }
+
+  /**
+   * 刷新指定idea的评论数
+   * @param ideaId Idea ID
+   * @returns Observable with updated comment count
+   */
+  refreshCommentCount(ideaId: string): Observable<ApiResponse<number>> {
+    console.log('Refreshing comment count for idea:', ideaId);
+    
+    if (!ideaId) {
+      console.error('Invalid idea ID for refreshCommentCount');
+      return throwError(() => new Error('Invalid idea ID'));
+    }
+    
+    return this.http.get<ApiResponse<number>>(`${this.apiUrl}/${ideaId}/refresh-comment-count`)
+      .pipe(
+        tap(response => {
+          console.log('Comment count refresh response:', response);
+        }),
+        catchError(this.handleError)
+      );
   }
 
   /**
