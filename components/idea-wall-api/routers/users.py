@@ -3,18 +3,13 @@ from typing import List, Optional
 from core.deps import get_current_user, has_role
 from services.user_service import user_service
 from models.user import User, UserInDB, UserRole
+from models.response import StandardResponse, ErrorDetail
 from pydantic import BaseModel
 
 router = APIRouter()
 
 class RoleUpdate(BaseModel):
     roles: List[str]
-
-class StandardResponse(BaseModel):
-    success: bool
-    data: Optional[dict] = None
-    meta: Optional[dict] = None
-    error: Optional[dict] = None
 
 # Helper function to get a User model from user_id
 async def get_user_model(user_id: str) -> User:
@@ -55,7 +50,7 @@ async def get_users_with_roles(
     return StandardResponse(
         success=True,
         data=[user.dict() for user in result["users"]],
-        meta=result["meta"]
+        pagination=result["pagination"]
     )
 
 @router.get("/{user_id}", response_model=StandardResponse)
@@ -78,10 +73,10 @@ async def get_user(
     if not user:
         return StandardResponse(
             success=False,
-            error={
-                "status_code": status.HTTP_404_NOT_FOUND,
-                "message": "User not found"
-            }
+            error=ErrorDetail(
+                code=status.HTTP_404_NOT_FOUND,
+                message="User not found"
+            )
         )
     
     return StandardResponse(
@@ -113,10 +108,10 @@ async def add_user_roles(
         except ValueError:
             return StandardResponse(
                 success=False,
-                error={
-                    "status_code": status.HTTP_400_BAD_REQUEST,
-                    "message": f"Invalid role: {role}"
-                }
+                error=ErrorDetail(
+                    code=status.HTTP_400_BAD_REQUEST,
+                    message=f"Invalid role: {role}"
+                )
             )
     
     # Get existing user if available
@@ -136,10 +131,10 @@ async def add_user_roles(
     if not updated_user:
         return StandardResponse(
             success=False,
-            error={
-                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "message": "Failed to update user roles"
-            }
+            error=ErrorDetail(
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message="Failed to update user roles"
+            )
         )
     
     return StandardResponse(
@@ -171,10 +166,10 @@ async def update_user_roles(
         except ValueError:
             return StandardResponse(
                 success=False,
-                error={
-                    "status_code": status.HTTP_400_BAD_REQUEST,
-                    "message": f"Invalid role: {role}"
-                }
+                error=ErrorDetail(
+                    code=status.HTTP_400_BAD_REQUEST,
+                    message=f"Invalid role: {role}"
+                )
             )
     
     # Update user roles (complete replacement)
@@ -188,10 +183,10 @@ async def update_user_roles(
     if not updated_user:
         return StandardResponse(
             success=False,
-            error={
-                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "message": "Failed to update user roles"
-            }
+            error=ErrorDetail(
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message="Failed to update user roles"
+            )
         )
     
     return StandardResponse(
@@ -224,10 +219,10 @@ async def delete_user_roles(
     if not success:
         return StandardResponse(
             success=False,
-            error={
-                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "message": "Failed to delete user roles"
-            }
+            error=ErrorDetail(
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message="Failed to delete user roles"
+            )
         )
     
     return StandardResponse(

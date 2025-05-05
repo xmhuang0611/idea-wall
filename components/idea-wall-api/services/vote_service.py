@@ -28,7 +28,7 @@ class VoteService:
         vote_dict = await db[self.collection_name].find_one(query)
         if vote_dict:
             vote_dict["id"] = str(vote_dict.pop("_id"))
-            # 确保 target_id 是字符串，而不是 ObjectId
+            # Ensure target_id is a string, not ObjectId
             if isinstance(vote_dict.get("target_id"), ObjectId):
                 vote_dict["target_id"] = str(vote_dict["target_id"])
             return Vote(**vote_dict)
@@ -44,7 +44,7 @@ class VoteService:
         
         async for vote_dict in cursor:
             vote_dict["id"] = str(vote_dict.pop("_id"))
-            # 确保 target_id 是字符串，而不是 ObjectId
+            # Ensure target_id is a string, not ObjectId
             if isinstance(vote_dict.get("target_id"), ObjectId):
                 vote_dict["target_id"] = str(vote_dict["target_id"])
             votes.append(Vote(**vote_dict))
@@ -61,7 +61,7 @@ class VoteService:
         
         async for vote_dict in cursor:
             vote_dict["id"] = str(vote_dict.pop("_id"))
-            # 确保 target_id 是字符串，而不是 ObjectId
+            # Ensure target_id is a string, not ObjectId
             if isinstance(vote_dict.get("target_id"), ObjectId):
                 vote_dict["target_id"] = str(vote_dict["target_id"])
             votes.append(Vote(**vote_dict))
@@ -71,7 +71,7 @@ class VoteService:
     async def create_vote(self, vote: VoteCreate, creator_id: str, creator_name: str = "Anonymous User") -> Vote:
         db = await get_database()
         
-        # 检查目标是否存在
+        # Check if target exists
         if vote.target_type == "Idea":
             target = await idea_service.get_idea(vote.target_id)
             if not target:
@@ -87,21 +87,21 @@ class VoteService:
                     detail="Comment not found"
                 )
 
-        # 检查是否已经投票
+        # Check if already voted
         existing_vote = await self.get_vote(target_id=vote.target_id, target_type=vote.target_type, user_id=creator_id)
         
-        # 如果是取消点赞（vote_status=0）且已有点赞记录
+        # If cancelling vote (vote_status=0) and vote record exists
         if vote.vote_status == 0 and existing_vote:
-            # 删除点赞记录
+            # Delete vote record
             await self.delete_vote(str(existing_vote.id))
             
-            # 更新目标的点赞计数（减1）
+            # Update target vote count (subtract 1)
             if vote.target_type == "Idea":
                 await idea_service.update_votes(vote.target_id, -1)
             else:
                 await comment_service.update_votes(vote.target_id, -1)
                 
-            # 返回更新后的投票信息
+            # Return updated vote information
             return Vote(
                 id=str(existing_vote.id),
                 vote_status=0,
@@ -115,14 +115,14 @@ class VoteService:
                 updater_name=creator_name
             )
                 
-        # 如果有现有投票且状态相同，则返回错误
+        # If existing vote with same status, return error
         if existing_vote and existing_vote.vote_status == vote.vote_status:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Vote already exists"
             )
             
-        # 如果是新增点赞（vote_status=1）
+        # If adding new vote (vote_status=1)
         if vote.vote_status == 1:
             vote_dict = vote.model_dump()
             vote_in_db = VoteInDB(
@@ -135,7 +135,7 @@ class VoteService:
             
             result = await db[self.collection_name].insert_one(vote_in_db.model_dump())
             
-            # 更新目标的投票计数（加1）
+            # Update target vote count (add 1)
             if vote.target_type == "Idea":
                 await idea_service.update_votes(vote.target_id, 1)
             else:
@@ -152,7 +152,7 @@ class VoteService:
                 updater_name=creator_name
             )
             
-        # 其他情况（不应该到达这里）
+        # Other cases (should not reach here)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid vote operation"

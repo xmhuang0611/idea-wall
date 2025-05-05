@@ -3,7 +3,8 @@ from typing import List, Optional
 from core.deps import get_current_user, get_current_user_optional
 from services.idea_service import idea_service
 from services.vote_service import vote_service
-from models.idea import Idea, IdeaCreate, StandardResponse, ResponseMeta, ErrorDetail, IdeaCategory
+from models.idea import Idea, IdeaCreate, IdeaCategory
+from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
 
 router = APIRouter()
@@ -46,9 +47,9 @@ async def get_ideas(
                 idea.hasVoted = user_voted_ideas[idea.id] == 1
     
     return StandardResponse(
-        status="success",
+        success=True,
         data=ideas,
-        meta=ResponseMeta(
+        pagination=Pagination(
             page=page,
             page_size=page_size,
             total=total
@@ -63,9 +64,9 @@ async def get_idea(
     idea = await idea_service.get_idea(idea_id)
     if not idea:
         return StandardResponse(
-            status="error",
+            success=False,
             error=ErrorDetail(
-                code="NOT_FOUND",
+                code=404,
                 message="Idea not found"
             )
         )
@@ -81,7 +82,7 @@ async def get_idea(
             idea.hasVoted = vote.vote_status == 1
     
     return StandardResponse(
-        status="success",
+        success=True,
         data=idea
     )
 
@@ -96,7 +97,7 @@ async def create_idea(
         creator_name=current_user.user_name
     )
     return StandardResponse(
-        status="success",
+        success=True,
         data=created_idea
     )
 
@@ -114,14 +115,14 @@ async def update_idea(
     )
     if not updated_idea:
         return StandardResponse(
-            status="error",
+            success=False,
             error=ErrorDetail(
-                code="NOT_FOUND",
+                code=404,
                 message="Idea not found"
             )
         )
     return StandardResponse(
-        status="success",
+        success=True,
         data=updated_idea
     )
 
@@ -133,12 +134,12 @@ async def delete_idea(
     success = await idea_service.delete_idea(idea_id, current_user.user_id)
     if not success:
         return StandardResponse(
-            status="error",
+            success=False,
             error=ErrorDetail(
-                code="NOT_FOUND",
+                code=404,
                 message="Idea not found or you don't have permission to delete it"
             )
         )
     return StandardResponse(
-        status="success"
+        success=True
     ) 

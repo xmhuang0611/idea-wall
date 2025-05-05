@@ -40,7 +40,7 @@ class UserService:
         
         return {
             "users": users,
-            "meta": {
+            "pagination": {
                 "page": page,
                 "page_size": page_size,
                 "total": total

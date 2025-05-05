@@ -3,20 +3,8 @@ import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http'
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Idea } from '../models/idea.model';
-
-interface ApiResponse<T> {
-  status: 'success' | 'error';
-  data: T;
-  meta?: {
-    page: number;
-    page_size: number;
-    total: number;
-  };
-  error?: {
-    code: string;
-    message: string;
-  };
-}
+import { ApiResponse } from '../shared/models/api-response.model';
+import { ToastService } from '../shared/services/toast.service';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +13,10 @@ export class IdeaService {
   private apiUrl = '/api/ideas';
   private voteUrl = '/api/votes';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient, 
+    private toastService: ToastService
+  ) {}
 
   getIdeas(params: {
     page?: any;
@@ -72,6 +63,11 @@ export class IdeaService {
   createIdea(idea: Partial<Idea>): Observable<ApiResponse<Idea>> {
     return this.http.post<ApiResponse<Idea>>(this.apiUrl, idea)
       .pipe(
+        tap(response => {
+          if (response.success) {
+            this.toastService.showSuccess('Idea created successfully');
+          }
+        }),
         catchError(this.handleError)
       );
   }
@@ -79,6 +75,11 @@ export class IdeaService {
   updateIdea(id: string, idea: Partial<Idea>): Observable<ApiResponse<Idea>> {
     return this.http.put<ApiResponse<Idea>>(`${this.apiUrl}/${id}`, idea)
       .pipe(
+        tap(response => {
+          if (response.success) {
+            this.toastService.showSuccess('Idea updated successfully');
+          }
+        }),
         catchError(this.handleError)
       );
   }
@@ -86,15 +87,20 @@ export class IdeaService {
   deleteIdea(id: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`)
       .pipe(
+        tap(response => {
+          if (response.success) {
+            this.toastService.showSuccess('Idea deleted successfully');
+          }
+        }),
         catchError(this.handleError)
       );
   }
 
   /**
-   * 为创意点赞或取消点赞
-   * @param id 创意ID
-   * @param voteStatus 1表示点赞，0表示取消点赞
-   * @returns 包含操作结果的Observable
+   * Vote or unvote an idea
+   * @param id Idea ID
+   * @param voteStatus 1 means vote, 0 means unvote
+   * @returns Observable with operation result
    */
   voteIdea(id: string, voteStatus: number): Observable<ApiResponse<void>> {
     const voteData = {
@@ -105,43 +111,53 @@ export class IdeaService {
 
     return this.http.post<ApiResponse<void>>(this.voteUrl, voteData)
       .pipe(
-        tap(() => {
-          console.log(`${voteStatus === 1 ? '点赞' : '取消点赞'}成功: ${id}`);
+        tap(response => {
+          if (response.success) {
+            const message = voteStatus === 1 ? 'Voted successfully' : 'Unvoted successfully';
+            this.toastService.showSuccess(message);
+          }
         }),
         catchError(this.handleError)
       );
   }
 
-  addComment(ideaId: string, comment: string, parentId?: string): Observable<any> {
+  addComment(ideaId: string, comment: string, parentId?: string): Observable<ApiResponse<any>> {
     const commentData = {
       description: comment,
       parent_id: parentId
     };
 
-    return this.http.post(`${this.apiUrl}/${ideaId}/comments`, commentData)
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/${ideaId}/comments`, commentData)
       .pipe(
+        tap(response => {
+          if (response.success) {
+            this.toastService.showSuccess('Comment published successfully');
+          }
+        }),
         catchError(this.handleError)
       );
   }
 
   /**
-   * 处理HTTP请求错误
-   * @param error HTTP错误响应
-   * @returns 包含错误信息的Observable
+   * Handle HTTP request errors
+   * @param error HTTP error response
+   * @returns Observable with error information
    */
-  private handleError(error: HttpErrorResponse) {
+  private handleError = (error: HttpErrorResponse) => {
     let errorMessage = '';
     
     if (error.error instanceof ErrorEvent) {
-      // 客户端错误
-      errorMessage = `客户端错误: ${error.error.message}`;
+      // Client-side error
+      errorMessage = `Client error: ${error.error.message}`;
     } else {
-      // 服务端错误
+      // Server-side error - using new error format
       const serverError = error.error?.error?.message || error.statusText;
-      errorMessage = `服务端错误: ${error.status} - ${serverError}`;
+      errorMessage = serverError;
     }
     
-    console.error(errorMessage);
+    // Show error notification
+    this.toastService.showError(errorMessage);
+    
     return throwError(() => new Error(errorMessage));
   }
 } 

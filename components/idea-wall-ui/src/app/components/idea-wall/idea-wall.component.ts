@@ -76,7 +76,7 @@ import { Idea } from '../../models/idea.model';
             <div class="flex flex-col items-center mr-6 w-16">
               <button (click)="onVote(idea)"
                       class="text-gray-500 hover:text-blue-600 transition-colors duration-300"
-                      title="{{idea.hasVoted ? '取消点赞' : '点赞'}}">
+                      title="{{idea.hasVoted ? 'Unvote' : 'Vote'}}">
                 <svg class="w-6 h-6" 
                      [class.text-blue-600]="idea.hasVoted" 
                      [class.text-gray-500]="!idea.hasVoted"
@@ -228,15 +228,15 @@ export class IdeaWallComponent implements OnInit {
         if (response.data) {
           this.ideas = response.data;
           
-          // 确保每个idea对象都有hasVoted属性（即使它在API中没有提供）
+          // Ensure each idea object has hasVoted property (even if not provided by API)
           this.ideas.forEach(idea => {
             if (idea.hasVoted === undefined) {
               idea.hasVoted = false;
             }
           });
           
-          if (response.meta) {
-            this.totalItems = response.meta.total;
+          if (response.pagination) {
+            this.totalItems = response.pagination.total;
           }
         } else {
           this.ideas = [];
@@ -244,7 +244,7 @@ export class IdeaWallComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('加载创意失败', error);
+        console.error('Failed to load ideas', error);
         this.ideas = [];
         this.totalItems = 0;
       }
@@ -271,19 +271,19 @@ export class IdeaWallComponent implements OnInit {
   }
 
   /**
-   * 处理点赞/取消点赞操作
-   * @param idea 要点赞的创意
+   * Handle vote/unvote operations
+   * @param idea The idea to vote on
    */
   onVote(idea: Idea): void {
-    // 点赞状态取反：如果已点赞则取消点赞(0)，否则点赞(1)
+    // Toggle vote status: if already voted then unvote (0), otherwise vote (1)
     const voteStatus = idea.hasVoted ? 0 : 1;
     
     this.ideaService.voteIdea(idea.id, voteStatus).subscribe({
       next: () => {
-        // 更新点赞状态
+        // Update vote status
         idea.hasVoted = !idea.hasVoted;
         
-        // 更新点赞计数
+        // Update vote count
         if (idea.hasVoted) {
           idea.total_votes += 1;
         } else {
@@ -291,7 +291,7 @@ export class IdeaWallComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('点赞失败', error);
+        console.error('Vote failed', error);
       }
     });
   }

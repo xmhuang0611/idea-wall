@@ -5,6 +5,7 @@ import { FooterComponent } from './components/footer/footer.component';
 import { AuthService } from './auth/auth.service';
 import { LoginDialogComponent } from './auth/login-dialog/login-dialog.component';
 import { CommonModule } from '@angular/common';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +15,8 @@ import { CommonModule } from '@angular/common';
     HeaderComponent, 
     FooterComponent,
     CommonModule,
-    LoginDialogComponent
+    LoginDialogComponent,
+    ToastModule
   ],
   template: `
     <div class="min-h-screen flex flex-col bg-gray-50">
@@ -23,6 +25,7 @@ import { CommonModule } from '@angular/common';
         <router-outlet></router-outlet>
       </main>
       <app-footer></app-footer>
+      <p-toast position="bottom-right"></p-toast>
     </div>
   `,
   styles: [`

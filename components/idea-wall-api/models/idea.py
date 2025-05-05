@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, TypeVar, Generic, Dict, Any
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
 from .audit import AuditModel
@@ -36,21 +36,4 @@ class Idea(IdeaBase):
     updater_name: str
     total_votes: int
     tag_details: Optional[List[IdeaTag]] = None
-    hasVoted: bool = False
-
-T = TypeVar('T')
-
-class ResponseMeta(BaseModel):
-    page: int
-    page_size: int
-    total: int
-
-class ErrorDetail(BaseModel):
-    code: str
-    message: str
-
-class StandardResponse(BaseModel, Generic[T]):
-    status: str
-    data: Optional[T] = None
-    meta: Optional[ResponseMeta] = None
-    error: Optional[ErrorDetail] = None 
+    hasVoted: bool = False 
