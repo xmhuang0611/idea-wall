@@ -40,6 +40,7 @@ Stores all ideas submitted to the platform.
 | feeling        | Number   | Feeling score                        | 8                                      |
 | tags           | Array    | Array of tag IDs                     | [1,2]                                  |
 | total_votes    | Number   | Total number of votes                | 42                                     |
+| total_comments | Number   | Total number of comments             | 10                                     |
 
 ### Comments Collection
 
@@ -78,7 +79,7 @@ Stores tags for categorizing ideas.
 | Field       | Type   | Description                  | Example Value |
 |-------------|--------|------------------------------|---------------|
 | tag_id      | number | Tag id                       | 1             |
-| tag         | String | Tag name                     | "Innovation"  |
+| tag_name    | String | Tag name                     | "Innovation"  |
 | parent_id   | number | Parent tag for nested tags   | 0             |
 
 ### Logs
@@ -140,7 +141,7 @@ Stores operation logs for all system operations.
 
 ### User Roles
 
-- IDEA_SESSION_PANNEL_REVIEWER
+- IDEA_SESSION_PANEL_REVIEWER
 - IDEA_INCUBATOR_REVIEWER
 - ADMIN
 

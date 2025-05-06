@@ -19,11 +19,5 @@ class VoteCreate(VoteBase):
 class VoteInDB(VoteBase, AuditModel):
     pass
 
-class Vote(VoteBase):
-    id: str
-    created_at: datetime
-    creator_id: str
-    creator_name: str
-    updated_at: datetime
-    updater_id: str
-    updater_name: str 
+class Vote(VoteInDB):
+    pass

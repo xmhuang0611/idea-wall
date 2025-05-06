@@ -33,7 +33,7 @@ def custom_openapi():
             "type": "oauth2",
             "flows": {
                 "implicit": {
-                    "authorizationUrl": "/api/auth/authorize",
+                    "authorizationUrl": oauth2_settings.auth_url,
                 }
             }
         }
