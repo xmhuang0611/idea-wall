@@ -167,12 +167,6 @@ Stores operation logs for all system operations.
 
 - `user_id`: Unique index
 
-#### Notes
-
-- `total_ideas`, `total_pain_points`, `total_votes`, and `total_points` are denormalized for quick access and ranking.
-- `notification_prefs` and `privacy_settings` are objects storing user-specific settings.
-- All user info fields are read-only except for settings and profile fields (nickname, avatar, bio, preferences, etc.).
-
 
 ### Idea Categories
 
