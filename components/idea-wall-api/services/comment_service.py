@@ -49,9 +49,10 @@ class CommentService:
             updater_name=creator_name
         )
         
+        # 创建评论
         result = await db[self.collection_name].insert_one(comment_in_db.model_dump())
         
-        # 评论创建成功后，更新idea的评论数量
+        # 更新idea的评论数量
         await db["ideas"].update_one(
             {"_id": ObjectId(idea_id)},
             {"$inc": {"comment_count": 1}}
@@ -84,6 +85,7 @@ class CommentService:
         comment = await self.get_comment(comment_id)
         if comment:
             idea_id = comment.idea_id
+            # 删除评论
             result = await db[self.collection_name].delete_one({"_id": ObjectId(comment_id)})
             if result.deleted_count > 0:
                 # 删除评论成功后，减少idea的评论数量

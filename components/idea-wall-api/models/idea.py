@@ -17,7 +17,7 @@ class IdeaBase(BaseModel):
     title: str
     description: str
     category: IdeaCategory
-    feeling: int = Field(ge=0, le=10)
+    feeling: int = Field(ge=1, le=10, description="Feeling level from 1 to 10")
     tags: List[int]
 
 class IdeaCreate(IdeaBase):
