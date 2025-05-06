@@ -36,9 +36,9 @@ now = datetime.utcnow()
 user_roles = [
     ("john_admin", ["ADMIN"]),
     ("grace_admin", ["ADMIN"]),
-    ("alice_reviewer", ["IDEA_SESSION_PANNEL_REVIEWER"]),
-    ("emma_reviewer", ["IDEA_SESSION_PANNEL_REVIEWER"]),
-    ("helen_panel", ["IDEA_SESSION_PANNEL_REVIEWER"]),
+    ("alice_reviewer", ["IDEA_SESSION_PANEL_REVIEWER"]),
+    ("emma_reviewer", ["IDEA_SESSION_PANEL_REVIEWER"]),
+    ("helen_panel", ["IDEA_SESSION_PANEL_REVIEWER"]),
     ("bob_incubator", ["IDEA_INCUBATOR_REVIEWER"]),
     ("ian_incubator", ["IDEA_INCUBATOR_REVIEWER"]),
     ("david_user", ["USER"]),
@@ -48,6 +48,7 @@ user_roles = [
 test_users = [
     {
         "user_id": uid,
+        "user_name": user_name_map.get(uid, uid),
         "roles": roles,
         "created_at": now,
         "creator_id": uid,
@@ -76,7 +77,7 @@ base_tags = [
 test_tags = [
     {
         "tag_id": tag_id,
-        "tag": tag_name,
+        "tag_name": tag_name,
         "parent_id": parent_id,
         "created_at": now,
         "creator_id": "john_admin",
@@ -167,7 +168,7 @@ for i in range(20):
     title = idea_titles[i % len(idea_titles)]
     desc = idea_descs[i % len(idea_descs)]
     category = random.choice(idea_categories)
-    feeling = random.randint(3, 10)
+    feeling = random.randint(1, 5)
     tags = random.sample([t[0] for t in base_tags], random.randint(1, 3))
     new_test_ideas.append({
         "title": title,
@@ -176,6 +177,7 @@ for i in range(20):
         "feeling": feeling,
         "tags": tags,
         "total_votes": 0,
+        "total_comments": 0,
         "created_by": user,
         "updated_by": user
     })
@@ -215,6 +217,7 @@ async def insert_test_data():
                 "feeling": idea["feeling"],
                 "tags": idea["tags"],
                 "total_votes": 0,
+                "total_comments": 0,
                 "created_at": created_at,
                 "creator_id": user_id,
                 "creator_name": user_name,
@@ -261,14 +264,19 @@ async def insert_test_data():
         if test_comments:
             await db.comments.insert_many(test_comments)
             print(f"{len(test_comments)} new comments created successfully")
+            
+            # Update total_comments for each idea
+            for idea_id in idea_ids:
+                comment_count = len([c for c in test_comments if c["idea_id"] == str(idea_id)])
+                await db.ideas.update_one({"_id": idea_id}, {"$set": {"total_comments": comment_count}})
 
         # Prepare votes (vote_status: 0 or 1, with audit fields)
         test_votes = []
         for idea_id in idea_ids:
             num_votes = random.randint(4, 10)
             vote_users = random.sample(comment_users, min(num_votes, len(comment_users)))
-            vote_date = generate_random_date(start_date, end_date)
             for voter in vote_users:
+                vote_date = generate_random_date(start_date, end_date)
                 vote_status = random.choice([0, 1])
                 test_votes.append({
                     "vote_status": vote_status,
