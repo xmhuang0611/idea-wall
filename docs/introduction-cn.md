@@ -118,3 +118,4 @@
 - **前端技术栈**：Angular + PrimeNG，实现在 idea-wall-ui
 - **后端技术栈**：Python FastAPI，实现在 idea-wall-api
 - **数据库**：MongoDB
+- **登录验证**：OAuth，responseType = token。使用JwksValidationHandler作为tokenValidationHandler，使用JwtHelperService解析token。
