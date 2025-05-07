@@ -1,35 +1,38 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List
-from core.deps import get_current_active_user
+from core.deps import get_current_user  
 from services.comment_service import comment_service
 from services.idea_service import idea_service
 from models.comment import Comment, CommentCreate
 from models.user import User
+from models.response import StandardResponse, Pagination
 
 router = APIRouter()
 
-@router.get("", response_model=List[Comment])
+@router.get("", response_model=StandardResponse[List[Comment]])
 async def get_comments(
     idea_id: str,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    current_user: User = Depends(get_current_active_user)
 ):
-    idea = await idea_service.get_idea(idea_id)
-    if not idea:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Idea not found"
+    comments = await comment_service.get_comments(idea_id=idea_id, skip=skip, limit=limit)
+    total = await comment_service.count_comments(idea_id=idea_id)
+    return StandardResponse(
+        success=True,
+        data=comments,
+        pagination=Pagination(
+            skip=skip,
+            limit=limit,
+            total=total
         )
-    return await comment_service.get_comments(idea_id=idea_id, skip=skip, limit=limit)
+    )
 
-@router.post("", response_model=Comment)
+@router.post("", response_model=StandardResponse[Comment])
 async def create_comment(
-    idea_id: str,
     comment: CommentCreate,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
-    idea = await idea_service.get_idea(idea_id)
+    idea = await idea_service.get_idea(comment.idea_id)
     if not idea:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -44,8 +47,13 @@ async def create_comment(
                 detail="Parent comment not found"
             )
             
-    return await comment_service.create_comment(
-        idea_id=idea_id,
+    created_comment = await comment_service.create_comment(
         comment=comment,
-        created_by=current_user.user_id
-    ) 
+        creator_id=current_user.user_id,
+        creator_name=current_user.user_name
+    )
+    
+    return StandardResponse(
+        success=True,
+        data=created_comment
+    )

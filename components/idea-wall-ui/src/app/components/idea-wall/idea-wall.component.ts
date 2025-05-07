@@ -4,11 +4,23 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IdeaService } from '../../services/idea.service';
 import { Idea } from '../../models/idea.model';
+import { TagModule } from 'primeng/tag';
+import { DividerModule } from 'primeng/divider';
+import { ButtonModule } from 'primeng/button';
+import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
 
 @Component({
   selector: 'app-idea-wall',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    RouterModule, 
+    TagModule, 
+    DividerModule, 
+    ButtonModule,
+    IdeaDetailsDrawerComponent
+  ],
   template: `
     <div class="bg-white rounded-lg shadow-sm p-6">
       <!-- Header with Tabs -->
@@ -72,33 +84,59 @@ import { Idea } from '../../models/idea.model';
         <div *ngFor="let idea of ideas"
              class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
           <div class="flex">
-            <!-- Like Column -->
+            <!-- Vote Column -->
             <div class="flex flex-col items-center mr-6 w-16">
-              <button (click)="onVote(idea, idea.hasVoted ? 0 : 1)"
-                      class="text-gray-500 hover:text-blue-600">
-                <svg class="w-6 h-6" [class.text-blue-600]="idea.hasVoted" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-6.5"/>
-                </svg>
+              <button (click)="onVote(idea)"
+                      class="hover:text-blue-600 transition-colors duration-300 flex flex-col items-center"
+                      title="{{idea.hasVoted ? 'Unvote' : 'Vote'}}">
+                <i class="{{idea.hasVoted ? 'pi pi-thumbs-up-fill' : 'pi pi-thumbs-up'}} text-xl flex justify-content-center"
+                   [class.text-blue-600]="idea.hasVoted" 
+                   [class.text-gray-500]="!idea.hasVoted"
+                   style="width: 24px; height: 24px; display: flex; align-items: center;"></i>
+                <span class="text-lg font-semibold mt-1">{{idea.total_votes}}</span>
               </button>
-              <span class="text-lg font-semibold my-1">{{idea.total_votes}}</span>
             </div>
 
             <!-- Content Column -->
             <div class="flex-1">
               <div class="flex items-center justify-between mb-2">
-                <h3 class="text-lg font-semibold text-gray-900">{{idea.title}}</h3>
+                <h3 class="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600" 
+                    (click)="openDetails(idea.id)">
+                  {{idea.title}}
+                </h3>
+                <button pButton 
+                        pRipple 
+                        icon="pi pi-info-circle"
+                        class="p-button-rounded p-button-text p-button-sm" 
+                        (click)="openDetails(idea.id)">
+                </button>
               </div>
               <p class="text-gray-600 mb-3 line-clamp-2">{{idea.description}}</p>
-              <div class="flex items-center justify-between text-sm text-gray-500 mt-4 pt-3 border-t border-gray-100">
-                <div class="flex items-center space-x-2">
-                  <span *ngFor="let tag of idea.tags" 
-                        class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
-                    {{tag}}
-                  </span>
+              
+              <!-- Tags - Moved above the divider -->
+              <div class="flex flex-wrap gap-2 mb-3">
+                <p-tag *ngFor="let tag of idea.tag_details" 
+                      [value]="tag.tag_name"
+                      [severity]="getTagSeverity(tag.tag_name)">
+                </p-tag>
+              </div>
+              
+              <p-divider></p-divider>
+              
+              <div class="flex items-center justify-between text-sm text-gray-500">
+                <div class="flex items-center">
+                  <!-- 修改评论按钮，显示评论数量 -->
+                  <button (click)="openDetails(idea.id)" 
+                          class="inline-flex items-center text-gray-500 hover:text-gray-700">
+                    <i class="pi pi-comment mr-1"></i>
+                    <span>{{ idea.total_comments || 0 }}</span>
+                  </button>
                 </div>
-                <div class="flex items-center space-x-4 text-gray-500">
-                  <span>By {{idea.created_by}}</span>
-                  <span>{{idea.created_at | date:'medium'}}</span>
+                <div class="flex items-center space-x-2 text-gray-500">
+                  <span>By {{idea.creator_name}}</span>
+                  <span class="hidden sm:inline mx-1">•</span>
+                  <span class="hidden sm:inline">{{idea.created_at | date:'medium'}}</span>
+                  <span class="sm:hidden">{{idea.created_at | date:'short'}}</span>
                 </div>
               </div>
             </div>
@@ -172,6 +210,13 @@ import { Idea } from '../../models/idea.model';
         <p class="text-gray-500">No ideas found matching your criteria.</p>
       </div>
     </div>
+    
+    <!-- Idea Details Drawer -->
+    <app-idea-details-drawer
+      [(visible)]="ideaDetailsVisible"
+      [ideaId]="selectedIdeaId"
+      (commentCountChange)="onCommentCountChange($event)">
+    </app-idea-details-drawer>
   `,
   styles: [`
     :host {
@@ -202,6 +247,13 @@ export class IdeaWallComponent implements OnInit {
 
   // Category options
   categories = ['Idea', 'Pain', 'Thought'];
+  
+  // Idea Details drawer
+  ideaDetailsVisible = false;
+  selectedIdeaId = '';
+
+  // 保存每个idea的评论数，用于更新列表显示
+  commentCounts: { [ideaId: string]: number } = {};
 
   constructor(private ideaService: IdeaService) {}
 
@@ -210,27 +262,41 @@ export class IdeaWallComponent implements OnInit {
   }
 
   loadIdeas(): void {
-    this.ideaService.getIdeas({
-      page: this.currentPage,
-      page_size: this.pageSize,
-      category: this.selectedCategory || undefined,
-      search: this.searchQuery || undefined,
-      sort_by: this.sortBy,
-      sort_order: this.sortOrder
-    }).subscribe({
-      next: (response) => {
-        this.ideas = response.data.map(idea => ({
-          ...idea,
-          hasVoted: idea.user_vote ? idea.user_vote > 0 : false
-        }));
-        if (response.meta) {
-          this.totalItems = response.meta.total;
+    const skip = (this.currentPage - 1) * this.pageSize;
+    
+    this.ideaService
+      .getIdeas({
+        skip: skip,
+        limit: this.pageSize,
+        category: this.selectedCategory,
+        search: this.searchQuery,
+        sort_by: this.sortBy,
+        sort_order: this.sortOrder
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.ideas = response.data.map(idea => ({
+              ...idea,
+              created_at: new Date(idea.created_at),
+              updated_at: new Date(idea.updated_at)
+            }));
+            
+            if (response.pagination) {
+              this.totalItems = response.pagination.total;
+            }
+            
+            console.log('Ideas loaded:', this.ideas.length);
+          } else {
+            console.error('Failed to load ideas:', response.error);
+            this.ideas = [];
+          }
+        },
+        error: (error) => {
+          console.error('Error loading ideas:', error);
+          this.ideas = [];
         }
-      },
-      error: (error) => {
-        console.error('Failed to load ideas', error);
-      }
-    });
+      });
   }
 
   onSearch(): void {
@@ -252,15 +318,28 @@ export class IdeaWallComponent implements OnInit {
     this.loadIdeas();
   }
 
-  onVote(idea: Idea, voteStatus: number): void {
-    this.ideaService.voteIdea(idea._id, voteStatus).subscribe({
+  /**
+   * Handle vote/unvote operations
+   * @param idea The idea to vote on
+   */
+  onVote(idea: Idea): void {
+    // Toggle vote status: if already voted then unvote (0), otherwise vote (1)
+    const voteStatus = idea.hasVoted ? 0 : 1;
+    
+    this.ideaService.voteIdea(idea.id, voteStatus).subscribe({
       next: () => {
-        idea.hasVoted = voteStatus > 0;
-        idea.total_votes += voteStatus - (idea.user_vote || 0);
-        idea.user_vote = voteStatus;
+        // Update vote status
+        idea.hasVoted = !idea.hasVoted;
+        
+        // Update vote count
+        if (idea.hasVoted) {
+          idea.total_votes += 1;
+        } else {
+          idea.total_votes -= 1;
+        }
       },
       error: (error) => {
-        console.error('Failed to vote', error);
+        console.error('Vote failed', error);
       }
     });
   }
@@ -324,6 +403,110 @@ export class IdeaWallComponent implements OnInit {
     }
 
     return pages;
+  }
+
+  /**
+   * 打开idea详情抽屉
+   * @param ideaId 
+   */
+  openDetails(ideaId: string): void {
+    this.selectedIdeaId = ideaId;
+    this.ideaDetailsVisible = false;
+    
+    // 直接获取评论数据
+    this.ideaService.getComments(ideaId).subscribe({
+      next: (commentsResponse) => {
+        if (commentsResponse.success && Array.isArray(commentsResponse.data)) {
+          const commentCount = commentsResponse.data.length;
+          // 更新评论数缓存
+          this.commentCounts[ideaId] = commentCount;
+          
+          // 更新当前列表中的评论数
+          const idea = this.ideas.find(i => i.id === ideaId);
+          if (idea && idea.total_comments !== commentCount) {
+            console.log(`Updating comment count before opening details: ${commentCount}`);
+            idea.total_comments = commentCount;
+          }
+        }
+        
+        // 打开详情抽屉
+        setTimeout(() => {
+          this.ideaDetailsVisible = true;
+        }, 0);
+      },
+      error: () => {
+        // 即使获取评论失败，也要打开详情页
+        setTimeout(() => {
+          this.ideaDetailsVisible = true;
+        }, 0);
+      }
+    });
+  }
+
+  /**
+   * 处理评论数量变化事件
+   * @param event {ideaId: string, count: number} 
+   */
+  onCommentCountChange(event: {ideaId: string, count: number}): void {
+    console.log('Comment count change event received:', event);
+    
+    // 更新本地评论数缓存
+    this.commentCounts[event.ideaId] = event.count;
+    
+    // 更新当前显示列表中的评论数
+    if (this.ideas && this.ideas.length) {
+      const idea = this.ideas.find(i => i.id === event.ideaId);
+      if (idea) {
+        // 仅当评论数不同时才更新
+        if (idea.total_comments !== event.count) {
+          console.log(`Updating idea ${idea.id} comment count from ${idea.total_comments} to ${event.count}`);
+          idea.total_comments = event.count;
+          
+          // 可选：如果需要确保与后端同步，可以直接更新数据库中的评论计数
+          // 通常不需要这样做，因为后端在添加或删除评论时会自动更新total_comments字段
+          // 但如果发现数据不一致，可以考虑调用API更新
+          this.ideaService.getIdeaById(event.ideaId).subscribe({
+            next: (response) => {
+              if (response.success && response.data) {
+                // 再次验证评论数是否同步
+                if (idea.total_comments !== response.data.total_comments) {
+                  console.log(`Syncing comment count with server: ${response.data.total_comments}`);
+                  idea.total_comments = response.data.total_comments;
+                }
+              }
+            },
+            error: (error) => {
+              console.error('Failed to sync comment count with server', error);
+            }
+          });
+        }
+      } else {
+        console.log(`Idea ${event.ideaId} not found in current list`);
+      }
+    }
+  }
+  
+  getTagSeverity(tag: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {
+    // Return different severities based on tag content to achieve different colors
+    const tagMap: {[key: string]: 'success' | 'info' | 'warning' | 'danger' | 'secondary'} = {
+      'urgent': 'danger',
+      'important': 'warning',
+      'feature': 'info',
+      'enhancement': 'success',
+      'bug': 'danger',
+      'documentation': 'info',
+      'discussion': 'secondary'
+    };
+    
+    const lowerTag = tag.toLowerCase();
+    for (const key in tagMap) {
+      if (lowerTag.includes(key)) {
+        return tagMap[key];
+      }
+    }
+    
+    // Default color
+    return 'info';
   }
 
   protected readonly Math = Math;

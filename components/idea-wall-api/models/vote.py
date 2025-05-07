@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Literal
 from datetime import datetime
 from enum import Enum
+from .audit import AuditModel
 
 class TargetType(str, Enum):
     IDEA = "Idea"
@@ -15,14 +16,8 @@ class VoteBase(BaseModel):
 class VoteCreate(VoteBase):
     pass
 
-class VoteInDB(VoteBase):
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    created_by: str
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_by: str
+class VoteInDB(VoteBase, AuditModel):
+    pass
 
-class Vote(VoteBase):
+class Vote(VoteInDB):
     id: str
-    created_at: datetime
-    created_by: str
-    updated_at: datetime 

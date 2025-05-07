@@ -1,27 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, Query
 from typing import List, Optional
-from core.deps import get_current_active_user
+from core.deps import get_current_user, get_current_user_optional
 from services.idea_service import idea_service
-from models.idea import Idea, IdeaCreate, StandardResponse, ResponseMeta, ErrorDetail, IdeaCategory
+from services.vote_service import vote_service
+from models.idea import Idea, IdeaCreate, IdeaCategory
+from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
 
 router = APIRouter()
 
 @router.get("", response_model=StandardResponse[List[Idea]])
 async def get_ideas(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
     category: Optional[IdeaCategory] = None,
     sort_by: Optional[str] = Query(None, regex="^(created_at|title|feeling|total_votes)$"),
     sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
     search: Optional[str] = None,
     tags: Optional[List[int]] = Query(None),
-    current_user: User = Depends(get_current_active_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
-    skip = (page - 1) * page_size
     ideas = await idea_service.get_ideas(
         skip=skip,
-        limit=page_size,
+        limit=limit,
         category=category,
         sort_by=sort_by,
         sort_order=sort_order,
@@ -34,12 +35,22 @@ async def get_ideas(
         tags=tags
     )
     
+    # 如果用户已登录，获取用户点赞状态
+    if current_user:
+        user_votes = await vote_service.get_votes_by_user(current_user.user_id, "Idea")
+        user_voted_ideas = {vote.target_id: vote.vote_status for vote in user_votes}
+        
+        # 为每个 idea 添加用户点赞状态
+        for idea in ideas:
+            if idea.id in user_voted_ideas:
+                idea.hasVoted = user_voted_ideas[idea.id] == 1
+    
     return StandardResponse(
-        status="success",
+        success=True,
         data=ideas,
-        meta=ResponseMeta(
-            page=page,
-            page_size=page_size,
+        pagination=Pagination(
+            skip=skip,
+            limit=limit,
             total=total
         )
     )
@@ -47,49 +58,44 @@ async def get_ideas(
 @router.get("/{idea_id}", response_model=StandardResponse[Idea])
 async def get_idea(
     idea_id: str,
-    current_user: User = Depends(get_current_active_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     idea = await idea_service.get_idea(idea_id)
     if not idea:
         return StandardResponse(
-            status="error",
+            success=False,
             error=ErrorDetail(
-                code="NOT_FOUND",
+                code=404,
                 message="Idea not found"
             )
         )
+    
+    # 如果用户已登录，获取用户点赞状态
+    if current_user:
+        vote = await vote_service.get_vote(
+            target_id=idea_id, 
+            target_type="Idea",
+            user_id=current_user.user_id
+        )
+        if vote:
+            idea.hasVoted = vote.vote_status == 1
+    
     return StandardResponse(
-        status="success",
+        success=True,
         data=idea
     )
 
 @router.post("", response_model=StandardResponse[Idea])
 async def create_idea(
     idea: IdeaCreate,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
-    created_idea = await idea_service.create_idea(idea, current_user.id)
+    created_idea = await idea_service.create_idea(
+        idea, 
+        creator_id=current_user.user_id,
+        creator_name=current_user.user_name
+    )
     return StandardResponse(
-        status="success",
+        success=True,
         data=created_idea
     )
-
-@router.put("/{idea_id}", response_model=StandardResponse[Idea])
-async def update_idea(
-    idea_id: str,
-    idea_update: IdeaCreate,
-    current_user: User = Depends(get_current_active_user)
-):
-    updated_idea = await idea_service.update_idea(idea_id, idea_update, current_user.id)
-    if not updated_idea:
-        return StandardResponse(
-            status="error",
-            error=ErrorDetail(
-                code="NOT_FOUND",
-                message="Idea not found"
-            )
-        )
-    return StandardResponse(
-        status="success",
-        data=updated_idea
-    ) 

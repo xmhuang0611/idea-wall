@@ -1,15 +1,21 @@
+import { Tag } from './tag.model';
+
 export interface Idea {
-  _id: string;
+  id: string;
   title: string;
   description: string;
   category: 'Idea' | 'Pain' | 'Thought';
   feeling: number;
   tags: number[];
+  tag_details?: Tag[];
   total_votes: number;
+  total_comments: number;
   user_vote?: number;
   hasVoted?: boolean;
   created_at: Date;
-  created_by: string;
+  creator_id: string;
+  creator_name: string;
   updated_at: Date;
-  updated_by: string;
+  updater_id: string;
+  updater_name: string;
 } 

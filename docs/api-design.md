@@ -28,7 +28,7 @@ Common HTTP status codes used in the API:
 - 500: Internal Server Error - Server error
 
 ```python
-status_code = 200 | 201 | 204 | 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500
+code = 200 | 201 | 204 | 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500
 ```
 
 ### 1.3 Standard Response Format
@@ -40,14 +40,14 @@ status_code = 200 | 201 | 204 | 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500
     // Response data
   },
   // optional, only for list response
-  "meta": {
-    "page": 1,
-    "page_size": 20,
+  "pagination": {
+    "skip": 1,
+    "limit": 20,
     "total": 100
   },
   // optional, only for error response
   "error": {
-    "status_code": status_code,
+    "code": code,
     "message": "Error message"
   }
 }
@@ -58,11 +58,7 @@ status_code = 200 | 201 | 204 | 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500
 - JWT-based authentication
 - Token included in Authorization header: `Authorization: Bearer <token>`
 - Token expiration: 24 hours
-- Refresh token mechanism for extended sessions
-- Token endpoints:
-  - POST /api/auth/login
-  - POST /api/auth/refresh
-  - POST /api/auth/logout
+- OAuth2.0 implicit grant type
 
 ### 1.5 Rate Limiting
 
@@ -110,7 +106,7 @@ Response Body:
     },
     // more users...
   ],
-  "meta": {
+  "pagination": {
     "page": 1,
     "page_size": 20,
     "total": 100
@@ -294,7 +290,7 @@ Response Body:
     },
     // more logs...
   ],
-  "meta": {
+  "pagination": {
     "page": 1,
     "page_size": 20,
     "total": 100

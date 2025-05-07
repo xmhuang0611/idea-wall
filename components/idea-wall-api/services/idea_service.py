@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import List, Optional, Dict, Any
-from fastapi import HTTPException, status
 from core.database import get_database
-from models.idea import IdeaCreate, IdeaInDB, Idea, IdeaCategory
+from models.idea import IdeaCreate, IdeaInDB, Idea, IdeaCategory, IdeaTag
 from bson import ObjectId
+from services.tag_service import tag_service
 
 class IdeaService:
     def __init__(self):
@@ -52,7 +52,7 @@ class IdeaService:
         sort_by: Optional[str] = None,
         sort_order: Optional[str] = None,
         search: Optional[str] = None,
-        tags: Optional[List[int]] = None
+        tags: Optional[List[int]] = None,
     ) -> List[Idea]:
         db = await get_database()
         
@@ -74,8 +74,10 @@ class IdeaService:
         cursor = cursor.skip(skip).limit(limit)
         
         ideas = []
+        all_tags = await tag_service.get_all_tags()
         async for idea_dict in cursor:
             idea_dict["id"] = str(idea_dict.pop("_id"))
+            idea_dict["tag_details"] = [IdeaTag(tag_id=tag.tag_id, tag_name=tag.tag_name) for tag in all_tags if tag.tag_id in idea_dict["tags"]]                
             ideas.append(Idea(**idea_dict))
         return ideas
 
@@ -84,50 +86,37 @@ class IdeaService:
         idea_dict = await db[self.collection_name].find_one({"_id": ObjectId(idea_id)})
         if idea_dict:
             idea_dict["id"] = str(idea_dict.pop("_id"))
+            all_tags = await tag_service.get_all_tags()
+            idea_dict["tag_details"] = [IdeaTag(tag_id=tag.tag_id, tag_name=tag.tag_name) for tag in all_tags if tag.tag_id in idea_dict["tags"]]
             return Idea(**idea_dict)
         return None
 
-    async def create_idea(self, idea: IdeaCreate, created_by: str) -> Idea:
+    async def create_idea(self, idea: IdeaCreate, creator_id: str, creator_name: str = "Anonymous User") -> Idea:
         db = await get_database()
         idea_dict = idea.model_dump()
         idea_in_db = IdeaInDB(
             **idea_dict,
-            created_by=created_by,
-            updated_by=created_by
+            creator_id=creator_id,
+            creator_name=creator_name,
+            updater_id=creator_id,
+            updater_name=creator_name,
+            total_votes=0,
+            total_comments=0
         )
         
         result = await db[self.collection_name].insert_one(idea_in_db.model_dump())
-        
         return Idea(
             id=str(result.inserted_id),
             **idea_dict,
             created_at=idea_in_db.created_at,
-            created_by=created_by,
+            creator_id=creator_id,
+            creator_name=creator_name,
             updated_at=idea_in_db.updated_at,
-            total_votes=0
+            updater_id=creator_id,
+            updater_name=creator_name,
+            total_votes=0,
+            total_comments=0
         )
-
-    async def update_idea(
-        self,
-        idea_id: str,
-        idea_update: IdeaCreate,
-        updated_by: str
-    ) -> Optional[Idea]:
-        db = await get_database()
-        update_data = idea_update.model_dump()
-        update_data.update({
-            "updated_at": datetime.utcnow(),
-            "updated_by": updated_by
-        })
-        
-        result = await db[self.collection_name].update_one(
-            {"_id": ObjectId(idea_id)},
-            {"$set": update_data}
-        )
-        
-        if result.modified_count:
-            return await self.get_idea(idea_id)
-        return None
 
     async def update_votes(self, idea_id: str, vote_change: int) -> bool:
         db = await get_database()

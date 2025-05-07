@@ -21,36 +21,36 @@
 
 
 ### 发表Idea功能
-1. 用户登录系统后，首页Ideas列表右上方的“发布”按钮为Enabled状态，点击该按钮弹出模态框发布Idea；
+1. 用户登录系统后，首页Ideas列表右上方的"发布"按钮为Enabled状态，点击该按钮弹出模态框发布Idea；
 2. Idea有一个Title字段，必填；
 3. Idea有一个category字段，可以选择Idea、Pain、Thought选项，必填；
 4. Idea有一个Feeling字段，表示发表该Idea的心情，是一个表情图案，数据库存number类型，展示时转换为表情图；
 5. 可以给Idea加上Tags，从Tags Collection表拉取Tags，数据库存Tags Id，是一个数组；
 6. Idea有一个Description字段，界面是一个富文本编辑器；
-7. created_at为当前时间，created_by_id当前用户user_id，created_by_name为当前用户name；
-8. updated_at为当前时间，updated_by_id当前用户user_id，updated_by_name为当前用户name；
-9. 发表Idea成功时同时往Logs表插入一条Log记录，object为“Idea”，object_id为Idea Id，object_data为保存后的Idea记录的json字符串，created_at为当前时间，created_by_id当前用户user_id，created_by_name为当前用户name。
+7. created_at为当前时间，creator_id当前用户user_id，creator_name为当前用户name；
+8. updated_at为当前时间，updater_id当前用户user_id，updater_name为当前用户name；
+9. 发表Idea成功时同时往Logs表插入一条Log记录，object为"Idea"，object_id为Idea Id，object_data为保存后的Idea记录的json字符串，created_at为当前时间，creator_id当前用户user_id，creator_name为当前用户name。
 
 
 ### 编辑Idea功能
-1. 在Idea列表页面，如果是当前用户发布的Idea，下方展示一个Edit按钮，点击弹出模态框编辑Idea，编辑界面和发表Idea界面一致，自动填充Idea字段。保存Idea时不改变created_at，created_by_id，created_by_name，只更新updated_at，updated_by_id，updated_by_name字段。
+1. 在Idea列表页面，如果是当前用户发布的Idea，下方展示一个Edit按钮，点击弹出模态框编辑Idea，编辑界面和发表Idea界面一致，自动填充Idea字段。保存Idea时不改变created_at，creator_id，creator_name，只更新updated_at，updater_id，updater_name字段。
 
 
 ### 发表评论功能
-1. 如果已经登录系统，点击Idea列表页面每条Idea下面的评论按钮，弹出模态框分页展示该Idea的所有评论。最上方还有一个富文本编辑器可以对Idea进行评论，评论保存在Comments Collection中，idea_id为评论的Idea Id，parent_id为空。
+1. 如果已经登录系统，点击Idea列表页面每条Idea下面的评论按钮，右侧弹出drawer分页展示该Idea的所有评论。最上方还有一个富文本编辑器可以对Idea进行评论，评论保存在Comments Collection中，idea_id为评论的Idea Id，parent_id为空。
 2. 也可以对某一条评论进行评论，idea_id为评论的Idea Id，parent_id为被评论的评论Id。
 3. 用户也可以编辑自己发表过的评论，编辑评论时也要记录Log。
 
 
 ### 我发布的Ideas
-1. 从我的头像下拉菜单中选择“我发布的Idea”，Ideas列表只过滤出我发布的Ideas。其他操作与Ideas列表一致。
+1. 从我的头像下拉菜单中选择"我发布的Idea"，Ideas列表只过滤出我发布的Ideas。其他操作与Ideas列表一致。
 
 
 ### 我收藏的Ideas
-1. 从我的头像下拉菜单中选择“我收藏的Idea”，Ideas列表只过滤出我收藏的Ideas。其他操作与Ideas列表一致。
+1. 从我的头像下拉菜单中选择"我收藏的Idea"，Ideas列表只过滤出我收藏的Ideas。其他操作与Ideas列表一致。
 
 
 ### Audit字段填充及系统日志记录
-1. 新增记录时：created_at为当前时间，created_by_id当前用户user_id，created_by_name为当前用户name；updated_at为当前时间，updated_by_id当前用户user_id，updated_by_name为当前用户name；
-2. 编辑记录时，不改变created_at，created_by_id，created_by_name，只更新updated_at，updated_by_id，updated_by_name字段。
-3. 只要更新了数据就要往Logs表插入一条Log记录，object为更新的记录类别，object_id为更新记录的Id，object_data为保存后的记录的json字符串，created_at为当前时间，created_by_id当前用户user_id，created_by_name为当前用户name。
+1. 新增记录时：created_at为当前时间，creator_id当前用户user_id，creator_name为当前用户name；updated_at为当前时间，updater_id当前用户user_id，updater_name为当前用户name；
+2. 编辑记录时，不改变created_at，creator_id，creator_name，只更新updated_at，updater_id，updater_name字段。
+3. 只要更新了数据就要往Logs表插入一条Log记录，object为更新的记录类别，object_id为更新记录的Id，object_data为保存后的记录的json字符串，created_at为当前时间，creator_id当前用户user_id，creator_name为当前用户name。
