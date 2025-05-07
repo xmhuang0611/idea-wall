@@ -8,10 +8,21 @@ import random
 # Add parent directory to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from core.config import get_settings
 
 # MongoDB connection settings
-MONGODB_URL = "mongodb://localhost:27017"
-DATABASE_NAME = "idea-wall"
+settings = get_settings()
+MONGODB_URL = settings.mongodb_url
+DATABASE_NAME = settings.database_name
+
+# clean all collections
+client = AsyncIOMotorClient(MONGODB_URL)
+async def clean_database():
+    db = client[DATABASE_NAME]
+    collections = await db.list_collection_names()
+    for collection_name in collections:
+        await db[collection_name].drop()
+    print("All collections have been dropped from the database.")
 
 # User name mapping for audit fields
 user_name_map = {
@@ -186,21 +197,16 @@ async def insert_test_data():
     client = AsyncIOMotorClient(MONGODB_URL)
     db = client[DATABASE_NAME]
     try:
-        # Get existing data to avoid duplicates
-        existing_users = await db.users.distinct("user_id")
-        existing_tags = await db.tags.distinct("tag_id")
-
+        # Clean all existing data first
+        await clean_database()
+        
         # Insert users
-        new_users = [user for user in test_users if user["user_id"] not in existing_users]
-        if new_users:
-            await db.users.insert_many(new_users)
-            print(f"{len(new_users)} new users created successfully")
+        await db.users.insert_many(test_users)
+        print(f"{len(test_users)} users created successfully")
 
         # Insert tags
-        new_tags = [tag for tag in test_tags if tag["tag_id"] not in existing_tags]
-        if new_tags:
-            await db.tags.insert_many(new_tags)
-            print(f"{len(new_tags)} new tags created successfully")
+        await db.tags.insert_many(test_tags)
+        print(f"{len(test_tags)} tags created successfully")
 
         # Prepare ideas with audit fields
         start_date = datetime.utcnow() - timedelta(days=30)
@@ -227,7 +233,7 @@ async def insert_test_data():
             })
         idea_results = await db.ideas.insert_many(prepared_ideas)
         idea_ids = idea_results.inserted_ids
-        print(f"{len(prepared_ideas)} new ideas created successfully")
+        print(f"{len(prepared_ideas)} ideas created successfully")
 
         # Prepare comments (in English, with audit fields)
         test_comments = []
@@ -263,7 +269,7 @@ async def insert_test_data():
                 })
         if test_comments:
             await db.comments.insert_many(test_comments)
-            print(f"{len(test_comments)} new comments created successfully")
+            print(f"{len(test_comments)} comments created successfully")
             
             # Update total_comments for each idea
             for idea_id in idea_ids:
@@ -293,15 +299,15 @@ async def insert_test_data():
             idea_id_str = str(idea_id)
             total_votes = sum(v["vote_status"] for v in test_votes if v["target_id"] == idea_id_str)
             await db.ideas.update_one({"_id": idea_id}, {"$set": {"total_votes": total_votes}})
-        if test_votes:
-            await db.votes.insert_many(test_votes)
-            print(f"{len(test_votes)} new votes created successfully")
+        
+        await db.votes.insert_many(test_votes)
+        print(f"{len(test_votes)} votes created successfully")
 
     except Exception as e:
         print(f"Error: {e}")
     finally:
         client.close()
-        print("Additional test data generation completed!")
+        print("Test data generation completed!")
 
 if __name__ == "__main__":
     asyncio.run(insert_test_data()) 

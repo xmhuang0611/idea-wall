@@ -7,7 +7,7 @@ import { Idea } from '../../models/idea.model';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';
-import { IdeaDetailsDrawerComponent } from '../comment-modal/idea-details-drawer.component';
+import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
 
 @Component({
   selector: 'app-idea-wall',
