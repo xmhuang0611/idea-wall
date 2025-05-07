@@ -3,7 +3,7 @@ from typing import List, Optional
 from core.deps import get_current_user, get_current_user_optional
 from services.idea_service import idea_service
 from services.vote_service import vote_service
-from models.idea import Idea, IdeaCreate, IdeaCategory
+from models.idea import Idea, IdeaCreate, IdeaCategory, IdeaUpdate
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
 
@@ -98,4 +98,53 @@ async def create_idea(
     return StandardResponse(
         success=True,
         data=created_idea
+    )
+
+@router.put("/{idea_id}", response_model=StandardResponse[Idea])
+async def update_idea(
+    idea_id: str,
+    idea: IdeaUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    # 检查idea是否存在
+    existing_idea = await idea_service.get_idea(idea_id)
+    if not existing_idea:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=404,
+                message="Idea not found"
+            )
+        )
+    
+    # 检查是否是创建者
+    if existing_idea.creator_id != current_user.user_id:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=403,
+                message="Only the creator can update this idea"
+            )
+        )
+    
+    # 更新idea
+    updated_idea = await idea_service.update_idea(
+        idea_id,
+        idea,
+        updater_id=current_user.user_id,
+        updater_name=current_user.user_name
+    )
+    
+    if not updated_idea:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=500,
+                message="Failed to update idea"
+            )
+        )
+    
+    return StandardResponse(
+        success=True,
+        data=updated_idea
     )

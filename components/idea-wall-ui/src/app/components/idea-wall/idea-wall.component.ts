@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { IdeaService } from '../../services/idea.service';
 import { Idea } from '../../models/idea.model';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';
 import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-idea-wall',
@@ -100,15 +101,16 @@ import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.
             <!-- Content Column -->
             <div class="flex-1">
               <div class="flex items-center justify-between mb-2">
-                <h3 class="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600" 
+                <h3 class="text-lg font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors" 
                     (click)="openDetails(idea.id)">
                   {{idea.title}}
                 </h3>
-                <button pButton 
-                        pRipple 
-                        icon="pi pi-info-circle"
-                        class="p-button-rounded p-button-text p-button-sm" 
-                        (click)="openDetails(idea.id)">
+                <button *ngIf="idea.creator_id === currentUserId"
+                        pButton
+                        icon="pi pi-pencil"
+                        class="p-button-rounded p-button-text p-button-sm"
+                        (click)="editIdea(idea.id)"
+                        title="Edit Idea">
                 </button>
               </div>
               <p class="text-gray-600 mb-3 line-clamp-2">{{idea.description}}</p>
@@ -232,6 +234,7 @@ import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.
 })
 export class IdeaWallComponent implements OnInit {
   ideas: Idea[] = [];
+  currentUserId: string = '';
   
   // Search and filter conditions
   searchQuery = '';
@@ -255,9 +258,16 @@ export class IdeaWallComponent implements OnInit {
   // 保存每个idea的评论数，用于更新列表显示
   commentCounts: { [ideaId: string]: number } = {};
 
-  constructor(private ideaService: IdeaService) {}
+  constructor(
+    private ideaService: IdeaService,
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.currentUserId = this.authService.getId();
+    }
     this.loadIdeas();
   }
 
@@ -507,6 +517,11 @@ export class IdeaWallComponent implements OnInit {
     
     // Default color
     return 'info';
+  }
+
+  // 添加编辑Idea方法
+  editIdea(ideaId: string): void {
+    this.router.navigate(['/submit-idea', ideaId]);
   }
 
   protected readonly Math = Math;

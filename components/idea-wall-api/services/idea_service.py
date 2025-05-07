@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from core.database import get_database
-from models.idea import IdeaCreate, IdeaInDB, Idea, IdeaCategory, IdeaTag
+from models.idea import IdeaCreate, IdeaUpdate, IdeaInDB, Idea, IdeaCategory, IdeaTag
 from bson import ObjectId
 from services.tag_service import tag_service
 
@@ -117,6 +117,33 @@ class IdeaService:
             total_votes=0,
             total_comments=0
         )
+
+    async def update_idea(self, idea_id: str, idea: IdeaUpdate, updater_id: str, updater_name: str) -> Optional[Idea]:
+        db = await get_database()
+        idea_dict = idea.model_dump()
+        
+        # 获取原始idea以保留一些字段
+        original_idea = await self.get_idea(idea_id)
+        if not original_idea:
+            return None
+            
+        # 更新idea
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {
+                "$set": {
+                    **idea_dict,
+                    "updater_id": updater_id,
+                    "updater_name": updater_name,
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        if result.modified_count > 0:
+            # 获取更新后的idea
+            return await self.get_idea(idea_id)
+        return None
 
     async def update_votes(self, idea_id: str, vote_change: int) -> bool:
         db = await get_database()
