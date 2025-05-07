@@ -49,99 +49,80 @@ class VoteService:
         db = await get_database()
         
         # Check if target exists
-        if vote.target_type == "Idea":
-            target = await idea_service.get_idea(vote.target_id)
-            if not target:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Idea not found"
-                )
-        else:
-            target = await comment_service.get_comment(vote.target_id)
-            if not target:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Comment not found"
-                )
+        target_service = idea_service if vote.target_type == "Idea" else comment_service
+        target = await target_service.get_idea(vote.target_id) if vote.target_type == "Idea" else await target_service.get_comment(vote.target_id)
+        
+        if not target:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"{vote.target_type} not found"
+            )
 
-        # Check if already voted
+        # Check if vote already exists
         existing_vote = await self.get_vote(target_id=vote.target_id, target_type=vote.target_type, user_id=creator_id)
         
-        # If cancelling vote (vote_status=0) and vote record exists
-        if vote.vote_status == 0 and existing_vote:
-            # Delete vote record
-            await self.delete_vote(str(existing_vote.id))
-            
-            # Update target vote count (subtract 1)
-            if vote.target_type == "Idea":
-                await idea_service.update_votes(vote.target_id, -1)
-            else:
-                await comment_service.update_votes(vote.target_id, -1)
+        # If vote exists
+        if existing_vote:
+            # If same status, return error
+            if existing_vote.vote_status == vote.vote_status:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Vote already exists with the same status"
+                )
                 
-            # Return updated vote information
+            # Update vote status
+            await db[self.collection_name].update_one(
+                {"_id": ObjectId(existing_vote.id)},
+                {"$set": {
+                    "vote_status": vote.vote_status,
+                    "updated_at": datetime.utcnow(),
+                    "updater_id": creator_id,
+                    "updater_name": creator_name
+                }}
+            )
+            
+            # Update target vote count
+            vote_change = vote.vote_status - existing_vote.vote_status
+            if vote_change != 0:
+                await target_service.update_votes(vote.target_id, vote_change)
+            
             return Vote(
-                id=str(existing_vote.id),
-                vote_status=0,
+                id=existing_vote.id,
+                vote_status=vote.vote_status,
                 target_id=vote.target_id,
                 target_type=vote.target_type,
                 created_at=existing_vote.created_at,
-                creator_id=creator_id,
-                creator_name=creator_name,
+                creator_id=existing_vote.creator_id,
+                creator_name=existing_vote.creator_name,
                 updated_at=datetime.utcnow(),
                 updater_id=creator_id,
                 updater_name=creator_name
             )
-                
-        # If existing vote with same status, return error
-        if existing_vote and existing_vote.vote_status == vote.vote_status:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Vote already exists"
-            )
-            
-        # If adding new vote (vote_status=1)
-        if vote.vote_status == 1:
-            vote_dict = vote.model_dump()
-            vote_in_db = VoteInDB(
-                **vote_dict,
-                creator_id=creator_id,
-                creator_name=creator_name,
-                updater_id=creator_id,
-                updater_name=creator_name
-            )
-            
-            result = await db[self.collection_name].insert_one(vote_in_db.model_dump())
-            
-            # Update target vote count (add 1)
-            if vote.target_type == "Idea":
-                await idea_service.update_votes(vote.target_id, 1)
-            else:
-                await comment_service.update_votes(vote.target_id, 1)
-            
-            return Vote(
-                id=str(result.inserted_id),
-                **vote_dict,
-                created_at=vote_in_db.created_at,
-                creator_id=creator_id,
-                creator_name=creator_name,
-                updated_at=vote_in_db.updated_at,
-                updater_id=creator_id,
-                updater_name=creator_name
-            )
-            
-        # Other cases (should not reach here)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid vote operation"
+        
+        # Create new vote
+        vote_in_db = VoteInDB(
+            **vote.model_dump(),
+            creator_id=creator_id,
+            creator_name=creator_name,
+            updater_id=creator_id,
+            updater_name=creator_name
         )
-
-    async def delete_vote(self, vote_id: str) -> bool:
-        db = await get_database()
-        vote = await self.get_vote(vote_id=vote_id)
-        if not vote:
-            return False
-            
-        result = await db[self.collection_name].delete_one({"_id": ObjectId(vote_id)})
-        return result.deleted_count > 0
+        
+        result = await db[self.collection_name].insert_one(vote_in_db.model_dump())
+        
+        # Update target vote count
+        if vote.vote_status != 0:
+            await target_service.update_votes(vote.target_id, vote.vote_status)
+        
+        return Vote(
+            id=str(result.inserted_id),
+            **vote.model_dump(),
+            created_at=vote_in_db.created_at,
+            creator_id=creator_id,
+            creator_name=creator_name,
+            updated_at=vote_in_db.updated_at,
+            updater_id=creator_id,
+            updater_name=creator_name
+        )
 
 vote_service = VoteService() 
