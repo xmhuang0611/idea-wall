@@ -4,7 +4,7 @@ from jose import JWTError
 from .config import get_settings
 from .security import decode_oauth2_token
 from services.user_service import user_service
-from models.user import User
+from models.user import User, UserRole
 
 settings = get_settings()
 
@@ -106,7 +106,7 @@ async def get_current_user_optional(
         return None
 
 # Role-based access control dependency
-def has_role(required_role: str):
+def user_has_role(required_role: UserRole):
     async def role_checker(user_info: User = Depends(get_current_user)):
         # Get user roles from database
         user = await user_service.get_user(user_info.user_id)

@@ -63,8 +63,8 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
             <!-- Tags -->
             <div class="flex flex-wrap gap-2 mb-3">
               <p-tag *ngFor="let tag of idea.tag_details" 
-                     [value]="tag.tag"
-                     [severity]="getTagSeverity(tag.tag)">
+                     [value]="tag.tag_name"
+                     [severity]="getTagSeverity(tag.tag_name)">
               </p-tag>
             </div>
             
@@ -105,7 +105,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
           <div class="surface-card shadow-2 border-round p-4">
             <h3 class="text-lg font-medium mb-3">
               Comments
-              <span *ngIf="comments.length > 0" class="text-sm font-normal text-500 ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full">({{comments.length}})</span>
+              <span *ngIf="comments.length > 0" class="text-sm font-normal text-500 ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full">({{idea.total_comments}})</span>
             </h3>
             
             <div class="comment-input-container mb-4">
@@ -387,100 +387,49 @@ export class IdeaDetailsDrawerComponent implements OnInit, OnChanges, OnDestroy 
   }
   
   loadComments(): void {
-    if (!this.ideaId) return;
-    
+    if (!this.ideaId) {
+      console.error('Cannot load comments: No idea ID provided');
+      return;
+    }
+
     this.commentsLoading = true;
-    console.log('Loading comments for idea:', this.ideaId);
     
-    this.ideaService.getComments(this.ideaId).subscribe({
-      next: (response: any) => {
-        console.log('Comments response structure:', response);
-        
-        // 初始化评论数组
-        this.comments = [];
-        
-        // 检查response及其data字段
-        if (!response) {
-          console.error('Empty response received');
+    this.ideaService.getComments(this.ideaId)
+      .subscribe({
+        next: (response) => {
           this.commentsLoading = false;
-          this.commentCountChange.emit({ ideaId: this.ideaId, count: 0 });
-          return;
-        }
-        
-        // 处理旧版API直接返回数组的情况
-        if (Array.isArray(response)) {
-          console.log('Direct array response detected');
-          this.processComments(response);
-        } 
-        // 处理新版API返回标准包装对象的情况
-        else if (response.success && response.data) {
-          console.log('Standard wrapped response detected');
-          if (Array.isArray(response.data)) {
-            this.processComments(response.data);
+          
+          if (response.success && response.data) {
+            this.comments = response.data.map(comment => ({
+              ...comment,
+              created_at: comment.created_at ? new Date(comment.created_at) : new Date(),
+              updated_at: comment.updated_at ? new Date(comment.updated_at) : new Date()
+            }));
+            
+            // 更新评论数并通知父组件
+            if (this.idea) {
+              this.idea.total_comments = this.comments.length;
+              this.commentCountChange.emit({
+                ideaId: this.ideaId,
+                count: this.comments.length
+              });
+            }
+            
+            this.updateDisplayedComments();
+            console.log(`Loaded ${this.comments.length} comments`);
           } else {
-            console.error('Response data is not an array:', response.data);
+            console.error('Failed to load comments:', response.error);
+            this.comments = [];
+            this.updateDisplayedComments();
           }
-        } 
-        // 处理异常情况
-        else {
-          console.error('Unexpected response format:', response);
+        },
+        error: (error) => {
+          this.commentsLoading = false;
+          console.error('Error loading comments:', error);
+          this.comments = [];
+          this.updateDisplayedComments();
         }
-        
-        this.commentsLoading = false;
-        this.commentCountChange.emit({
-          ideaId: this.ideaId,
-          count: this.comments.length
-        });
-      },
-      error: (error: any) => {
-        console.error('Failed to load comments:', error);
-        this.comments = [];
-        this.commentsLoading = false;
-        
-        this.commentCountChange.emit({
-          ideaId: this.ideaId,
-          count: 0
-        });
-      }
-    });
-  }
-  
-  // 处理comments数据的辅助方法
-  private processComments(commentsData: any[]): void {
-    console.log('Processing comments data, count:', commentsData.length);
-    console.log('First item sample:', commentsData.length > 0 ? commentsData[0] : 'No comments');
-    
-    // 遍历并处理评论数据
-    this.comments = commentsData.map((comment: any) => {
-      console.log('Processing comment item:', comment);
-      
-      // 创建一个新对象确保结构符合前端模型
-      const processedComment: Comment = {
-        id: comment.id || (comment as any)._id || '',
-        idea_id: comment.idea_id || this.ideaId,
-        description: comment.description || '',
-        parent_id: comment.parent_id,
-        votes: comment.votes || 0,
-        created_at: typeof comment.created_at === 'string' ? new Date(comment.created_at) : comment.created_at,
-        creator_id: comment.creator_id || '',
-        creator_name: comment.creator_name || 'Anonymous User',
-        updated_at: typeof comment.updated_at === 'string' ? new Date(comment.updated_at) : comment.updated_at,
-        updater_id: comment.updater_id,
-        updater_name: comment.updater_name
-      };
-      
-      return processedComment;
-    });
-    
-    // 确保评论按时间倒序排列（最新的在最前面）
-    this.comments.sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-    
-    console.log('Processed comments successfully, count:', this.comments.length);
-    
-    // 更新分页显示
-    this.updateDisplayedComments();
+      });
   }
   
   // 更新当前页显示的评论
@@ -501,36 +450,37 @@ export class IdeaDetailsDrawerComponent implements OnInit, OnChanges, OnDestroy 
   }
   
   submitComment(): void {
-    if (this.commentForm.invalid || this.isSubmitting) return;
+    if (!this.commentForm.valid || !this.ideaId || this.isSubmitting) {
+      return;
+    }
     
-    const commentText = this.commentForm.get('comment')?.value;
+    const comment = this.commentForm.get('comment')?.value;
+    
+    if (!comment || comment.trim() === '') {
+      return;
+    }
+    
     this.isSubmitting = true;
     
-    console.log('Submitting comment:', commentText);
-    
-    this.ideaService.addComment(this.ideaId, commentText).subscribe({
-      next: (response) => {
-        console.log('Comment submission response:', response);
-        if (response.success) {
-          this.commentForm.reset();
-          // 确保评论框失去焦点
-          const textarea = document.getElementById('comment') as HTMLTextAreaElement;
-          if (textarea) {
-            textarea.blur();
-          }
-          
-          // 设置短暂延迟后再加载评论，确保后端数据已更新
-          setTimeout(() => {
+    this.ideaService.addComment(this.ideaId, comment)
+      .subscribe({
+        next: (response) => {
+          this.isSubmitting = false;
+          if (response.success) {
+            // 重置表单
+            this.commentForm.reset();
+            
+            // 重新加载评论
             this.loadComments();
-          }, 300);
+          } else {
+            console.error('Failed to submit comment:', response.error);
+          }
+        },
+        error: (error) => {
+          this.isSubmitting = false;
+          console.error('Error submitting comment:', error);
         }
-        this.isSubmitting = false;
-      },
-      error: (error) => {
-        console.error('Failed to post comment:', error);
-        this.isSubmitting = false;
-      }
-    });
+      });
   }
   
   onSidebarHide(): void {

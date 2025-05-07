@@ -52,7 +52,7 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
                   </div>
                   <div class="dropdown-divider"></div>
                   <button class="logout-button" (click)="logout()">
-                    <i class="logout-icon"></i>
+                    <i class="pi pi-sign-out logout-icon"></i>
                     Logout
                   </button>
                 </div>
@@ -138,11 +138,8 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
         }
         
         .logout-icon {
-          display: inline-block;
           margin-right: 8px;
-          width: 20px;
-          height: 20px;
-          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V9.414a1 1 0 00-.293-.707L11.414 4.414A1 1 0 0010.707 4H4a1 1 0 00-1 1z" clip-rule="evenodd" /><path d="M14 7V5a1 1 0 00-1-1H9.414l-1-1H3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V9.414l-3-3H14z" /></svg>');
+          font-size: 16px;
         }
       }
     }

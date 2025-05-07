@@ -91,11 +91,6 @@ import { Tag } from '../../models/tag.model';
             <span>3</span>
             <span>4</span>
             <span>5</span>
-            <span>6</span>
-            <span>7</span>
-            <span>8</span>
-            <span>9</span>
-            <span>10</span>
           </div>
           <small class="text-red-500" *ngIf="ideaForm.get('feeling')?.invalid && ideaForm.get('feeling')?.touched">
             Please select a feeling level
@@ -108,7 +103,7 @@ import { Tag } from '../../models/tag.model';
           <p-multiSelect id="tags"
                         formControlName="tags"
                         [options]="availableTags"
-                        optionLabel="tag"
+                        optionLabel="tag_name"
                         [showToggleAll]="false"
                         placeholder="Select relevant tags"
                         styleClass="w-full"
@@ -181,7 +176,7 @@ export class SubmitIdeaComponent implements OnInit {
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       category: ['', Validators.required],
-      feeling: [4, [Validators.required, Validators.min(1), Validators.max(10)]],
+      feeling: [4, [Validators.required, Validators.min(1), Validators.max(5)]],
       tags: [[]]
     });
   }

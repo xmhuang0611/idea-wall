@@ -41,8 +41,8 @@ code = 200 | 201 | 204 | 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500
   },
   // optional, only for list response
   "pagination": {
-    "page": 1,
-    "page_size": 20,
+    "skip": 1,
+    "limit": 20,
     "total": 100
   },
   // optional, only for error response

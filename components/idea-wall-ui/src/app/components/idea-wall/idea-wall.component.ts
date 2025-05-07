@@ -7,7 +7,7 @@ import { Idea } from '../../models/idea.model';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';
-import { IdeaDetailsDrawerComponent } from '../comment-modal/idea-details-drawer.component';
+import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
 
 @Component({
   selector: 'app-idea-wall',
@@ -116,8 +116,8 @@ import { IdeaDetailsDrawerComponent } from '../comment-modal/idea-details-drawer
               <!-- Tags - Moved above the divider -->
               <div class="flex flex-wrap gap-2 mb-3">
                 <p-tag *ngFor="let tag of idea.tag_details" 
-                      [value]="tag.tag"
-                      [severity]="getTagSeverity(tag.tag)">
+                      [value]="tag.tag_name"
+                      [severity]="getTagSeverity(tag.tag_name)">
                 </p-tag>
               </div>
               
@@ -129,7 +129,7 @@ import { IdeaDetailsDrawerComponent } from '../comment-modal/idea-details-drawer
                   <button (click)="openDetails(idea.id)" 
                           class="inline-flex items-center text-gray-500 hover:text-gray-700">
                     <i class="pi pi-comment mr-1"></i>
-                    <span>{{ idea.comment_count || 0 }}</span>
+                    <span>{{ idea.total_comments || 0 }}</span>
                   </button>
                 </div>
                 <div class="flex items-center space-x-2 text-gray-500">
@@ -262,48 +262,41 @@ export class IdeaWallComponent implements OnInit {
   }
 
   loadIdeas(): void {
-    this.ideaService.getIdeas({
-      page: this.currentPage,
-      page_size: this.pageSize,
-      category: this.selectedCategory || undefined,
-      search: this.searchQuery || undefined,
-      sort_by: this.sortBy,
-      sort_order: this.sortOrder
-    }).subscribe({
-      next: (response) => {
-        if (response.data) {
-          this.ideas = response.data;
-          
-          // Ensure each idea object has hasVoted property (even if not provided by API)
-          this.ideas.forEach(idea => {
-            if (idea.hasVoted === undefined) {
-              idea.hasVoted = false;
+    const skip = (this.currentPage - 1) * this.pageSize;
+    
+    this.ideaService
+      .getIdeas({
+        skip: skip,
+        limit: this.pageSize,
+        category: this.selectedCategory,
+        search: this.searchQuery,
+        sort_by: this.sortBy,
+        sort_order: this.sortOrder
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.ideas = response.data.map(idea => ({
+              ...idea,
+              created_at: new Date(idea.created_at),
+              updated_at: new Date(idea.updated_at)
+            }));
+            
+            if (response.pagination) {
+              this.totalItems = response.pagination.total;
             }
             
-            // 使用缓存的评论数更新列表显示
-            if (this.commentCounts[idea.id] !== undefined) {
-              // 如果有缓存的评论数，并且与当前显示不同，则更新
-              if (idea.comment_count !== this.commentCounts[idea.id]) {
-                console.log(`Using cached comment count for ${idea.id}: ${this.commentCounts[idea.id]}`);
-                idea.comment_count = this.commentCounts[idea.id];
-              }
-            }
-          });
-          
-          if (response.pagination) {
-            this.totalItems = response.pagination.total;
+            console.log('Ideas loaded:', this.ideas.length);
+          } else {
+            console.error('Failed to load ideas:', response.error);
+            this.ideas = [];
           }
-        } else {
+        },
+        error: (error) => {
+          console.error('Error loading ideas:', error);
           this.ideas = [];
-          this.totalItems = 0;
         }
-      },
-      error: (error) => {
-        console.error('Failed to load ideas', error);
-        this.ideas = [];
-        this.totalItems = 0;
-      }
-    });
+      });
   }
 
   onSearch(): void {
@@ -420,81 +413,32 @@ export class IdeaWallComponent implements OnInit {
     this.selectedIdeaId = ideaId;
     this.ideaDetailsVisible = false;
     
-    // 在打开详情前，先刷新评论数，确保列表页和详情页显示一致
-    this.ideaService.refreshCommentCount(ideaId).subscribe({
-      next: (response) => {
-        if (response.success && typeof response.data === 'number') {
-          const commentCount = response.data;
+    // 直接获取评论数据
+    this.ideaService.getComments(ideaId).subscribe({
+      next: (commentsResponse) => {
+        if (commentsResponse.success && Array.isArray(commentsResponse.data)) {
+          const commentCount = commentsResponse.data.length;
           // 更新评论数缓存
           this.commentCounts[ideaId] = commentCount;
           
           // 更新当前列表中的评论数
           const idea = this.ideas.find(i => i.id === ideaId);
-          if (idea && idea.comment_count !== commentCount) {
+          if (idea && idea.total_comments !== commentCount) {
             console.log(`Updating comment count before opening details: ${commentCount}`);
-            idea.comment_count = commentCount;
+            idea.total_comments = commentCount;
           }
         }
         
-        // 评论数更新后，再获取详情评论数据
-        this.ideaService.getComments(ideaId).subscribe({
-          next: (commentsResponse) => {
-            if (commentsResponse.success && Array.isArray(commentsResponse.data)) {
-              const actualCommentCount = commentsResponse.data.length;
-              // 如果API返回的评论数与实际获取的评论数不一致，再次更新
-              if (this.commentCounts[ideaId] !== actualCommentCount) {
-                console.log(`Adjusting comment count from API ${this.commentCounts[ideaId]} to actual ${actualCommentCount}`);
-                this.commentCounts[ideaId] = actualCommentCount;
-                
-                const idea = this.ideas.find(i => i.id === ideaId);
-                if (idea) {
-                  idea.comment_count = actualCommentCount;
-                }
-              }
-            }
-            
-            // 最后打开详情抽屉
-            setTimeout(() => {
-              this.ideaDetailsVisible = true;
-            }, 0);
-          },
-          error: () => {
-            // 即使获取评论失败，也要打开详情页
-            setTimeout(() => {
-              this.ideaDetailsVisible = true;
-            }, 0);
-          }
-        });
+        // 打开详情抽屉
+        setTimeout(() => {
+          this.ideaDetailsVisible = true;
+        }, 0);
       },
       error: () => {
-        // 如果刷新评论数失败，退回到原先的方案获取评论
-        this.ideaService.getComments(ideaId).subscribe({
-          next: (response) => {
-            if (response.success && Array.isArray(response.data)) {
-              const commentCount = response.data.length;
-              // 更新评论数缓存
-              this.commentCounts[ideaId] = commentCount;
-              
-              // 更新当前列表中的评论数
-              const idea = this.ideas.find(i => i.id === ideaId);
-              if (idea && idea.comment_count !== commentCount) {
-                console.log(`Updating comment count before opening details: ${commentCount}`);
-                idea.comment_count = commentCount;
-              }
-            }
-            
-            // 评论数更新后，再打开详情抽屉
-            setTimeout(() => {
-              this.ideaDetailsVisible = true;
-            }, 0);
-          },
-          error: () => {
-            // 即使获取评论失败，也要打开详情页
-            setTimeout(() => {
-              this.ideaDetailsVisible = true;
-            }, 0);
-          }
-        });
+        // 即使获取评论失败，也要打开详情页
+        setTimeout(() => {
+          this.ideaDetailsVisible = true;
+        }, 0);
       }
     });
   }
@@ -514,20 +458,20 @@ export class IdeaWallComponent implements OnInit {
       const idea = this.ideas.find(i => i.id === event.ideaId);
       if (idea) {
         // 仅当评论数不同时才更新
-        if (idea.comment_count !== event.count) {
-          console.log(`Updating idea ${idea.id} comment count from ${idea.comment_count} to ${event.count}`);
-          idea.comment_count = event.count;
+        if (idea.total_comments !== event.count) {
+          console.log(`Updating idea ${idea.id} comment count from ${idea.total_comments} to ${event.count}`);
+          idea.total_comments = event.count;
           
           // 可选：如果需要确保与后端同步，可以直接更新数据库中的评论计数
-          // 通常不需要这样做，因为后端在添加或删除评论时会自动更新comment_count字段
+          // 通常不需要这样做，因为后端在添加或删除评论时会自动更新total_comments字段
           // 但如果发现数据不一致，可以考虑调用API更新
           this.ideaService.getIdeaById(event.ideaId).subscribe({
             next: (response) => {
               if (response.success && response.data) {
                 // 再次验证评论数是否同步
-                if (idea.comment_count !== response.data.comment_count) {
-                  console.log(`Syncing comment count with server: ${response.data.comment_count}`);
-                  idea.comment_count = response.data.comment_count;
+                if (idea.total_comments !== response.data.total_comments) {
+                  console.log(`Syncing comment count with server: ${response.data.total_comments}`);
+                  idea.total_comments = response.data.total_comments;
                 }
               }
             },

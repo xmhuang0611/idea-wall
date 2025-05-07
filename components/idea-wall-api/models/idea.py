@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
-from datetime import datetime
+from typing import List, Optional
 from enum import Enum
 from .audit import AuditModel
 
@@ -11,13 +10,13 @@ class IdeaCategory(str, Enum):
 
 class IdeaTag(BaseModel):
     tag_id: int
-    tag: str
+    tag_name: str
 
 class IdeaBase(BaseModel):
     title: str
     description: str
     category: IdeaCategory
-    feeling: int = Field(ge=1, le=10, description="Feeling level from 1 to 10")
+    feeling: int = Field(ge=1, le=5)
     tags: List[int]
 
 class IdeaCreate(IdeaBase):
@@ -25,17 +24,9 @@ class IdeaCreate(IdeaBase):
 
 class IdeaInDB(IdeaBase, AuditModel):
     total_votes: int = 0
-    comment_count: int = 0
+    total_comments: int = 0
 
-class Idea(IdeaBase):
+class Idea(IdeaInDB):
     id: str
-    created_at: datetime
-    creator_id: str
-    creator_name: str
-    updated_at: datetime
-    updater_id: str
-    updater_name: str
-    total_votes: int
-    comment_count: int = 0
     tag_details: Optional[List[IdeaTag]] = None
     hasVoted: bool = False 

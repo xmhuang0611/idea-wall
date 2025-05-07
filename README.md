@@ -29,6 +29,9 @@ pydantic-core 依赖于Rust和Cargo，需预先安装
       Cargo, the Rust package manager, is not installed or is not on PATH.
       This package requires Rust and Cargo to compile extensions. Install it through
       the system's package manager or via https://rustup.rs/
+
+对于有些依赖包，需使用国内的镜像源会更稳定和快速。例如，使用阿里云、清华大学等镜像：
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple requests==2.26.0
 ```
 
 ### 配置环境变量
@@ -38,6 +41,12 @@ pydantic-core 依赖于Rust和Cargo，需预先安装
 MONGODB_URL=mongodb://localhost:27017
 DATABASE_NAME=idea_wall
 SECRET_KEY=your_secret_key
+```
+
+### 生成测试数据
+```bash
+pip install motor
+python scripts/generate_test_data.py
 ```
 
 ### 启动服务

@@ -1,21 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from typing import List, Optional
 from core.deps import get_current_user, get_current_user_optional
 from services.idea_service import idea_service
 from services.vote_service import vote_service
-from services.comment_service import comment_service
 from models.idea import Idea, IdeaCreate, IdeaCategory
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
-from core.database import get_database
-from bson import ObjectId
 
 router = APIRouter()
 
 @router.get("", response_model=StandardResponse[List[Idea]])
 async def get_ideas(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
     category: Optional[IdeaCategory] = None,
     sort_by: Optional[str] = Query(None, regex="^(created_at|title|feeling|total_votes)$"),
     sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
@@ -23,10 +20,9 @@ async def get_ideas(
     tags: Optional[List[int]] = Query(None),
     current_user: Optional[User] = Depends(get_current_user_optional)
 ):
-    skip = (page - 1) * page_size
     ideas = await idea_service.get_ideas(
         skip=skip,
-        limit=page_size,
+        limit=limit,
         category=category,
         sort_by=sort_by,
         sort_order=sort_order,
@@ -53,8 +49,8 @@ async def get_ideas(
         success=True,
         data=ideas,
         pagination=Pagination(
-            page=page,
-            page_size=page_size,
+            skip=skip,
+            limit=limit,
             total=total
         )
     )
@@ -62,7 +58,7 @@ async def get_ideas(
 @router.get("/{idea_id}", response_model=StandardResponse[Idea])
 async def get_idea(
     idea_id: str,
-    current_user: Optional[User] = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     idea = await idea_service.get_idea(idea_id)
     if not idea:
@@ -103,80 +99,3 @@ async def create_idea(
         success=True,
         data=created_idea
     )
-
-@router.put("/{idea_id}", response_model=StandardResponse[Idea])
-async def update_idea(
-    idea_id: str,
-    idea_update: IdeaCreate,
-    current_user: User = Depends(get_current_user)
-):
-    updated_idea = await idea_service.update_idea(
-        idea_id, 
-        idea_update, 
-        updater_id=current_user.user_id, 
-        updater_name=current_user.user_name
-    )
-    if not updated_idea:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=404,
-                message="Idea not found"
-            )
-        )
-    return StandardResponse(
-        success=True,
-        data=updated_idea
-    )
-
-@router.delete("/{idea_id}", response_model=StandardResponse)
-async def delete_idea(
-    idea_id: str,
-    current_user: User = Depends(get_current_user)
-):
-    success = await idea_service.delete_idea(idea_id, current_user.user_id)
-    if not success:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=404,
-                message="Idea not found or you don't have permission to delete it"
-            )
-        )
-    return StandardResponse(
-        success=True
-    )
-
-@router.get("/{idea_id}/refresh-comment-count", response_model=StandardResponse[int])
-async def refresh_comment_count(
-    idea_id: str,
-    current_user: Optional[User] = Depends(get_current_user_optional)
-):
-    """刷新指定idea的评论数并返回最新数量"""
-    # 验证idea是否存在
-    idea = await idea_service.get_idea(idea_id, refresh_comment_count=False)
-    if not idea:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=404,
-                message="Idea not found"
-            )
-        )
-    
-    # 获取真实评论数
-    real_comment_count = await comment_service.count_comments(idea_id)
-    
-    # 如果数据库中的评论数与实际不符，更新数据库
-    if idea.comment_count != real_comment_count:
-        # 更新数据库
-        db = await get_database()
-        await db["ideas"].update_one(
-            {"_id": ObjectId(idea_id)},
-            {"$set": {"comment_count": real_comment_count}}
-        )
-    
-    return StandardResponse(
-        success=True,
-        data=real_comment_count
-    ) 

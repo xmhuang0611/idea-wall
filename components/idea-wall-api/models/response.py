@@ -1,12 +1,11 @@
 from pydantic import BaseModel
-from typing import List, Optional, TypeVar, Generic, Dict, Any
-from enum import Enum
+from typing import Optional, TypeVar, Generic
 
 T = TypeVar('T')
 
 class Pagination(BaseModel):
-    page: int
-    page_size: int
+    skip: int
+    limit: int
     total: int
 
 class ErrorDetail(BaseModel):

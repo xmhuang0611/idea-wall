@@ -1,6 +1,4 @@
-from datetime import datetime
 from typing import List, Optional
-from fastapi import HTTPException
 from core.database import get_database
 from models.comment import CommentCreate, CommentInDB, Comment
 from bson import ObjectId
@@ -33,7 +31,6 @@ class CommentService:
 
     async def create_comment(
         self,
-        idea_id: str,
         comment: CommentCreate,
         creator_id: str,
         creator_name: str = "Anonymous User"
@@ -42,11 +39,11 @@ class CommentService:
         comment_dict = comment.model_dump()
         comment_in_db = CommentInDB(
             **comment_dict,
-            idea_id=idea_id,
             creator_id=creator_id,
             creator_name=creator_name,
             updater_id=creator_id,
-            updater_name=creator_name
+            updater_name=creator_name,
+            votes=0
         )
         
         # 创建评论
@@ -54,14 +51,13 @@ class CommentService:
         
         # 更新idea的评论数量
         await db["ideas"].update_one(
-            {"_id": ObjectId(idea_id)},
-            {"$inc": {"comment_count": 1}}
+            {"_id": ObjectId(comment.idea_id)},
+            {"$inc": {"total_comments": 1}}
         )
         
         return Comment(
             id=str(result.inserted_id),
             **comment_dict,
-            idea_id=idea_id,
             created_at=comment_in_db.created_at,
             creator_id=creator_id,
             creator_name=creator_name,
@@ -78,22 +74,5 @@ class CommentService:
             {"$inc": {"votes": vote_change}}
         )
         return result.modified_count > 0
-
-    async def delete_comment(self, comment_id: str) -> bool:
-        db = await get_database()
-        # 获取评论所属的idea_id
-        comment = await self.get_comment(comment_id)
-        if comment:
-            idea_id = comment.idea_id
-            # 删除评论
-            result = await db[self.collection_name].delete_one({"_id": ObjectId(comment_id)})
-            if result.deleted_count > 0:
-                # 删除评论成功后，减少idea的评论数量
-                await db["ideas"].update_one(
-                    {"_id": ObjectId(idea_id)},
-                    {"$inc": {"comment_count": -1}}
-                )
-                return True
-        return False
 
 comment_service = CommentService() 
