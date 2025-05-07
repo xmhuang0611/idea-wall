@@ -6,7 +6,7 @@ from models.response import StandardResponse, Pagination, ErrorDetail
 
 router = APIRouter()
 
-@router.get("/", response_model=StandardResponse[List[Tag]])
+@router.get("", response_model=StandardResponse[List[Tag]])
 async def get_tags(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),

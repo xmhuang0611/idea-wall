@@ -1,21 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { Tag } from '../models/tag.model';
-
-interface ApiResponse<T> {
-  status: 'success' | 'error';
-  data: T;
-  meta?: {
-    page: number;
-    page_size: number;
-    total: number;
-  };
-  error?: {
-    code: string;
-    message: string;
-  };
-}
+import { ApiResponse } from '../shared/models/api-response.model';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -38,10 +26,22 @@ export class TagService {
       httpParams = httpParams.set('limit', params.limit.toString());
     }
 
-    return this.http.get<Tag[]>(this.apiUrl, { params: httpParams });
+    return this.http.get<ApiResponse<Tag[]>>(this.apiUrl, { params: httpParams })
+      .pipe(
+        map(response => response.data || [])
+      );
   }
 
   getTagById(id: number): Observable<Tag> {
-    return this.http.get<Tag>(`${this.apiUrl}/${id}`);
+    return this.http.get<ApiResponse<Tag>>(`${this.apiUrl}/${id}`)
+      .pipe(
+        map(response => {
+          if (!response.data) {
+            throw new Error('Tag not found');
+          }
+          return response.data;
+        }),
+        catchError(error => throwError(() => error))
+      );
   }
 } 

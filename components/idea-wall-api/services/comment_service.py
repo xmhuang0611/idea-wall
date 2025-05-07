@@ -46,9 +46,10 @@ class CommentService:
             votes=0
         )
         
+        # 创建评论
         result = await db[self.collection_name].insert_one(comment_in_db.model_dump())
         
-        # 评论创建成功后，更新idea的评论数量
+        # 更新idea的评论数量
         await db["ideas"].update_one(
             {"_id": ObjectId(comment.idea_id)},
             {"$inc": {"total_comments": 1}}
