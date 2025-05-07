@@ -79,8 +79,8 @@ export class IdeaService {
       );
   }
 
-  updateIdea(id: string, idea: Partial<Idea>): Observable<ApiResponse<Idea>> {
-    return this.http.put<ApiResponse<Idea>>(`${this.apiUrl}/${id}`, idea)
+  updateIdea(ideaId: string, ideaData: any): Observable<ApiResponse<Idea>> {
+    return this.http.put<ApiResponse<Idea>>(`${this.apiUrl}/${ideaId}`, ideaData)
       .pipe(
         tap(response => {
           if (response.success) {
@@ -90,6 +90,7 @@ export class IdeaService {
         catchError(this.handleError)
       );
   }
+
 
   deleteIdea(id: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`)

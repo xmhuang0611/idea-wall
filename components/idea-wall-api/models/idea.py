@@ -22,6 +22,9 @@ class IdeaBase(BaseModel):
 class IdeaCreate(IdeaBase):
     pass
 
+class IdeaUpdate(IdeaBase):
+    pass
+
 class IdeaInDB(IdeaBase, AuditModel):
     total_votes: int = 0
     total_comments: int = 0

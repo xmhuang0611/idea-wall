@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
@@ -29,8 +29,8 @@ import { Tag } from '../../models/tag.model';
   template: `
     <div class="bg-white rounded-lg shadow-sm p-6 max-w-3xl mx-auto mt-8">
       <div class="mb-6">
-        <h2 class="text-2xl font-semibold text-gray-900">Submit Your Idea</h2>
-        <p class="text-gray-600 mt-2">Share your innovative ideas with the community</p>
+        <h2 class="text-2xl font-semibold text-gray-900">{{isEditMode ? 'Edit Idea' : 'Submit Your Idea'}}</h2>
+        <p class="text-gray-600 mt-2">{{isEditMode ? 'Update your idea details' : 'Share your innovative ideas with the community'}}</p>
       </div>
 
       <form [formGroup]="ideaForm" (ngSubmit)="onSubmit()" class="space-y-6">
@@ -82,7 +82,7 @@ import { Tag } from '../../models/tag.model';
           <p-slider id="feeling"
                    formControlName="feeling"
                    [min]="1"
-                   [max]="10"
+                   [max]="5"
                    [step]="1"
                    styleClass="w-full"></p-slider>
           <div class="flex justify-between text-sm text-gray-500 mt-1">
@@ -93,7 +93,7 @@ import { Tag } from '../../models/tag.model';
             <span>5</span>
           </div>
           <small class="text-red-500" *ngIf="ideaForm.get('feeling')?.invalid && ideaForm.get('feeling')?.touched">
-            Please select a feeling level
+            Please select a feeling level between 1 and 5
           </small>
         </div>
 
@@ -104,6 +104,7 @@ import { Tag } from '../../models/tag.model';
                         formControlName="tags"
                         [options]="availableTags"
                         optionLabel="tag_name"
+                        optionValue="tag_id"
                         [showToggleAll]="false"
                         placeholder="Select relevant tags"
                         styleClass="w-full"
@@ -121,7 +122,7 @@ import { Tag } from '../../models/tag.model';
                   (click)="onCancel()"></button>
           <button pButton
                   type="submit"
-                  label="Submit Idea"
+                  [label]="isEditMode ? 'Update Idea' : 'Submit Idea'"
                   [loading]="isSubmitting"
                   [disabled]="ideaForm.invalid || isSubmitting"></button>
         </div>
@@ -165,10 +166,13 @@ export class SubmitIdeaComponent implements OnInit {
   isSubmitting = false;
   categories = ['Idea', 'Pain', 'Thought'];
   availableTags: Tag[] = [];
+  isEditMode = false;
+  ideaId: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private tagService: TagService,
     private ideaService: IdeaService
   ) {
@@ -176,13 +180,22 @@ export class SubmitIdeaComponent implements OnInit {
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       category: ['', Validators.required],
-      feeling: [4, [Validators.required, Validators.min(1), Validators.max(5)]],
+      feeling: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
       tags: [[]]
     });
   }
 
   ngOnInit(): void {
     this.loadTags();
+    
+    // 检查是否是编辑模式
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.isEditMode = true;
+        this.ideaId = params['id'];
+        this.loadIdea(this.ideaId);
+      }
+    });
   }
 
   loadTags(): void {
@@ -192,6 +205,34 @@ export class SubmitIdeaComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to load tags:', error);
+      }
+    });
+  }
+
+  loadIdea(ideaId: string | null): void {
+    if (!ideaId) {
+      console.error('Invalid idea ID');
+      this.router.navigate(['/']);
+      return;
+    }
+
+    this.ideaService.getIdeaById(ideaId).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          const idea = response.data;
+          console.log('Loaded idea:', idea);
+          this.ideaForm.patchValue({
+            title: idea.title,
+            description: idea.description,
+            category: idea.category,
+            feeling: Number(idea.feeling),
+            tags: idea.tags || []
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load idea:', error);
+        this.router.navigate(['/']);
       }
     });
   }
@@ -209,22 +250,37 @@ export class SubmitIdeaComponent implements OnInit {
       title: formValue.title,
       description: formValue.description,
       category: formValue.category,
-      feeling: formValue.feeling,
-      tags: formValue.tags?.map((tag: Tag) => tag.tag_id) || []
+      feeling: Number(formValue.feeling),
+      tags: formValue.tags || []
     };
 
-    this.ideaService.createIdea(ideaData).subscribe({
-      next: (response) => {
-        if (response.success) {
-          // 提交成功后跳转到主页
-          this.router.navigate(['/']);
+    if (this.isEditMode && this.ideaId) {
+      // 更新现有Idea
+      this.ideaService.updateIdea(this.ideaId, ideaData).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.router.navigate(['/']);
+          }
+          this.isSubmitting = false;
+        },
+        error: () => {
+          this.isSubmitting = false;
         }
-        this.isSubmitting = false;
-      },
-      error: () => {
-        this.isSubmitting = false;
-      }
-    });
+      });
+    } else {
+      // 创建新Idea
+      this.ideaService.createIdea(ideaData).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.router.navigate(['/']);
+          }
+          this.isSubmitting = false;
+        },
+        error: () => {
+          this.isSubmitting = false;
+        }
+      });
+    }
   }
 
   onCancel(): void {
