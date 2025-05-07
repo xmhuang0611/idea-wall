@@ -20,20 +20,21 @@ export class IdeaService {
   ) {}
 
   getIdeas(params: {
-    page?: any;
-    page_size?: any;
+    skip?: number;
+    limit?: number;
     category?: string;
     search?: string;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
+    tags?: number[];
   } = {}): Observable<ApiResponse<Idea[]>> {
     let httpParams = new HttpParams();
     
-    if (params.page) {
-      httpParams = httpParams.set('page', params.page.toString());
+    if (params.skip !== undefined) {
+      httpParams = httpParams.set('skip', params.skip.toString());
     }
-    if (params.page_size) {
-      httpParams = httpParams.set('page_size', params.page_size.toString());
+    if (params.limit !== undefined) {
+      httpParams = httpParams.set('limit', params.limit.toString());
     }
     if (params.category) {
       httpParams = httpParams.set('category', params.category);
@@ -46,6 +47,11 @@ export class IdeaService {
     }
     if (params.sort_order) {
       httpParams = httpParams.set('sort_order', params.sort_order);
+    }
+    if (params.tags && params.tags.length > 0) {
+      params.tags.forEach(tag => {
+        httpParams = httpParams.append('tags', tag.toString());
+      });
     }
 
     return this.http.get<ApiResponse<Idea[]>>(this.apiUrl, { params: httpParams })
@@ -125,12 +131,13 @@ export class IdeaService {
   addComment(ideaId: string, comment: string, parentId?: string): Observable<ApiResponse<any>> {
     const commentData = {
       description: comment,
-      parent_id: parentId
+      idea_id: ideaId,
+      parent_id: parentId || null
     };
 
     console.log('Sending comment data:', commentData);
 
-    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/${ideaId}/comments`, commentData)
+    return this.http.post<ApiResponse<any>>(`/api/comments`, commentData)
       .pipe(
         tap(response => {
           console.log('Server response for comment:', response);
@@ -142,7 +149,7 @@ export class IdeaService {
       );
   }
 
-  getComments(ideaId: string): Observable<ApiResponse<Comment[]>> {
+  getComments(ideaId: string, skip: number = 0, limit: number = 20): Observable<ApiResponse<Comment[]>> {
     console.log('Getting comments for idea:', ideaId);
     
     if (!ideaId) {
@@ -150,50 +157,18 @@ export class IdeaService {
       return throwError(() => new Error('Invalid idea ID'));
     }
     
-    return this.http.get<ApiResponse<Comment[]>>(`${this.apiUrl}/${ideaId}/comments`)
+    let params = new HttpParams()
+      .set('idea_id', ideaId)
+      .set('skip', skip.toString())
+      .set('limit', limit.toString());
+    
+    return this.http.get<ApiResponse<Comment[]>>(`/api/comments`, { params })
       .pipe(
         tap(response => {
-          console.log('Raw comments response:', response);
+          console.log('Comments response:', response);
           
-          // 规范化响应格式
-          if (!response) {
-            console.error('Empty response received');
-            return;
-          }
-          
-          // 处理旧版API直接返回数组的情况
-          if (Array.isArray(response)) {
-            console.log('Direct array response, converting to standard format');
-            // 转换为标准响应格式
-            const standardResponse: ApiResponse<Comment[]> = {
-              success: true,
-              data: response
-            };
-            // @ts-ignore - 我们需要在运行时修改response的结构
-            response = standardResponse;
-          }
-          
-          // 检查success和data字段
-          if (!response.success) {
-            console.error('Comment fetch not successful:', response);
-            if (!response.data) {
-              // @ts-ignore
-              response.data = [];
-            }
-            return;
-          }
-          
-          // 检查data字段
-          if (!response.data) {
-            console.warn('No data field in response');
-            response.data = []; // 确保data字段至少是空数组
-            return;
-          }
-          
-          // 确保data是数组
-          if (!Array.isArray(response.data)) {
-            console.error('Response data is not an array:', response.data);
-            response.data = [];
+          if (!response.success || !response.data) {
+            console.error('Comment fetch not successful or no data:', response);
             return;
           }
           
@@ -205,11 +180,6 @@ export class IdeaService {
             if (typeof comment.updated_at === 'string') {
               comment.updated_at = new Date(comment.updated_at);
             }
-            
-            // 确保id字段存在
-            if (!comment.id && (comment as any)._id) {
-              comment.id = (comment as any)._id;
-            }
           });
           
           console.log('Processed comments count:', response.data.length);
@@ -217,34 +187,11 @@ export class IdeaService {
         catchError(error => {
           console.error('Error fetching comments:', error);
           // 返回一个带有空数组的成功响应，而不是错误
-          // 这样UI层可以显示"没有评论"而不是错误状态
           return of({
             success: true,
             data: []
           });
         })
-      );
-  }
-
-  /**
-   * 刷新指定idea的评论数
-   * @param ideaId Idea ID
-   * @returns Observable with updated comment count
-   */
-  refreshCommentCount(ideaId: string): Observable<ApiResponse<number>> {
-    console.log('Refreshing comment count for idea:', ideaId);
-    
-    if (!ideaId) {
-      console.error('Invalid idea ID for refreshCommentCount');
-      return throwError(() => new Error('Invalid idea ID'));
-    }
-    
-    return this.http.get<ApiResponse<number>>(`${this.apiUrl}/${ideaId}/refresh-comment-count`)
-      .pipe(
-        tap(response => {
-          console.log('Comment count refresh response:', response);
-        }),
-        catchError(this.handleError)
       );
   }
 

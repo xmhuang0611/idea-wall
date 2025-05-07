@@ -58,7 +58,7 @@ async def get_ideas(
 @router.get("/{idea_id}", response_model=StandardResponse[Idea])
 async def get_idea(
     idea_id: str,
-    current_user: Optional[User] = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     idea = await idea_service.get_idea(idea_id)
     if not idea:

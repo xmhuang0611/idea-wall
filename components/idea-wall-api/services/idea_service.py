@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from core.database import get_database
-from models.idea import IdeaCreate, IdeaInDB, Idea, IdeaCategory
+from models.idea import IdeaCreate, IdeaInDB, Idea, IdeaCategory, IdeaTag
 from bson import ObjectId
 from services.tag_service import tag_service
 
@@ -77,7 +77,7 @@ class IdeaService:
         all_tags = await tag_service.get_all_tags()
         async for idea_dict in cursor:
             idea_dict["id"] = str(idea_dict.pop("_id"))
-            idea_dict["tag_details"] = [tag for tag in all_tags if tag.tag_id in idea_dict["tags"]]                
+            idea_dict["tag_details"] = [IdeaTag(tag_id=tag.tag_id, tag_name=tag.tag_name) for tag in all_tags if tag.tag_id in idea_dict["tags"]]                
             ideas.append(Idea(**idea_dict))
         return ideas
 
@@ -87,7 +87,7 @@ class IdeaService:
         if idea_dict:
             idea_dict["id"] = str(idea_dict.pop("_id"))
             all_tags = await tag_service.get_all_tags()
-            idea_dict["tag_details"] = [tag for tag in all_tags if tag.tag_id in idea_dict["tags"]]
+            idea_dict["tag_details"] = [IdeaTag(tag_id=tag.tag_id, tag_name=tag.tag_name) for tag in all_tags if tag.tag_id in idea_dict["tags"]]
             return Idea(**idea_dict)
         return None
 

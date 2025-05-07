@@ -58,7 +58,7 @@ async def shutdown_event():
 
 # Include routers
 app.include_router(ideas.router, prefix="/api/ideas", tags=["ideas"])
-app.include_router(comments.router, prefix="/api/ideas/{idea_id}/comments", tags=["comments"])
+app.include_router(comments.router, prefix="/api/comments", tags=["comments"])
 app.include_router(votes.router, prefix="/api/votes", tags=["votes"])
 app.include_router(tags.router, prefix="/api/tags", tags=["tags"])
 
