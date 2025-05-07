@@ -20,4 +20,4 @@ class VoteInDB(VoteBase, AuditModel):
     pass
 
 class Vote(VoteInDB):
-    pass
+    id: str

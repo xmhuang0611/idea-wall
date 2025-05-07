@@ -27,5 +27,6 @@ class IdeaInDB(IdeaBase, AuditModel):
     total_comments: int = 0
 
 class Idea(IdeaInDB):
+    id: str
     tag_details: Optional[List[IdeaTag]] = None
     hasVoted: bool = False 
