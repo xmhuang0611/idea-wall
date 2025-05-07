@@ -2,7 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 您的自定义样式可以放在这下面 */
+/* PrimeNG Core CSS */
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.css";
+@import "primeicons/primeicons.css";
+
+/* Global Custom Styles */
 
 body {
   margin: 0;
@@ -17,4 +22,129 @@ body {
 
 .flex-grow-1 {
   flex-grow: 1;
+}
+
+/* PrimeNG Custom Styles */
+.p-dialog {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  
+  .p-dialog-header {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem;
+    
+    .p-dialog-title {
+      font-weight: 600;
+      color: #1e293b;
+    }
+    
+    .p-dialog-header-icon {
+      color: #64748b;
+      
+      &:hover {
+        background-color: #e2e8f0;
+        color: #334155;
+      }
+    }
+  }
+  
+  .p-dialog-content {
+    padding: 0;
+  }
+}
+
+.login-dialog-container {
+  .p-dialog {
+    overflow: hidden;
+  }
+  
+  .p-dialog-content {
+    padding: 0;
+  }
+}
+
+/* Toast Styles */
+.p-toast {
+  opacity: 1 !important;
+  
+  .p-toast-message {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    
+    &.p-toast-message-success {
+      background-color: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      color: #166534;
+      
+      .p-toast-icon {
+        color: #22c55e;
+      }
+    }
+    
+    &.p-toast-message-error {
+      background-color: #fef2f2;
+      border-left: 4px solid #ef4444;
+      color: #991b1b;
+      
+      .p-toast-icon {
+        color: #ef4444;
+      }
+    }
+    
+    &.p-toast-message-info {
+      background-color: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      color: #1e40af;
+      
+      .p-toast-icon {
+        color: #3b82f6;
+      }
+    }
+    
+    &.p-toast-message-warn {
+      background-color: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+      
+      .p-toast-icon {
+        color: #f59e0b;
+      }
+    }
+  }
+}
+
+/* OverlayPanel Styles */
+.p-overlaypanel {
+  .p-overlaypanel-content {
+    padding: 0;
+  }
+  
+  &:before, &:after {
+    border: solid transparent;
+    content: "";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+  
+  &:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-bottom-color: #ffffff;
+    border-width: 8px;
+    margin-left: -8px;
+    top: -16px;
+    left: 15px;
+  }
+  
+  &:before {
+    border-color: rgba(0, 0, 0, 0);
+    border-bottom-color: #e5e7eb;
+    border-width: 9px;
+    margin-left: -9px;
+    top: -18px;
+    left: 15px;
+  }
 } 

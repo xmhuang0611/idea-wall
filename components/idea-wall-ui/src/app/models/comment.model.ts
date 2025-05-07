@@ -1,9 +1,13 @@
 export interface Comment {
-  _id: string;
+  id: string;
   idea_id: string;
   description: string;
   parent_id?: string;
   votes: number;
   created_at: Date;
-  created_by: string;
+  creator_id: string;
+  creator_name: string;
+  updated_at?: Date;
+  updater_id?: string;
+  updater_name?: string;
 } 

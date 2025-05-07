@@ -1,50 +1,35 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, TypeVar, Generic, Dict, Any
-from datetime import datetime
+from typing import List, Optional
 from enum import Enum
+from .audit import AuditModel
 
 class IdeaCategory(str, Enum):
     IDEA = "Idea"
     PAIN = "Pain"
     THOUGHT = "Thought"
 
+class IdeaTag(BaseModel):
+    tag_id: int
+    tag_name: str
+
 class IdeaBase(BaseModel):
     title: str
     description: str
     category: IdeaCategory
-    feeling: int = Field(ge=0, le=10)
+    feeling: int = Field(ge=1, le=5)
     tags: List[int]
 
 class IdeaCreate(IdeaBase):
     pass
 
-class IdeaInDB(IdeaBase):
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    created_by: str
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_by: str
+class IdeaUpdate(IdeaBase):
+    pass
+
+class IdeaInDB(IdeaBase, AuditModel):
     total_votes: int = 0
+    total_comments: int = 0
 
-class Idea(IdeaBase):
+class Idea(IdeaInDB):
     id: str
-    created_at: datetime
-    created_by: str
-    updated_at: datetime
-    total_votes: int
-
-T = TypeVar('T')
-
-class ResponseMeta(BaseModel):
-    page: int
-    page_size: int
-    total: int
-
-class ErrorDetail(BaseModel):
-    code: str
-    message: str
-
-class StandardResponse(BaseModel, Generic[T]):
-    status: str
-    data: Optional[T] = None
-    meta: Optional[ResponseMeta] = None
-    error: Optional[ErrorDetail] = None 
+    tag_details: Optional[List[IdeaTag]] = None
+    hasVoted: bool = False 
