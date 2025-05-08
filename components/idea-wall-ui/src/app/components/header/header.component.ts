@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/auth.service';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
@@ -40,23 +40,28 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
             </button>
             
             <!-- User Avatar with Dropdown -->
-            <div *ngIf="isLoggedIn" class="relative user-avatar">
-              <div class="avatar-circle" (click)="op.toggle($event)">
-                {{ getUserInitials() }}
-              </div>
-              
-              <p-overlayPanel #op [showCloseIcon]="false" [style]="{width: '220px'}" styleClass="user-dropdown">
-                <div class="user-dropdown-content">
-                  <div class="user-info">
-                    <span class="user-name">{{ userName }}</span>
-                  </div>
-                  <div class="dropdown-divider"></div>
-                  <button class="logout-button" (click)="logout()">
-                    <i class="pi pi-sign-out logout-icon"></i>
-                    Logout
-                  </button>
+            <div *ngIf="isLoggedIn" class="flex items-center space-x-2">
+              <button *ngIf="isAdmin" class="settings-button" (click)="goToSettings()">
+                <i class="pi pi-cog"></i>
+              </button>
+              <div class="relative user-avatar">
+                <div class="avatar-circle" (click)="op.toggle($event)">
+                  {{ getUserInitials() }}
                 </div>
-              </p-overlayPanel>
+                
+                <p-overlayPanel #op [showCloseIcon]="false" [style]="{width: '220px'}" styleClass="user-dropdown">
+                  <div class="user-dropdown-content">
+                    <div class="user-info">
+                      <span class="user-name">{{ userName }}</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <button class="logout-button" (click)="logout()">
+                      <i class="pi pi-sign-out logout-icon"></i>
+                      Logout
+                    </button>
+                  </div>
+                </p-overlayPanel>
+              </div>
             </div>
           </div>
         </div>
@@ -87,6 +92,29 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
       
       &:hover {
         background-color: #2563eb;
+      }
+    }
+
+    .settings-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #f3f4f6;
+      color: #4b5563;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      
+      &:hover {
+        background-color: #e5e7eb;
+        color: #1f2937;
+      }
+
+      i {
+        font-size: 1.2rem;
       }
     }
     
@@ -148,8 +176,9 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
 export class HeaderComponent implements OnInit {
   isLoggedIn = false;
   userName = '';
+  isAdmin = false;
   
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
   
   ngOnInit() {
     this.updateLoginStatus();
@@ -159,6 +188,8 @@ export class HeaderComponent implements OnInit {
     this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
       this.userName = this.authService.getUserName();
+      this.isAdmin = true
+      // this.isAdmin = this.authService.getUserRoles().includes('ADMIN');
     }
   }
   
@@ -174,5 +205,9 @@ export class HeaderComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  goToSettings(): void {
+    this.router.navigate(['/settings']);
   }
 } 

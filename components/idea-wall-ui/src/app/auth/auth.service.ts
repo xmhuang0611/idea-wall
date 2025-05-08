@@ -6,6 +6,7 @@ import { authConfig } from './auth.config';
 import { Observable, of, Subject } from 'rxjs';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
+import { RoleDisplayService } from '../utils/role-display.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,8 @@ export class AuthService {
 
   constructor(
     private oauthService: OAuthService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private roleDisplayService: RoleDisplayService
   ) {
     if (this.useOauth) {
       this.configureOAuth();
@@ -98,6 +100,15 @@ export class AuthService {
 
   public getUserName(): string {
     return this.decodedAccessToken && (this.decodedAccessToken.user_name || '') || '';
+  }
+
+  public getUserRoles(): string[] {
+    return this.decodedAccessToken?.roles || [];
+  }
+
+  public getUserDisplayRoles(): string[] {
+    const roles = this.getUserRoles();
+    return this.roleDisplayService.getDisplayNames(roles);
   }
 
   public isLoggedIn(): boolean {
