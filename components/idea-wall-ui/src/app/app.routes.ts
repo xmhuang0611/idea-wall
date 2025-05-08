@@ -5,7 +5,7 @@ import { SubmitIdeaComponent } from './components/submit-idea/submit-idea.compon
 
 export const routes: Routes = [
   { path: '', component: IdeaWallComponent },
-  { path: 'submit-idea', component: SubmitIdeaComponent },
-  { path: 'submit-idea/:id', component: SubmitIdeaComponent },
+  { path: 'submit-idea', component: SubmitIdeaComponent, canActivate: [AuthGuard] },
+  { path: 'submit-idea/:id', component: SubmitIdeaComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '' }
 ];

@@ -11,6 +11,7 @@ import { SliderModule } from 'primeng/slider';
 import { TagService } from '../../services/tag.service';
 import { IdeaService } from '../../services/idea.service';
 import { Tag } from '../../models/tag.model';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-submit-idea',
@@ -124,7 +125,7 @@ import { Tag } from '../../models/tag.model';
                   type="submit"
                   [label]="isEditMode ? 'Update Idea' : 'Submit Idea'"
                   [loading]="isSubmitting"
-                  [disabled]="ideaForm.invalid || isSubmitting"></button>
+                  [disabled]="ideaForm.invalid || isSubmitting || !authService.isLoggedIn()"></button>
         </div>
       </form>
     </div>
@@ -174,7 +175,8 @@ export class SubmitIdeaComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private tagService: TagService,
-    private ideaService: IdeaService
+    private ideaService: IdeaService,
+    public authService: AuthService
   ) {
     this.ideaForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
@@ -186,6 +188,12 @@ export class SubmitIdeaComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // 检查用户是否已登录
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/']);
+      return;
+    }
+
     this.loadTags();
     
     // 检查是否是编辑模式
