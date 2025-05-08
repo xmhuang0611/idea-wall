@@ -42,7 +42,11 @@ import { AuthService } from '../../auth/auth.service';
             </div>
           </div>
           <button routerLink="/submit-idea"
-                  class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 flex items-center">
+                  [disabled]="!authService.isLoggedIn()"
+                  [class.opacity-50]="!authService.isLoggedIn()"
+                  [class.cursor-not-allowed]="!authService.isLoggedIn()"
+                  class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 flex items-center"
+                  (click)="!authService.isLoggedIn() && $event.preventDefault()">
             <span class="text-xl mr-2">+</span>
             Submit Your Idea
           </button>
@@ -261,7 +265,7 @@ export class IdeaWallComponent implements OnInit {
   constructor(
     private ideaService: IdeaService,
     private router: Router,
-    private authService: AuthService
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
