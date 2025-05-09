@@ -11,6 +11,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { PanelModule } from 'primeng/panel';
 import { CardModule } from 'primeng/card';
+import { PaginatorModule } from 'primeng/paginator';
 import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
 import { AuthService } from '../../auth/auth.service';
 
@@ -28,6 +29,7 @@ import { AuthService } from '../../auth/auth.service';
     DropdownModule,
     PanelModule,
     CardModule,
+    PaginatorModule,
     IdeaDetailsDrawerComponent
   ],
   template: `
@@ -160,58 +162,16 @@ import { AuthService } from '../../auth/auth.service';
       </div>
 
       <!-- Pagination -->
-      <div class="mt-4 flex flex-column md:flex-row justify-content-between align-items-center">
-        <div class="flex align-items-center">
-          <div class="mr-3">
-            Show
-            <p-dropdown 
-                [options]="pageSizeOptions"
-                [(ngModel)]="pageSize"
-                (onChange)="onPageSizeChange()"
-                class="mx-2">
-            </p-dropdown>
-            items per page
-          </div>
-          <div>
-            Showing {{(currentPage - 1) * pageSize + 1}} - {{Math.min(currentPage * pageSize, totalItems)}} of {{totalItems}} items
-          </div>
-        </div>
-        <div class="flex align-items-center mt-3 mt-md-0">
-          <button pButton
-                  label="First"
-                  class="p-button-text p-button-sm"
-                  (click)="onPageChange(1)"
-                  [disabled]="currentPage === 1">
-          </button>
-          <button pButton
-                  label="Previous"
-                  class="p-button-text p-button-sm"
-                  (click)="onPageChange(currentPage - 1)"
-                  [disabled]="currentPage === 1">
-          </button>
-          <ng-container *ngFor="let page of getPageNumbers()">
-            <button *ngIf="page !== '...'"
-                    pButton
-                    [label]="page.toString()"
-                    class="p-button-text p-button-sm"
-                    [class.p-button-primary]="currentPage === +page"
-                    (click)="onPageChange(+page)">
-            </button>
-            <span *ngIf="page === '...'" class="mx-1">...</span>
-          </ng-container>
-          <button pButton
-                  label="Next"
-                  class="p-button-text p-button-sm"
-                  (click)="onPageChange(currentPage + 1)"
-                  [disabled]="currentPage === getTotalPages()">
-          </button>
-          <button pButton
-                  label="Last"
-                  class="p-button-text p-button-sm"
-                  (click)="onPageChange(getTotalPages())"
-                  [disabled]="currentPage === getTotalPages()">
-          </button>
-        </div>
+      <div class="mt-4">
+        <p-paginator
+          [rows]="pageSize"
+          [totalRecords]="totalItems"
+          [rowsPerPageOptions]="pageSizeOptions"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="{first}-{last} of {totalRecords}"
+          styleClass="border-none"
+          (onPageChange)="onPageChange($event)">
+        </p-paginator>
       </div>
     </p-card>
 
@@ -264,6 +224,27 @@ import { AuthService } from '../../auth/auth.service';
         
         .ideas-container {
           gap: 1rem;
+        }
+      }
+
+      .p-paginator {
+        padding: 0.5rem 0;
+        
+        .p-paginator-element {
+          min-width: 2rem;
+          height: 2rem;
+        }
+
+        .p-paginator-current {
+          font-size: 1rem;
+          color: var(--text-color-secondary);
+        }
+
+        .p-paginator-page-options {
+          .p-dropdown {
+            height: 2rem;
+            min-width: 4rem;
+          }
         }
       }
     }
@@ -376,8 +357,9 @@ export class IdeaWallComponent implements OnInit {
     this.loadIdeas();
   }
 
-  onPageChange(page: number): void {
-    this.currentPage = page;
+  onPageChange(event: any): void {
+    this.currentPage = event.page + 1;
+    this.pageSize = event.rows;
     this.loadIdeas();
   }
 
