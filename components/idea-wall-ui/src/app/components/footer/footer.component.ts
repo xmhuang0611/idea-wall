@@ -7,39 +7,59 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [RouterModule, CommonModule],
   template: `
-    <footer class="bg-900 text-white">
-      <div class="container mx-auto px-4 py-2">
+    <div class="footer-wrapper">
+      <div class="container">
         <div class="flex justify-content-between align-items-center">
-          <div class="text-sm">
-            Idea Wall - your idea library, visit our 
-            <a href="https://github.com" 
-               target="_blank" 
-               class="text-primary hover:text-primary-400">
-              GitHub repository
-            </a>
-            to learn more.
+          <!-- Left Side -->
+          <div class="flex align-items-center">
+            <span>Idea Wall - your idea library, visit our</span>
+            <a href="https://github.com/your-repo" target="_blank">GitHub repository</a>
+            <span>to learn more.</span>
           </div>
           
-          <div class="flex gap-6">
-            <a routerLink="/home" class="text-300 hover:text-white">Home</a>
-            <a routerLink="/ideas" class="text-300 hover:text-white">Ideas</a>
-            <a routerLink="/about" class="text-300 hover:text-white">About</a>
-          </div>
-          
-          <div class="text-sm text-400">
-            © 2025 Idea Wall
+          <!-- Right Side -->
+          <div class="flex align-items-center">
+            <span>© 2025 Idea Wall</span>
           </div>
         </div>
       </div>
-    </footer>
+    </div>
   `,
   styles: [`
-    :host {
-      display: block;
+    .footer-wrapper {
+      background: #212529;
+      color: #ffffff;
+      height: 48px;
+      display: flex;
+      align-items: center;
     }
-    
-    footer {
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      height: 100%;
+
+      > div {
+        height: 100%;
+      }
+    }
+
+    span {
       font-size: 14px;
+      opacity: 0.9;
+    }
+
+    a {
+      color: #2196F3;
+      text-decoration: none;
+      font-size: 14px;
+      margin: 0 4px;
+      transition: color 0.2s;
+
+      &:hover {
+        color: #1976D2;
+      }
     }
   `]
 })
