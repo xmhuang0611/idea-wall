@@ -31,7 +31,7 @@ import { AuthService } from '../../auth/auth.service';
     IdeaDetailsDrawerComponent
   ],
   template: `
-    <div class="shadow-lg border-round bg-white mb-5">
+    <div class="border-round bg-white mb-5">
       <!-- Header with Tabs -->
       <div class="mb-5 p-4">
         <div class="flex justify-content-between align-items-center mb-3">

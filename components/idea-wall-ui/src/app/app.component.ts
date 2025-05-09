@@ -23,7 +23,9 @@ import { ToastModule } from 'primeng/toast';
       <app-header></app-header>
       <main class="main-content">
         <div class="container">
-          <router-outlet></router-outlet>
+          <div class="content-container">
+            <router-outlet></router-outlet>
+          </div>
         </div>
       </main>
       <app-footer></app-footer>
@@ -45,14 +47,49 @@ import { ToastModule } from 'primeng/toast';
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1600px;
       margin: 0 auto;
-      padding: 0 1rem;
+      padding: 0 0.5rem;
+    }
+
+    .content-container {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      padding: 24px;
+      min-height: calc(100vh - 200px);
     }
 
     :host ::ng-deep {
       .p-toast {
         z-index: 1000;
+      }
+
+      // 美化滚动条
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+
+        &:hover {
+          background: #a8a8a8;
+        }
+      }
+
+      // 优化文字渲染
+      * {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
     }
   `]
