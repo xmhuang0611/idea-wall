@@ -30,8 +30,8 @@ import { AuthService } from '../../auth/auth.service';
     CardModule
   ],
   template: `
-    <div class="surface-ground py-4 px-4 md:px-6 lg:px-8">
-      <p-card [style]="{'max-width': '800px'}" class="mx-auto">
+    <div class="surface-ground py-2 px-4 md:px-6 lg:px-8 flex justify-content-center w-full">
+      <p-card [style]="{'max-width': '1200px', 'width': '100%'}" class="mx-auto">
         <ng-template pTemplate="header">
           <div class="bg-primary-50 p-4 border-round-top">
             <h2 class="text-2xl font-semibold text-900 m-0">
@@ -153,9 +153,13 @@ import { AuthService } from '../../auth/auth.service';
     }
     
     :host ::ng-deep {
+      .p-card.p-component {
+        width: 1600px !important;
+      }
+
       .p-card {
         .p-card-body {
-          padding: 1.5rem;
+          padding: 2rem;
           width: 100%;
         }
 

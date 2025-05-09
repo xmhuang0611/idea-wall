@@ -23,9 +23,7 @@ import { ToastModule } from 'primeng/toast';
       <app-header></app-header>
       <main class="main-content">
         <div class="container">
-          <div class="content-container">
             <router-outlet></router-outlet>
-          </div>
         </div>
       </main>
       <app-footer></app-footer>
@@ -50,14 +48,6 @@ import { ToastModule } from 'primeng/toast';
       max-width: 1600px;
       margin: 0 auto;
       padding: 0 0.5rem;
-    }
-
-    .content-container {
-      background: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-      padding: 24px;
-      min-height: calc(100vh - 200px);
     }
 
     :host ::ng-deep {
