@@ -47,7 +47,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       styleClass="idea-details-sidebar"
       (onHide)="onSidebarHide()">
       <ng-template pTemplate="header">
-        <div class="flex items-center justify-content-between py-2 w-full">
+        <div class="flex items-center justify-content-between py-1 w-full">
           <h3 class="text-xl font-semibold m-0 text-900">Idea Details</h3>
         </div>
       </ng-template>
@@ -58,30 +58,26 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
           <i class="pi pi-spin pi-spinner text-3xl text-primary"></i>
         </div>
         
-        <div *ngIf="!isLoading && !idea" class="text-center p-4 surface-ground border-round">
-          <i class="pi pi-exclamation-circle text-3xl text-500 mb-3"></i>
+        <div *ngIf="!isLoading && !idea" class="text-center px-4 py-2 surface-ground border-round">
+          <i class="pi pi-exclamation-circle text-3xl text-500 mb-2"></i>
           <p class="m-0 font-medium">Idea not found or failed to load.</p>
         </div>
         
         <div *ngIf="!isLoading && idea" class="idea-details">
           <!-- Main content card -->
-          <div class="surface-card shadow-3 border-round p-3">
+          <div class="surface-card shadow-3 border-round px-3 py-2">
             <!-- Title Section -->
-            <div class="flex items-center gap-2 mb-4">
-              <h2 class="text-2xl font-semibold m-0 text-900 mr-2">{{idea.title}}</h2>
+            <div class="flex items-center gap-2 mb-2">
+              <h2 class="text-2xl font-semibold m-0 text-900 mr-1">{{idea.title}}</h2>
               <p-chip 
                 [label]="idea.category || 'Idea'" 
                 [style]="getCategoryStyle(idea.category || 'Idea')"
-                styleClass="category-chip mx-2">
+                styleClass="category-chip mx-1">
               </p-chip>
-              <div class="flex items-center gap-1">
-                <i class="pi pi-thumbs-up text-primary mr-1"></i>
-                <span class="font-medium">{{idea.total_votes}} votes</span>
-              </div>
             </div>
             
             <!-- Tags -->
-            <div class="flex flex-wrap gap-2 mb-4">
+            <div class="flex flex-wrap gap-1 mb-2">
               <p-tag *ngFor="let tag of idea.tag_details" 
                     [value]="tag.tag_name"
                     [severity]="getTagSeverity(tag.tag_name)"
@@ -90,35 +86,41 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
             </div>
             
             <!-- Creator info and date -->
-            <div class="flex items-center text-sm text-600 mb-4 creator-info p-3 border-round">
+            <div class="flex items-center text-sm text-600 mb-2 creator-info px-3 py-2 border-round">
               <p-avatar 
                 icon="pi pi-user" 
                 shape="circle" 
                 styleClass="flex-shrink-0"
-                [style]="{'width': '40px', 'height': '40px', 'background': '#e3f2fd', 'color': '#0ea5e9'}">
+                [style]="{'width': '32px', 'height': '32px', 'background': '#e3f2fd', 'color': '#0ea5e9'}">
               </p-avatar>
-              <div class="flex flex-column ml-3">
-                <span class="font-medium text-700 mb-1">{{idea.creator_name}}</span>
-                <span class="text-sm text-500">{{idea.created_at | date:'medium'}}</span>
+              <div class="flex flex-column ml-2">
+                <span class="font-medium text-700 px-1">{{idea.creator_name}}</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm text-500 px-1">{{idea.created_at | date:'medium'}}</span>
+                  <div class="flex items-center gap-1">
+                    <i class="pi pi-thumbs-up text-primary"></i>
+                    <span class="font-medium">{{idea.total_votes}} votes</span>
+                  </div>
+                </div>
               </div>
             </div>
             
             <!-- Description with improved styling -->
-            <div class="p-3 border-round description-container">
+            <div class="px-3 py-2 border-round description-container">
               <p class="line-height-3 m-0 text-700">{{idea.description}}</p>
             </div>
           </div>
           
           <!-- Comments Section -->
-          <div class="surface-card shadow-3 border-round p-3 mt-3">
-            <div class="flex items-center justify-content-between mb-3">
+          <div class="surface-card shadow-3 border-round px-3 py-2 mt-2">
+            <div class="flex items-center justify-content-between mb-2">
               <h3 class="text-xl font-medium m-0 text-900">
                 Comments
                 <span *ngIf="comments.length > 0" class="comment-count ml-2">{{idea.total_comments}}</span>
               </h3>
             </div>
             
-            <div class="comment-input-container mb-4">
+            <div class="comment-input-container mb-3">
               <form [formGroup]="commentForm" class="relative">
                 <div class="field mb-0">
                   <textarea 
@@ -143,43 +145,46 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
               </form>
             </div>
             
-            <div *ngIf="commentsLoading" class="flex justify-content-center p-3">
+            <div *ngIf="commentsLoading" class="flex justify-content-center py-2">
               <i class="pi pi-spin pi-spinner text-xl text-primary"></i>
             </div>
             
-            <div *ngIf="!commentsLoading && (!comments || comments.length === 0)" class="text-center p-4 surface-ground border-round empty-comments">
-              <i class="pi pi-comments text-2xl mb-3 text-500"></i>
+            <div *ngIf="!commentsLoading && (!comments || comments.length === 0)" class="text-center px-4 py-2 surface-ground border-round empty-comments">
+              <i class="pi pi-comments text-2xl mb-2 text-500"></i>
               <p class="m-0 text-700">No comments yet. Be the first to share your thoughts!</p>
             </div>
             
             <div *ngIf="!commentsLoading && comments && comments.length > 0" class="comment-list-container">
               <div class="comment-list">
                 <div *ngFor="let comment of displayedComments; let last = last" 
-                     [class.mb-3]="!last" 
+                     [class.mb-2]="!last" 
                      class="comment-item">
-                  <div class="flex items-center mb-3">
+                  <div class="flex items-center mb-1">
                     <p-avatar 
                       icon="pi pi-user" 
                       shape="circle" 
                       styleClass="flex-shrink-0"
-                      [style]="{'width': '32px', 'height': '32px', 'background': '#e3f2fd', 'color': '#0ea5e9'}">
+                      [style]="{'width': '24px', 'height': '24px', 'background': '#e3f2fd', 'color': '#0ea5e9'}">
                     </p-avatar>
-                    <div class="flex flex-column ml-3">
-                      <span class="font-medium text-700 mb-1">{{ comment.creator_name }}</span>
-                      <span class="text-xs text-500">{{ comment.created_at | date:'medium' }}</span>
+                    <div class="flex flex-column ml-2">
+                      <div class="flex items-center">
+                        <span class="font-medium text-700 text-sm">{{ comment.creator_name }}</span>
+                        <span class="text-xs text-500 ml-2">{{ comment.created_at | date:'medium' }}</span>
+                      </div>
                     </div>
                   </div>
                   <div class="comment-content">
-                    <p class="m-0 line-height-3 p-3">{{ comment.description }}</p>
+                    <p class="m-0 line-height-3 px-2 py-1 text-sm">{{ comment.description }}</p>
                   </div>
                 </div>
               </div>
               
-              <div class="flex justify-content-center mt-4">
+              <div class="flex justify-content-center mt-2">
                 <p-paginator 
                   [rows]="commentPageSize" 
                   [totalRecords]="comments.length"
                   [rowsPerPageOptions]="[5, 10, 20]"
+                  [alwaysShow]="true"
                   styleClass="custom-paginator"
                   (onPageChange)="onCommentPageChange($event)">
                 </p-paginator>
@@ -196,7 +201,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
     }
     
     .idea-container {
-      padding: 1rem 0.75rem;
+      padding: 0.5rem 0.75rem;
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -208,30 +213,30 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
     }
     
     .comment-list {
-      max-height: 350px;
+      max-height: 500px;
       overflow-y: auto;
       padding-right: 0.5rem;
     }
     
     @media (max-width: 768px) {
       .idea-container {
-        padding: 0.5rem;
+        padding: 0.25rem 0.75rem;
       }
       
       .comment-list {
-        max-height: 250px;
+        max-height: 350px;
       }
     }
     
     @media (min-width: 1600px) {
       .comment-list {
-        max-height: 450px;
+        max-height: 600px;
       }
     }
     
     :host ::ng-deep .p-inputtextarea {
       width: 100%;
-      min-height: 80px;
+      min-height: 70px;
       border-color: #e2e8f0;
       font-size: 1rem;
       transition: all 0.2s;
@@ -267,7 +272,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
     :host ::ng-deep .comment-textarea {
       border: none !important;
       border-radius: 0 !important;
-      padding: 1rem !important;
+      padding: 0.75rem 1rem !important;
       font-size: 1rem;
       box-shadow: none !important;
       background-color: #ffffff;
@@ -280,13 +285,13 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
     }
     
     :host ::ng-deep .p-chip {
-      height: 28px !important;
+      height: 24px !important;
       min-width: 60px;
       justify-content: center;
     }
     
     .line-height-3 {
-      line-height: 1.6rem;
+      line-height: 1.5rem;
     }
     
     .comment-actions {
@@ -295,7 +300,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       right: 1rem;
     }
     
-    /* 自定义滚动条样式 */
+    /* Custom scrollbar styles */
     :host ::ng-deep ::-webkit-scrollbar {
       width: 6px;
     }
@@ -314,10 +319,10 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       background: #94a3b8;
     }
     
-    /* 添加自定义样式 */
+    /* Custom styles */
     :host ::ng-deep .p-sidebar-header {
       background-color: #ffffff;
-      padding: 1rem;
+      padding: 0.5rem 1rem;
       border-bottom: 1px solid #e2e8f0;
     }
     
@@ -338,21 +343,21 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
     
     .comment-item {
       background-color: #ffffff;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
       border: 1px solid #e2e8f0;
       transition: transform 0.2s, box-shadow 0.2s;
     }
     
     .comment-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
     }
     
     .comment-content {
       background-color: #f8fafc;
-      border-radius: 6px;
+      border-radius: 4px;
     }
     
     .category-chip {
@@ -363,14 +368,36 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
     
     :host ::ng-deep .tag-item {
       border-radius: 6px;
-      padding: 0.3rem 0.7rem;
+      padding: 0.25rem 0.7rem;
       font-weight: 500;
       margin-right: 0.5rem;
     }
     
-    :host ::ng-deep .custom-paginator .p-paginator-page.p-highlight {
-      background-color: #2563eb;
-      color: #ffffff;
+    :host ::ng-deep .custom-paginator {
+      .p-paginator {
+        padding: 0.25rem;
+        border-radius: 6px;
+        background-color: #f8fafc;
+      }
+      
+      .p-paginator-page {
+        min-width: 2rem;
+        height: 2rem;
+        margin: 0 0.1rem;
+      }
+      
+      .p-paginator-page.p-highlight {
+        background-color: #2563eb;
+        color: #ffffff;
+      }
+      
+      .p-paginator-first, 
+      .p-paginator-prev, 
+      .p-paginator-next, 
+      .p-paginator-last {
+        min-width: 2rem;
+        height: 2rem;
+      }
     }
   `]
 })
