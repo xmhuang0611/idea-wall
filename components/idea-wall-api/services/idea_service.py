@@ -13,7 +13,8 @@ class IdeaService:
         self,
         category: Optional[IdeaCategory] = None,
         search: Optional[str] = None,
-        tags: Optional[List[int]] = None
+        tags: Optional[List[int]] = None,
+        creator_id: Optional[str] = None
     ) -> Dict[str, Any]:
         filter_query = {}
         
@@ -31,6 +32,10 @@ class IdeaService:
                 {"title": {"$regex": search, "$options": "i"}},
                 {"description": {"$regex": search, "$options": "i"}}
             ]
+
+        # 创建者过滤
+        if creator_id:
+            filter_query["creator_id"] = creator_id
             
         return filter_query
 
@@ -38,10 +43,11 @@ class IdeaService:
         self,
         category: Optional[IdeaCategory] = None,
         search: Optional[str] = None,
-        tags: Optional[List[int]] = None
+        tags: Optional[List[int]] = None,
+        creator_id: Optional[str] = None
     ) -> int:
         db = await get_database()
-        filter_query = self._build_filter_query(category, search, tags)
+        filter_query = self._build_filter_query(category, search, tags, creator_id)
         return await db[self.collection_name].count_documents(filter_query)
 
     async def get_ideas(
@@ -53,11 +59,12 @@ class IdeaService:
         sort_order: Optional[str] = None,
         search: Optional[str] = None,
         tags: Optional[List[int]] = None,
+        creator_id: Optional[str] = None
     ) -> List[Idea]:
         db = await get_database()
         
         # 构建过滤条件
-        filter_query = self._build_filter_query(category, search, tags)
+        filter_query = self._build_filter_query(category, search, tags, creator_id)
             
         # 构建排序条件
         sort_options = {}

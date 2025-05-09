@@ -12,6 +12,8 @@ import { DropdownModule } from 'primeng/dropdown';
 import { PanelModule } from 'primeng/panel';
 import { CardModule } from 'primeng/card';
 import { PaginatorModule } from 'primeng/paginator';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { InputSwitchModule } from 'primeng/inputswitch';
 import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
 import { AuthService } from '../../auth/auth.service';
 
@@ -30,19 +32,28 @@ import { AuthService } from '../../auth/auth.service';
     PanelModule,
     CardModule,
     PaginatorModule,
+    InputSwitchModule,
     IdeaDetailsDrawerComponent
   ],
   template: `
     <p-card class="mb-5">
       <!-- Submit Button -->
-      <div class="flex justify-content-end mb-4">
+      <div class="flex justify-content-start gap-2 mb-4 align-items-center">
+        <div class="flex align-items-center">
+          <span class="text-base font-medium text-primary">My Ideas</span>
+          <p-inputSwitch [(ngModel)]="showMyIdeas"
+                        [disabled]="!authService.isLoggedIn()"
+                        (ngModelChange)="onMyIdeasChange($event)"
+                        class="ml-2">
+          </p-inputSwitch>
+        </div>
         <button pButton
                 pRipple
                 icon="pi pi-plus"
                 label="Submit Your Idea"
                 routerLink="/submit-idea"
                 [disabled]="!authService.isLoggedIn()"
-                class="p-button-rounded"
+                class="p-button-rounded ml-4"
                 (click)="!authService.isLoggedIn() && $event.preventDefault()">
         </button>
       </div>
@@ -96,17 +107,18 @@ import { AuthService } from '../../auth/auth.service';
       <!-- Ideas List -->
       <div class="ideas-container">
         <p-card *ngFor="let idea of ideas"
-             class="idea-card">
+             class="idea-card"
+             (click)="openDetails(idea.id)">
           <div class="flex">
             <!-- Vote Column -->
             <div class="flex flex-column align-items-center mr-3" style="width: 80px">
               <button pButton
                       pRipple
-                      (click)="onVote(idea)"
+                      (click)="$event.stopPropagation(); onVote(idea)"
                       class="p-button-rounded p-button-text"
                       [class.p-button-secondary]="!idea.hasVoted"
                       [class.p-button-primary]="idea.hasVoted"
-                      icon="pi pi-thumbs-up"
+                      icon="pi pi-thumbs-up-fill"
                       title="{{idea.hasVoted ? 'Unvote' : 'Vote'}}">
               </button>
               <span class="mt-1 font-bold">{{idea.total_votes}}</span>
@@ -116,8 +128,7 @@ import { AuthService } from '../../auth/auth.service';
             <div class="flex-1">
               <div class="flex justify-content-between align-items-center mb-2">
                 <div class="flex align-items-center gap-2">
-                  <h3 class="text-primary m-0 cursor-pointer" 
-                      (click)="openDetails(idea.id)">
+                  <h3 class="text-primary m-0">
                     {{idea.title}}
                   </h3>
                   <p-tag [value]="idea.category" [severity]="getCategoryStyle(idea.category)"></p-tag>
@@ -126,7 +137,7 @@ import { AuthService } from '../../auth/auth.service';
                         pButton
                         icon="pi pi-pencil"
                         class="p-button-rounded p-button-text p-button-sm"
-                        (click)="editIdea(idea.id)"
+                        (click)="$event.stopPropagation(); editIdea(idea.id)"
                         title="Edit Idea">
                 </button>
               </div>
@@ -148,16 +159,15 @@ import { AuthService } from '../../auth/auth.service';
                   <button pButton
                           pRipple
                           icon="pi pi-comment"
-                          (click)="openDetails(idea.id)" 
+                          (click)="$event.stopPropagation(); openDetails(idea.id)" 
                           label="{{ idea.total_comments || 0 }}"
                           class="p-button-text p-button-sm">
                   </button>
                 </div>
-                <div class="flex align-items-center">
-                  <span>By {{idea.creator_name}}</span>
-                  <span class="mx-1 hidden sm:inline">•</span>
-                  <span class="hidden sm:inline">{{idea.created_at | date:'medium'}}</span>
-                  <span class="sm:hidden">{{idea.created_at | date:'short'}}</span>
+                <div class="flex align-items-center gap-2">
+                  <span class="creator-name font-bold">{{idea.creator_name}}</span>
+                  <span class="hidden sm:inline text-600">{{idea.created_at | date:'MMM d, y h:mm a'}}</span>
+                  <span class="sm:hidden text-600">{{idea.created_at | date:'short'}}</span>
                 </div>
               </div>
             </div>
@@ -263,6 +273,48 @@ import { AuthService } from '../../auth/auth.service';
           }
         }
       }
+
+      .p-selectbutton {
+        .p-button {
+          padding: 0.5rem 1rem;
+          
+          &.p-highlight {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+          }
+        }
+      }
+
+      .p-inputswitch {
+        .p-inputswitch-slider {
+          background: var(--surface-200);
+        }
+        
+        &.p-inputswitch-checked {
+          .p-inputswitch-slider {
+            background: var(--primary-color);
+          }
+        }
+
+        &.ml-2 {
+          margin-left: 0.5rem;
+        }
+      }
+
+      .creator-name {
+        font-size: 0.875rem;
+      }
+
+      .text-500 {
+        color: var(--text-color-secondary);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+      }
+
+      .text-600 {
+        color: var(--text-color);
+        font-size: 0.875rem;
+      }
     }
     
     .idea-title {
@@ -274,6 +326,7 @@ import { AuthService } from '../../auth/auth.service';
     
     .idea-card {
       transition: all 0.2s ease;
+      cursor: pointer;
       
       &:hover {
         transform: translateY(-2px);
@@ -285,6 +338,7 @@ import { AuthService } from '../../auth/auth.service';
 export class IdeaWallComponent implements OnInit {
   ideas: Idea[] = [];
   currentUserId: string = '';
+  showMyIdeas: boolean = false;
   
   // Search and filter conditions
   searchQuery = '';
@@ -325,15 +379,21 @@ export class IdeaWallComponent implements OnInit {
   loadIdeas(): void {
     const skip = (this.currentPage - 1) * this.pageSize;
     
+    const params: any = {
+      skip: skip,
+      limit: this.pageSize,
+      category: this.selectedCategory || undefined,
+      search: this.searchQuery,
+      sort_by: this.sortBy,
+      sort_order: this.sortOrder
+    };
+
+    if (this.showMyIdeas) {
+      params.creator_id = this.currentUserId;
+    }
+    
     this.ideaService
-      .getIdeas({
-        skip: skip,
-        limit: this.pageSize,
-        category: this.selectedCategory || undefined,
-        search: this.searchQuery,
-        sort_by: this.sortBy,
-        sort_order: this.sortOrder
-      })
+      .getIdeas(params)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
@@ -587,6 +647,11 @@ export class IdeaWallComponent implements OnInit {
       default:
         return 'info';
     }
+  }
+
+  onMyIdeasChange(checked: boolean): void {
+    this.currentPage = 1;
+    this.loadIdeas();
   }
 
   protected readonly Math = Math;
