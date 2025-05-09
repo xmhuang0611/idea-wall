@@ -48,7 +48,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       (onHide)="onSidebarHide()">
       <ng-template pTemplate="header">
         <div class="flex items-center justify-content-between py-1 w-full">
-          <h3 class="text-xl font-semibold m-0 text-900">Idea Details</h3>
+          <h3 class="text-lg font-semibold m-0 text-900">Idea Details</h3>
         </div>
       </ng-template>
       
@@ -68,7 +68,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
           <div class="surface-card shadow-3 border-round px-3 py-2">
             <!-- Title Section -->
             <div class="flex items-center gap-2 mb-2">
-              <h2 class="text-2xl font-semibold m-0 text-900 mr-1">{{idea.title}}</h2>
+              <h2 class="text-xl font-semibold m-0 text-900 mr-1">{{idea.title}}</h2>
               <p-chip 
                 [label]="idea.category || 'Idea'" 
                 [style]="getCategoryStyle(idea.category || 'Idea')"
@@ -98,7 +98,8 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
                 <div class="flex items-center gap-2">
                   <span class="text-sm text-500 px-1">{{idea.created_at | date:'medium'}}</span>
                   <div class="flex items-center gap-1">
-                    <i class="pi pi-thumbs-up text-primary"></i>
+                    <i [class]="idea.hasVoted ? 'pi pi-thumbs-up-fill text-primary fill-icon' : 'pi pi-thumbs-up text-primary'" 
+                       [pTooltip]="idea.hasVoted ? 'You voted for this idea' : 'Vote for this idea'"></i>
                     <span class="font-medium">{{idea.total_votes}} votes</span>
                   </div>
                 </div>
@@ -114,9 +115,9 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
           <!-- Comments Section -->
           <div class="surface-card shadow-3 border-round px-3 py-2 mt-2">
             <div class="flex items-center justify-content-between mb-2">
-              <h3 class="text-xl font-medium m-0 text-900">
+              <h3 class="text-lg font-medium m-0 text-900">
                 Comments
-                <span *ngIf="comments.length > 0" class="comment-count ml-2">{{idea.total_comments}}</span>
+                <span *ngIf="comments.length > 0" class="comment-count">({{idea.total_comments}})</span>
               </h3>
             </div>
             
@@ -179,7 +180,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
                 </div>
               </div>
               
-              <div class="flex justify-content-center mt-2">
+              <div class="flex justify-center mt-2">
                 <p-paginator 
                   [rows]="commentPageSize" 
                   [totalRecords]="comments.length"
@@ -213,7 +214,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
     }
     
     .comment-list {
-      max-height: 500px;
+      max-height: 400px;
       overflow-y: auto;
       padding-right: 0.5rem;
     }
@@ -224,13 +225,13 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       }
       
       .comment-list {
-        max-height: 350px;
+        max-height: 300px;
       }
     }
     
     @media (min-width: 1600px) {
       .comment-list {
-        max-height: 600px;
+        max-height: 500px;
       }
     }
     
@@ -381,9 +382,10 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       }
       
       .p-paginator-page {
-        min-width: 2rem;
-        height: 2rem;
+        min-width: 1.75rem;
+        height: 1.75rem;
         margin: 0 0.1rem;
+        font-size: 0.875rem;
       }
       
       .p-paginator-page.p-highlight {
@@ -395,9 +397,15 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       .p-paginator-prev, 
       .p-paginator-next, 
       .p-paginator-last {
-        min-width: 2rem;
-        height: 2rem;
+        min-width: 1.75rem;
+        height: 1.75rem;
+        font-size: 0.875rem;
       }
+    }
+    
+    .fill-icon {
+      color: #2563eb !important;
+      font-weight: bold;
     }
   `]
 })
