@@ -1,14 +1,14 @@
-<div class="p-dialog-content">
-    <div class="p-field p-mb-3">
-        <label for="userId" class="p-d-block p-mb-2">User ID</label>
-        <input id="userId" type="text" pInputText [(ngModel)]="userId" class="p-inputtext p-component p-d-block p-mb-2 w-full" placeholder="Enter your user ID">
+<div class="p-dialog-content p-4">
+    <div class="p-field mb-4">
+        <label for="userId" class="block mb-2 text-sm font-medium">User ID</label>
+        <input id="userId" type="text" pInputText [(ngModel)]="userId" class="p-inputtext p-component block w-full" placeholder="Enter your user ID">
     </div>
-    <div class="p-field p-mb-3">
-        <label for="userName" class="p-d-block p-mb-2">User Name</label>
-        <input id="userName" type="text" pInputText [(ngModel)]="userName" class="p-inputtext p-component p-d-block p-mb-2 w-full" placeholder="Enter your user name">
+    <div class="p-field mb-4">
+        <label for="userName" class="block mb-2 text-sm font-medium">User Name</label>
+        <input id="userName" type="text" pInputText [(ngModel)]="userName" class="p-inputtext p-component block w-full" placeholder="Enter your user name">
     </div>
-    <div class="p-d-flex p-jc-end p-mt-4">
-        <button pButton label="Cancel" class="p-button-outlined p-mr-2" (click)="onCancel()"></button>
+    <div class="flex justify-content-end gap-2 mt-6">
+        <button pButton label="Cancel" class="p-button-outlined" (click)="onCancel()"></button>
         <button pButton label="Login" class="p-button-primary" (click)="onLogin()" [disabled]="!userId || !userName"></button>
     </div>
 </div> 

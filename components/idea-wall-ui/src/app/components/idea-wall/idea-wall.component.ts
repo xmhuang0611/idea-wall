@@ -34,61 +34,62 @@ import { AuthService } from '../../auth/auth.service';
   ],
   template: `
     <p-card class="mb-5">
-      <!-- Header with Tabs -->
-      <div class="mb-5">
-        <div class="flex justify-content-between align-items-center mb-3">
-          <div class="flex align-items-center">
-            <div class="p-1">
-              <button *ngFor="let cat of categories"
-                      (click)="onCategorySelect(cat)"
-                      pButton
-                      [label]="cat"
-                      [class]="selectedCategory === cat ? 'p-button-primary' : 'p-button-secondary p-button-outlined'"
-                      class="p-button-sm mr-1">
-              </button>
-            </div>
+      <!-- Submit Button -->
+      <div class="flex justify-content-end mb-4">
+        <button pButton
+                pRipple
+                icon="pi pi-plus"
+                label="Submit Your Idea"
+                routerLink="/submit-idea"
+                [disabled]="!authService.isLoggedIn()"
+                class="p-button-rounded"
+                (click)="!authService.isLoggedIn() && $event.preventDefault()">
+        </button>
+      </div>
+
+      <!-- Filters Row -->
+      <div class="flex gap-4 mb-5">
+        <!-- Search -->
+        <div class="flex-2">
+          <label class="block mb-1">Search</label>
+          <div class="p-inputgroup">
+            <input type="text"
+                   pInputText
+                   [(ngModel)]="searchQuery"
+                   (input)="onSearch()"
+                   placeholder="Search ideas..."
+                   class="w-full">
+            <span class="p-inputgroup-addon">
+              <i class="pi pi-search"></i>
+            </span>
           </div>
-          <button pButton
-                  pRipple
-                  icon="pi pi-plus"
-                  label="Submit Your Idea"
-                  routerLink="/submit-idea"
-                  [disabled]="!authService.isLoggedIn()"
-                  class="p-button-rounded"
-                  (click)="!authService.isLoggedIn() && $event.preventDefault()">
-          </button>
         </div>
 
-        <!-- Filters -->
-        <div class="grid">
-          <!-- Search -->
-          <div class="col-12 md:col-8">
-            <label class="block mb-1">Search</label>
-            <div class="p-inputgroup">
-              <input type="text"
-                     pInputText
-                     [(ngModel)]="searchQuery"
-                     (input)="onSearch()"
-                     placeholder="Search ideas...">
-              <span class="p-inputgroup-addon">
-                <i class="pi pi-search"></i>
-              </span>
-            </div>
-          </div>
+        <!-- Category Filter -->
+        <div class="flex-1">
+          <label class="block mb-1">Category</label>
+          <p-dropdown 
+            [options]="categoryOptions"
+            [(ngModel)]="selectedCategory"
+            (onChange)="onCategorySelect(selectedCategory)"
+            placeholder="All Categories"
+            [showClear]="true"
+            class="w-full">
+          </p-dropdown>
+        </div>
 
-          <!-- Sort -->
-          <div class="col-12 md:col-4">
-            <label class="block mb-1">Sort By</label>
-            <p-dropdown 
-                [options]="[
-                  {label: 'Latest Created', value: 'created_at'},
-                  {label: 'Most Popular', value: 'total_votes'}
-                ]"
-                [(ngModel)]="sortBy"
-                (onChange)="onSortChange()"
-                class="w-full">
-            </p-dropdown>
-          </div>
+        <!-- Sort -->
+        <div class="flex-1">
+          <label class="block mb-1">Sort By</label>
+          <p-dropdown 
+            [options]="[
+              {label: 'Latest Created', value: 'created_at'},
+              {label: 'Most Popular', value: 'total_votes'}
+            ]"
+            [(ngModel)]="sortBy"
+            (onChange)="onSortChange()"
+            class="w-full">
+          </p-dropdown>
         </div>
       </div>
 
@@ -114,10 +115,13 @@ import { AuthService } from '../../auth/auth.service';
             <!-- Content Column -->
             <div class="flex-1">
               <div class="flex justify-content-between align-items-center mb-2">
-                <h3 class="text-primary m-0 cursor-pointer" 
-                    (click)="openDetails(idea.id)">
-                  {{idea.title}}
-                </h3>
+                <div class="flex align-items-center gap-2">
+                  <h3 class="text-primary m-0 cursor-pointer" 
+                      (click)="openDetails(idea.id)">
+                    {{idea.title}}
+                  </h3>
+                  <p-tag [value]="idea.category" [severity]="getCategoryStyle(idea.category)"></p-tag>
+                </div>
                 <button *ngIf="idea.creator_id === currentUserId"
                         pButton
                         icon="pi pi-pencil"
@@ -189,6 +193,10 @@ import { AuthService } from '../../auth/auth.service';
     }
     
     :host ::ng-deep {
+      .flex-2 {
+        flex: 2;
+      }
+
       .p-card {
         .p-card-body {
           padding: 2rem;
@@ -198,6 +206,14 @@ import { AuthService } from '../../auth/auth.service';
         .p-card-content {
           padding: 0;
           width: 100%;
+        }
+      }
+
+      .p-dropdown {
+        width: 100%;
+        
+        .p-dropdown-label {
+          padding-right: 2.5rem;
         }
       }
 
@@ -272,7 +288,7 @@ export class IdeaWallComponent implements OnInit {
   
   // Search and filter conditions
   searchQuery = '';
-  selectedCategory = 'Idea';
+  selectedCategory: string | null = null;
   sortBy = 'created_at';
   sortOrder: 'asc' | 'desc' = 'desc';
 
@@ -284,6 +300,7 @@ export class IdeaWallComponent implements OnInit {
 
   // Category options
   categories = ['Idea', 'Pain', 'Thought'];
+  categoryOptions = this.categories.map(cat => ({label: cat, value: cat}));
   
   // Idea Details drawer
   ideaDetailsVisible = false;
@@ -312,7 +329,7 @@ export class IdeaWallComponent implements OnInit {
       .getIdeas({
         skip: skip,
         limit: this.pageSize,
-        category: this.selectedCategory,
+        category: this.selectedCategory || undefined,
         search: this.searchQuery,
         sort_by: this.sortBy,
         sort_order: this.sortOrder
@@ -402,7 +419,7 @@ export class IdeaWallComponent implements OnInit {
     }
   }
 
-  onCategorySelect(category: string): void {
+  onCategorySelect(category: string | null): void {
     this.selectedCategory = category;
     this.currentPage = 1;
     this.loadIdeas();
@@ -557,6 +574,19 @@ export class IdeaWallComponent implements OnInit {
   // 添加编辑Idea方法
   editIdea(ideaId: string): void {
     this.router.navigate(['/submit-idea', ideaId]);
+  }
+
+  getCategoryStyle(category: string): 'info' | 'danger' | 'success' {
+    switch (category) {
+      case 'Idea':
+        return 'info';  // blue
+      case 'Pain':
+        return 'danger';  // red
+      case 'Thought':
+        return 'success';  // green
+      default:
+        return 'info';
+    }
   }
 
   protected readonly Math = Math;
