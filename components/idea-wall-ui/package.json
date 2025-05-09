@@ -25,6 +25,7 @@
     "angular-oauth2-oidc-jwks": "^17.0.0",
     "marked": "^9.1.6",
     "ngx-markdown": "^17.2.1",
+    "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
     "primeng": "^17.11.0",
     "prismjs": "^1.29.0",
