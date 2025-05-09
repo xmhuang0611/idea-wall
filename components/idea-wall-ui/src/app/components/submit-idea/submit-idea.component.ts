@@ -34,7 +34,7 @@ import { AuthService } from '../../auth/auth.service';
         <p class="text-600 mt-2">{{isEditMode ? 'Update your idea details' : 'Share your innovative ideas with the community'}}</p>
       </div>
 
-      <form [formGroup]="ideaForm" (ngSubmit)="onSubmit()" class="flex flex-column gap-6">
+      <form [formGroup]="ideaForm" (ngSubmit)="onSubmit()" class="flex flex-column">
         <!-- Title -->
         <div class="form-group">
           <label for="title" class="block text-sm font-medium text-700 mb-1">Title</label>
@@ -115,11 +115,11 @@ import { AuthService } from '../../auth/auth.service';
         </div>
 
         <!-- Submit Button -->
-        <div class="flex justify-content-end gap-4">
+        <div class="flex justify-content-end">
           <button pButton
                   type="button"
                   label="Cancel"
-                  class="p-button-text"
+                  class="p-button-text mr-2"
                   (click)="onCancel()"></button>
           <button pButton
                   type="submit"
