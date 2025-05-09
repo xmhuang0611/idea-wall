@@ -47,14 +47,14 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       styleClass="idea-details-sidebar"
       (onHide)="onSidebarHide()">
       <ng-template pTemplate="header">
-        <div class="flex items-center justify-content-between py-1 w-full">
+        <div class="flex align-items-center justify-content-between py-1 w-full">
           <h3 class="text-lg font-semibold m-0 text-900">Idea Details</h3>
         </div>
       </ng-template>
       
       <div class="p-fluid idea-container">
         <!-- Idea Details -->
-        <div *ngIf="isLoading" class="flex justify-content-center items-center h-full px-3">
+        <div *ngIf="isLoading" class="flex justify-content-center align-items-center h-full px-3">
           <i class="pi pi-spin pi-spinner text-3xl text-primary"></i>
         </div>
         
@@ -67,7 +67,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
           <!-- Main content card -->
           <div class="surface-card shadow-3 border-round px-3 py-2">
             <!-- Title Section -->
-            <div class="flex items-center gap-2 mb-2">
+            <div class="flex align-items-center gap-2 mb-2">
               <h2 class="text-xl font-semibold m-0 text-900 mr-1">{{idea.title}}</h2>
               <p-chip 
                 [label]="idea.category || 'Idea'" 
@@ -86,7 +86,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
             </div>
             
             <!-- Creator info and date -->
-            <div class="flex items-center text-sm text-600 mb-2 creator-info px-3 py-2 border-round">
+            <div class="flex align-items-center text-sm text-600 mb-2 creator-info px-3 py-2 border-round">
               <p-avatar 
                 icon="pi pi-user" 
                 shape="circle" 
@@ -95,9 +95,9 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
               </p-avatar>
               <div class="flex flex-column ml-2">
                 <span class="font-medium text-700 px-1">{{idea.creator_name}}</span>
-                <div class="flex items-center gap-2">
+                <div class="flex align-items-center gap-2">
                   <span class="text-sm text-500 px-1">{{idea.created_at | date:'medium'}}</span>
-                  <div class="flex items-center gap-1">
+                  <div class="flex align-items-center gap-1">
                     <i [class]="idea.hasVoted ? 'pi pi-thumbs-up-fill text-primary fill-icon' : 'pi pi-thumbs-up text-primary'" 
                        [pTooltip]="idea.hasVoted ? 'You voted for this idea' : 'Vote for this idea'"></i>
                     <span class="font-medium">{{idea.total_votes}} votes</span>
@@ -114,7 +114,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
           
           <!-- Comments Section -->
           <div class="surface-card shadow-3 border-round px-3 py-2 mt-2">
-            <div class="flex items-center justify-content-between mb-2">
+            <div class="flex align-items-center justify-content-between mb-2">
               <h3 class="text-lg font-medium m-0 text-900">
                 Comments
                 <span *ngIf="comments.length > 0" class="comment-count">({{idea.total_comments}})</span>
@@ -160,7 +160,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
                 <div *ngFor="let comment of displayedComments; let last = last" 
                      [class.mb-2]="!last" 
                      class="comment-item">
-                  <div class="flex items-center mb-1">
+                  <div class="flex align-items-center mb-1">
                     <p-avatar 
                       icon="pi pi-user" 
                       shape="circle" 
@@ -168,7 +168,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
                       [style]="{'width': '24px', 'height': '24px', 'background': '#e3f2fd', 'color': '#0ea5e9'}">
                     </p-avatar>
                     <div class="flex flex-column ml-2">
-                      <div class="flex items-center">
+                      <div class="flex align-items-center">
                         <span class="font-medium text-700 text-sm">{{ comment.creator_name }}</span>
                         <span class="text-xs text-500 ml-2">{{ comment.created_at | date:'medium' }}</span>
                       </div>

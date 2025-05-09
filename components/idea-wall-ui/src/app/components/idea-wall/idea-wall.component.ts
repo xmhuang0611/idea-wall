@@ -7,6 +7,10 @@ import { Idea } from '../../models/idea.model';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { DropdownModule } from 'primeng/dropdown';
+import { PanelModule } from 'primeng/panel';
+import { CardModule } from 'primeng/card';
 import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
 import { AuthService } from '../../auth/auth.service';
 
@@ -20,92 +24,95 @@ import { AuthService } from '../../auth/auth.service';
     TagModule, 
     DividerModule, 
     ButtonModule,
+    InputTextModule,
+    DropdownModule,
+    PanelModule,
+    CardModule,
     IdeaDetailsDrawerComponent
   ],
   template: `
-    <div class="bg-white rounded-lg shadow-sm p-6">
+    <div class="shadow-lg border-round bg-white mb-5">
       <!-- Header with Tabs -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center space-x-1">
-            <div class="flex rounded-lg bg-gray-100 p-1">
+      <div class="mb-5 p-4">
+        <div class="flex justify-content-between align-items-center mb-3">
+          <div class="flex align-items-center">
+            <div class="p-1">
               <button *ngFor="let cat of categories"
                       (click)="onCategorySelect(cat)"
-                      class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                      [class.bg-blue-500]="selectedCategory === cat"
-                      [class.shadow-sm]="selectedCategory === cat"
-                      [class.text-white]="selectedCategory === cat"
-                      [class.text-gray-900]="selectedCategory === cat"
-                      [class.text-gray-600]="selectedCategory !== cat">
-                {{cat}}
+                      pButton
+                      [label]="cat"
+                      [class]="selectedCategory === cat ? 'p-button-primary' : 'p-button-secondary p-button-outlined'"
+                      class="p-button-sm mr-1">
               </button>
             </div>
           </div>
-          <button routerLink="/submit-idea"
+          <button pButton
+                  pRipple
+                  icon="pi pi-plus"
+                  label="Submit Your Idea"
+                  routerLink="/submit-idea"
                   [disabled]="!authService.isLoggedIn()"
-                  [class.opacity-50]="!authService.isLoggedIn()"
-                  [class.cursor-not-allowed]="!authService.isLoggedIn()"
-                  class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 flex items-center"
+                  class="p-button-rounded"
                   (click)="!authService.isLoggedIn() && $event.preventDefault()">
-            <span class="text-xl mr-2">+</span>
-            Submit Your Idea
           </button>
         </div>
 
         <!-- Filters -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid">
           <!-- Search -->
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-            <div class="relative">
+          <div class="col-12 md:col-8">
+            <label class="block mb-1">Search</label>
+            <div class="p-inputgroup">
               <input type="text"
+                     pInputText
                      [(ngModel)]="searchQuery"
                      (input)="onSearch()"
-                     placeholder="Search ideas..."
-                     class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <span class="absolute right-3 top-2.5 text-gray-400">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
+                     placeholder="Search ideas...">
+              <span class="p-inputgroup-addon">
+                <i class="pi pi-search"></i>
               </span>
             </div>
           </div>
 
           <!-- Sort -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-            <select [(ngModel)]="sortBy"
-                    (change)="onSortChange()"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option value="created_at">Latest Created</option>
-              <option value="total_votes">Most Popular</option>
-            </select>
+          <div class="col-12 md:col-4">
+            <label class="block mb-1">Sort By</label>
+            <p-dropdown 
+                [options]="[
+                  {label: 'Latest Created', value: 'created_at'},
+                  {label: 'Most Popular', value: 'total_votes'}
+                ]"
+                [(ngModel)]="sortBy"
+                (onChange)="onSortChange()"
+                class="w-full">
+            </p-dropdown>
           </div>
         </div>
       </div>
 
       <!-- Ideas List -->
-      <div class="space-y-4">
+      <div class="p-4">
         <div *ngFor="let idea of ideas"
-             class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+             class="mb-3 p-3 border-1 border-round border-300 surface-0">
           <div class="flex">
             <!-- Vote Column -->
-            <div class="flex flex-col items-center mr-6 w-16">
-              <button (click)="onVote(idea)"
-                      class="hover:text-blue-600 transition-colors duration-300 flex flex-col items-center"
+            <div class="flex flex-column align-items-center mr-3" style="width: 80px">
+              <button pButton
+                      pRipple
+                      (click)="onVote(idea)"
+                      class="p-button-rounded p-button-text"
+                      [class.p-button-secondary]="!idea.hasVoted"
+                      [class.p-button-primary]="idea.hasVoted"
+                      icon="pi pi-thumbs-up"
                       title="{{idea.hasVoted ? 'Unvote' : 'Vote'}}">
-                <i class="{{idea.hasVoted ? 'pi pi-thumbs-up-fill' : 'pi pi-thumbs-up'}} text-xl flex justify-content-center"
-                   [class.text-blue-600]="idea.hasVoted" 
-                   [class.text-gray-500]="!idea.hasVoted"
-                   style="width: 24px; height: 24px; display: flex; align-items: center;"></i>
-                <span class="text-lg font-semibold mt-1">{{idea.total_votes}}</span>
               </button>
+              <span class="mt-1 font-bold">{{idea.total_votes}}</span>
             </div>
 
             <!-- Content Column -->
             <div class="flex-1">
-              <div class="flex items-center justify-between mb-2">
-                <h3 class="text-lg font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors" 
+              <div class="flex justify-content-between align-items-center mb-2">
+                <h3 class="text-primary m-0 cursor-pointer" 
                     (click)="openDetails(idea.id)">
                   {{idea.title}}
                 </h3>
@@ -117,30 +124,32 @@ import { AuthService } from '../../auth/auth.service';
                         title="Edit Idea">
                 </button>
               </div>
-              <p class="text-gray-600 mb-3 line-clamp-2">{{idea.description}}</p>
+              <p class="mb-3">{{idea.description}}</p>
               
-              <!-- Tags - Moved above the divider -->
-              <div class="flex flex-wrap gap-2 mb-3">
+              <!-- Tags -->
+              <div class="flex flex-wrap mb-3">
                 <p-tag *ngFor="let tag of idea.tag_details" 
                       [value]="tag.tag_name"
-                      [severity]="getTagSeverity(tag.tag_name)">
+                      [severity]="getTagSeverity(tag.tag_name)"
+                      class="mr-1 mb-1">
                 </p-tag>
               </div>
               
               <p-divider></p-divider>
               
-              <div class="flex items-center justify-between text-sm text-gray-500">
-                <div class="flex items-center">
-                  <!-- 修改评论按钮，显示评论数量 -->
-                  <button (click)="openDetails(idea.id)" 
-                          class="inline-flex items-center text-gray-500 hover:text-gray-700">
-                    <i class="pi pi-comment mr-1"></i>
-                    <span>{{ idea.total_comments || 0 }}</span>
+              <div class="flex justify-content-between align-items-center">
+                <div>
+                  <button pButton
+                          pRipple
+                          icon="pi pi-comment"
+                          (click)="openDetails(idea.id)" 
+                          label="{{ idea.total_comments || 0 }}"
+                          class="p-button-text p-button-sm">
                   </button>
                 </div>
-                <div class="flex items-center space-x-2 text-gray-500">
+                <div class="flex align-items-center">
                   <span>By {{idea.creator_name}}</span>
-                  <span class="hidden sm:inline mx-1">•</span>
+                  <span class="mx-1 hidden sm:inline">•</span>
                   <span class="hidden sm:inline">{{idea.created_at | date:'medium'}}</span>
                   <span class="sm:hidden">{{idea.created_at | date:'short'}}</span>
                 </div>
@@ -151,76 +160,66 @@ import { AuthService } from '../../auth/auth.service';
       </div>
 
       <!-- Pagination -->
-      <div class="mt-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-        <div class="flex items-center space-x-4">
-          <div class="text-sm text-gray-500">
+      <div class="mt-4 p-4 flex flex-column md:flex-row justify-content-between align-items-center">
+        <div class="flex align-items-center">
+          <div class="mr-3">
             Show
-            <select [(ngModel)]="pageSize"
-                    (change)="onPageSizeChange()"
-                    class="mx-2 px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
+            <p-dropdown 
+                [options]="pageSizeOptions"
+                [(ngModel)]="pageSize"
+                (onChange)="onPageSizeChange()"
+                class="mx-2">
+            </p-dropdown>
             items per page
           </div>
-          <div class="text-sm text-gray-500">
+          <div>
             Showing {{(currentPage - 1) * pageSize + 1}} - {{Math.min(currentPage * pageSize, totalItems)}} of {{totalItems}} items
           </div>
         </div>
-        <div class="flex items-center space-x-2">
-          <button (click)="onPageChange(1)"
-                  [disabled]="currentPage === 1"
-                  class="px-3 py-1 border rounded-md text-sm"
-                  [class.opacity-50]="currentPage === 1">
-            First
+        <div class="flex align-items-center mt-3 mt-md-0">
+          <button pButton
+                  label="First"
+                  class="p-button-text p-button-sm"
+                  (click)="onPageChange(1)"
+                  [disabled]="currentPage === 1">
           </button>
-          <button (click)="onPageChange(currentPage - 1)"
-                  [disabled]="currentPage === 1"
-                  class="px-3 py-1 border rounded-md text-sm"
-                  [class.opacity-50]="currentPage === 1">
-            Previous
+          <button pButton
+                  label="Previous"
+                  class="p-button-text p-button-sm"
+                  (click)="onPageChange(currentPage - 1)"
+                  [disabled]="currentPage === 1">
           </button>
-          <div class="flex space-x-1">
-            <ng-container *ngFor="let page of getPageNumbers()">
-              <button *ngIf="page !== '...'"
-                      (click)="onPageChange(+page)"
-                      class="px-3 py-1 border rounded-md text-sm"
-                      [class.bg-blue-500]="currentPage === +page"
-                      [class.text-white]="currentPage === +page">
-                {{page}}
-              </button>
-              <span *ngIf="page === '...'" class="px-2">...</span>
-            </ng-container>
-          </div>
-          <button (click)="onPageChange(currentPage + 1)"
-                  [disabled]="currentPage * pageSize >= totalItems"
-                  class="px-3 py-1 border rounded-md text-sm"
-                  [class.opacity-50]="currentPage * pageSize >= totalItems">
-            Next
+          <ng-container *ngFor="let page of getPageNumbers()">
+            <button *ngIf="page !== '...'"
+                    pButton
+                    [label]="page.toString()"
+                    class="p-button-text p-button-sm"
+                    [class.p-button-primary]="currentPage === +page"
+                    (click)="onPageChange(+page)">
+            </button>
+            <span *ngIf="page === '...'" class="mx-1">...</span>
+          </ng-container>
+          <button pButton
+                  label="Next"
+                  class="p-button-text p-button-sm"
+                  (click)="onPageChange(currentPage + 1)"
+                  [disabled]="currentPage === getTotalPages()">
           </button>
-          <button (click)="onPageChange(getTotalPages())"
-                  [disabled]="currentPage === getTotalPages()"
-                  class="px-3 py-1 border rounded-md text-sm"
-                  [class.opacity-50]="currentPage === getTotalPages()">
-            Last
+          <button pButton
+                  label="Last"
+                  class="p-button-text p-button-sm"
+                  (click)="onPageChange(getTotalPages())"
+                  [disabled]="currentPage === getTotalPages()">
           </button>
         </div>
       </div>
-
-      <!-- Empty State -->
-      <div *ngIf="ideas?.length === 0" 
-           class="text-center py-12">
-        <p class="text-gray-500">No ideas found matching your criteria.</p>
-      </div>
     </div>
-    
+
     <!-- Idea Details Drawer -->
     <app-idea-details-drawer
-      [(visible)]="ideaDetailsVisible"
       [ideaId]="selectedIdeaId"
+      [visible]="ideaDetailsVisible"
+      (visibleChange)="ideaDetailsVisible = $event"
       (commentCountChange)="onCommentCountChange($event)">
     </app-idea-details-drawer>
   `,
@@ -228,11 +227,21 @@ import { AuthService } from '../../auth/auth.service';
     :host {
       display: block;
     }
-    .line-clamp-2 {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+    
+    .idea-title {
+      color: var(--primary-color);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .idea-card {
+      transition: all 0.2s ease;
+    }
+    
+    .idea-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
   `]
 })

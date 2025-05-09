@@ -3,49 +3,42 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/auth.service';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterModule, CommonModule, OverlayPanelModule],
+  imports: [RouterModule, CommonModule, OverlayPanelModule, ButtonModule],
   template: `
-    <header class="bg-white shadow-sm">
-      <nav class="container mx-auto px-4 py-3">
-        <div class="flex items-center justify-between">
-          <!-- Logo and Brand -->
-          <div class="flex items-center space-x-4">
-            <a routerLink="/" class="flex items-center space-x-2">
-              <span class="text-xl font-bold text-blue-600">Idea Wall</span>
+    <header class="bg-white border-1 border-300">
+      <div class="container mx-auto px-4">
+        <nav class="h-12 flex align-items-center justify-content-between">
+          <!-- Left Side -->
+          <div class="flex align-items-center gap-6">
+            <a routerLink="/" class="text-primary hover:text-primary-600 no-underline">
+              Idea Wall
             </a>
-            
-            <!-- Navigation Links -->
-            <div class="hidden md:flex space-x-6">
-              <a routerLink="/" class="text-gray-600 hover:text-blue-600">Home</a>
-              <a routerLink="/ideas" class="text-gray-600 hover:text-blue-600">Ideas</a>
-              <div class="relative group">
-                <button class="text-gray-600 hover:text-blue-600">
-                  Useful Links
-                </button>
-              </div>
-              <a routerLink="/about" class="text-gray-600 hover:text-blue-600">About</a>
-            </div>
+            <a routerLink="/" class="text-600 hover:text-primary no-underline">HomeIdeas</a>
+            <a routerLink="/useful-links" class="text-600 hover:text-primary no-underline">Useful Links</a>
+            <a routerLink="/about" class="text-600 hover:text-primary no-underline">About</a>
           </div>
 
           <!-- Right Side -->
-          <div class="flex items-center space-x-4">
+          <div class="flex align-items-center">
             <button *ngIf="!isLoggedIn" 
                     (click)="login()"
-                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-              Login
+                    pButton
+                    label="Login"
+                    class="p-button-primary">
             </button>
             
             <!-- User Avatar with Dropdown -->
-            <div *ngIf="isLoggedIn" class="relative user-avatar">
+            <div *ngIf="isLoggedIn" class="user-avatar">
               <div class="avatar-circle" (click)="op.toggle($event)">
                 {{ getUserInitials() }}
               </div>
               
-              <p-overlayPanel #op [showCloseIcon]="false" [style]="{width: '220px'}" styleClass="user-dropdown">
+              <p-overlayPanel #op [showCloseIcon]="false" styleClass="user-dropdown">
                 <div class="user-dropdown-content">
                   <div class="user-info">
                     <span class="user-name">{{ userName }}</span>
@@ -59,8 +52,8 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
               </p-overlayPanel>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
     </header>
   `,
   styles: [`
@@ -76,17 +69,18 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      background-color: #3b82f6;
-      color: white;
+      background-color: var(--primary-color);
+      color: var(--primary-color-text);
       font-weight: bold;
       cursor: pointer;
       transition: background-color 0.2s;
+      font-size: 14px;
       
       &:hover {
-        background-color: #2563eb;
+        background-color: var(--primary-600);
       }
     }
     
@@ -101,45 +95,45 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
     }
     
     .user-dropdown-content {
-      display: flex;
-      flex-direction: column;
+      min-width: 200px;
       
       .user-info {
-        padding: 16px;
+        padding: 12px 16px;
         
         .user-name {
           font-weight: 500;
-          font-size: 16px;
-          color: #1f2937;
+          font-size: 14px;
+          color: var(--text-color);
         }
       }
       
       .dropdown-divider {
         height: 1px;
-        background-color: #e5e7eb;
+        background-color: var(--surface-200);
         margin: 0;
       }
       
       .logout-button {
         display: flex;
         align-items: center;
+        width: 100%;
         background: none;
         border: none;
-        padding: 12px 16px;
+        padding: 10px 16px;
         cursor: pointer;
-        color: #4b5563;
+        color: var(--text-color-secondary);
         font-size: 14px;
         text-align: left;
         transition: background-color 0.2s;
         
         &:hover {
-          background-color: #f3f4f6;
-          color: #1f2937;
+          background-color: var(--surface-hover);
+          color: var(--text-color);
         }
         
         .logout-icon {
           margin-right: 8px;
-          font-size: 16px;
+          font-size: 14px;
         }
       }
     }

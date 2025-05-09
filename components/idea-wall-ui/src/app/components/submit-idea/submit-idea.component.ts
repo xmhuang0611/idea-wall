@@ -28,29 +28,29 @@ import { AuthService } from '../../auth/auth.service';
     SliderModule
   ],
   template: `
-    <div class="bg-white rounded-lg shadow-sm p-6 max-w-3xl mx-auto mt-8">
+    <div class="bg-white border-round shadow-sm p-6 max-w-3xl mx-auto mt-8">
       <div class="mb-6">
-        <h2 class="text-2xl font-semibold text-gray-900">{{isEditMode ? 'Edit Idea' : 'Submit Your Idea'}}</h2>
-        <p class="text-gray-600 mt-2">{{isEditMode ? 'Update your idea details' : 'Share your innovative ideas with the community'}}</p>
+        <h2 class="text-2xl font-semibold text-900">{{isEditMode ? 'Edit Idea' : 'Submit Your Idea'}}</h2>
+        <p class="text-600 mt-2">{{isEditMode ? 'Update your idea details' : 'Share your innovative ideas with the community'}}</p>
       </div>
 
-      <form [formGroup]="ideaForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <form [formGroup]="ideaForm" (ngSubmit)="onSubmit()" class="flex flex-column gap-6">
         <!-- Title -->
         <div class="form-group">
-          <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+          <label for="title" class="block text-sm font-medium text-700 mb-1">Title</label>
           <input pInputText
                  id="title"
                  formControlName="title"
                  placeholder="Enter a descriptive title"
                  class="w-full">
-          <small class="text-red-500" *ngIf="ideaForm.get('title')?.invalid && ideaForm.get('title')?.touched">
+          <small class="text-danger" *ngIf="ideaForm.get('title')?.invalid && ideaForm.get('title')?.touched">
             Title is required and must be at least 3 characters long
           </small>
         </div>
 
         <!-- Description -->
         <div class="form-group">
-          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <label for="description" class="block text-sm font-medium text-700 mb-1">Description</label>
           <textarea pInputTextarea
                     id="description"
                     formControlName="description"
@@ -58,49 +58,49 @@ import { AuthService } from '../../auth/auth.service';
                     [autoResize]="true"
                     placeholder="Describe your idea in detail"
                     class="w-full"></textarea>
-          <small class="text-red-500" *ngIf="ideaForm.get('description')?.invalid && ideaForm.get('description')?.touched">
+          <small class="text-danger" *ngIf="ideaForm.get('description')?.invalid && ideaForm.get('description')?.touched">
             Description is required and must be at least 10 characters long
           </small>
         </div>
 
         <!-- Category -->
         <div class="form-group">
-          <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <label for="category" class="block text-sm font-medium text-700 mb-1">Category</label>
           <p-dropdown id="category"
                      formControlName="category"
                      [options]="categories"
                      placeholder="Select a category"
                      styleClass="w-full"
                      [style]="{'width': '100%'}"></p-dropdown>
-          <small class="text-red-500" *ngIf="ideaForm.get('category')?.invalid && ideaForm.get('category')?.touched">
+          <small class="text-danger" *ngIf="ideaForm.get('category')?.invalid && ideaForm.get('category')?.touched">
             Please select a category
           </small>
         </div>
 
         <!-- Feeling -->
         <div class="form-group">
-          <label for="feeling" class="block text-sm font-medium text-gray-700 mb-1">Feeling Level</label>
+          <label for="feeling" class="block text-sm font-medium text-700 mb-1">Feeling Level</label>
           <p-slider id="feeling"
                    formControlName="feeling"
                    [min]="1"
                    [max]="5"
                    [step]="1"
                    styleClass="w-full"></p-slider>
-          <div class="flex justify-between text-sm text-gray-500 mt-1">
+          <div class="flex justify-content-between text-sm text-500 mt-1">
             <span>1</span>
             <span>2</span>
             <span>3</span>
             <span>4</span>
             <span>5</span>
           </div>
-          <small class="text-red-500" *ngIf="ideaForm.get('feeling')?.invalid && ideaForm.get('feeling')?.touched">
+          <small class="text-danger" *ngIf="ideaForm.get('feeling')?.invalid && ideaForm.get('feeling')?.touched">
             Please select a feeling level between 1 and 5
           </small>
         </div>
 
         <!-- Tags -->
         <div class="form-group">
-          <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+          <label for="tags" class="block text-sm font-medium text-700 mb-1">Tags</label>
           <p-multiSelect id="tags"
                         formControlName="tags"
                         [options]="availableTags"
@@ -111,11 +111,11 @@ import { AuthService } from '../../auth/auth.service';
                         styleClass="w-full"
                         [style]="{'width': '100%'}"
                         [maxSelectedLabels]="3"></p-multiSelect>
-          <small class="text-gray-500">Select tags that best describe your idea (optional)</small>
+          <small class="text-500">Select tags that best describe your idea (optional)</small>
         </div>
 
         <!-- Submit Button -->
-        <div class="flex justify-end space-x-4">
+        <div class="flex justify-content-end gap-4">
           <button pButton
                   type="button"
                   label="Cancel"

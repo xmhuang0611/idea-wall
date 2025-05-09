@@ -19,10 +19,12 @@ import { ToastModule } from 'primeng/toast';
     ToastModule
   ],
   template: `
-    <div class="min-h-screen flex flex-col bg-gray-50">
+    <div class="min-h-screen flex flex-column">
       <app-header></app-header>
-      <main class="flex-grow container mx-auto px-4 py-8">
-        <router-outlet></router-outlet>
+      <main class="flex-grow surface-ground">
+        <div class="container mx-auto px-4 py-6">
+          <router-outlet></router-outlet>
+        </div>
       </main>
       <app-footer></app-footer>
       <p-toast position="bottom-right"></p-toast>
@@ -31,6 +33,12 @@ import { ToastModule } from 'primeng/toast';
   styles: [`
     :host {
       display: block;
+    }
+    
+    :host ::ng-deep {
+      .p-toast {
+        z-index: 1000;
+      }
     }
   `]
 })
