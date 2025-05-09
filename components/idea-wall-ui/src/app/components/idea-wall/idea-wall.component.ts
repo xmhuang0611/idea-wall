@@ -31,9 +31,9 @@ import { AuthService } from '../../auth/auth.service';
     IdeaDetailsDrawerComponent
   ],
   template: `
-    <div class="border-round bg-white mb-5">
+    <p-card class="mb-5">
       <!-- Header with Tabs -->
-      <div class="mb-5 p-4">
+      <div class="mb-5">
         <div class="flex justify-content-between align-items-center mb-3">
           <div class="flex align-items-center">
             <div class="p-1">
@@ -91,9 +91,9 @@ import { AuthService } from '../../auth/auth.service';
       </div>
 
       <!-- Ideas List -->
-      <div class="p-4">
-        <div *ngFor="let idea of ideas"
-             class="mb-3 p-3 border-1 border-round border-300 surface-0">
+      <div class="ideas-container">
+        <p-card *ngFor="let idea of ideas"
+             class="idea-card">
           <div class="flex">
             <!-- Vote Column -->
             <div class="flex flex-column align-items-center mr-3" style="width: 80px">
@@ -156,11 +156,11 @@ import { AuthService } from '../../auth/auth.service';
               </div>
             </div>
           </div>
-        </div>
+        </p-card>
       </div>
 
       <!-- Pagination -->
-      <div class="mt-4 p-4 flex flex-column md:flex-row justify-content-between align-items-center">
+      <div class="mt-4 flex flex-column md:flex-row justify-content-between align-items-center">
         <div class="flex align-items-center">
           <div class="mr-3">
             Show
@@ -213,7 +213,7 @@ import { AuthService } from '../../auth/auth.service';
           </button>
         </div>
       </div>
-    </div>
+    </p-card>
 
     <!-- Idea Details Drawer -->
     <app-idea-details-drawer
@@ -228,6 +228,46 @@ import { AuthService } from '../../auth/auth.service';
       display: block;
     }
     
+    :host ::ng-deep {
+      .p-card {
+        .p-card-body {
+          padding: 2rem;
+          width: 100%;
+        }
+
+        .p-card-content {
+          padding: 0;
+          width: 100%;
+        }
+      }
+
+      .ideas-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .idea-card {
+        .p-card-body {
+          padding: 1.5rem;
+        }
+      }
+      
+      @media screen and (max-width: 576px) {
+        .p-card .p-card-body {
+          padding: 1rem;
+        }
+        
+        .idea-card .p-card-body {
+          padding: 1rem;
+        }
+        
+        .ideas-container {
+          gap: 1rem;
+        }
+      }
+    }
+    
     .idea-title {
       color: var(--primary-color);
       font-size: 1.2rem;
@@ -237,11 +277,11 @@ import { AuthService } from '../../auth/auth.service';
     
     .idea-card {
       transition: all 0.2s ease;
-    }
-    
-    .idea-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
     }
   `]
 })
