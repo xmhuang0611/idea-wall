@@ -130,7 +130,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
                     formControlName="comment" 
                     [rows]="3" 
                     [autoResize]="false"
-                    placeholder="Share your thoughts on this idea..."
+                    placeholder="Share your comment here"
                     class="w-full comment-textarea">
                   </textarea>
                 </div>
