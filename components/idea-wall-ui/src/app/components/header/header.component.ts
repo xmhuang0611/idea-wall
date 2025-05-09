@@ -38,7 +38,7 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
               <p-avatar 
                 icon="pi pi-user"
                 shape="circle"
-                [style]="{'background-color': 'var(--primary-color)'}"
+                [style]="{'color': 'var(--primary-color)'}"
                 class="cursor-pointer"
                 (click)="op.toggle($event)">
               </p-avatar>

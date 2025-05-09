@@ -123,7 +123,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
             <div class="flex align-items-center justify-content-between mb-2">
               <h3 class="text-xl font-medium m-0 text-900">
                 Comments
-                <span *ngIf="comments.length > 0" class="text-sm text-500 ml-2">({{idea.total_comments}})</span>
+                <span *ngIf="comments.length > 0" class="text-xl text-500">({{idea.total_comments}})</span>
               </h3>
             </div>
             

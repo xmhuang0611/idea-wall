@@ -12,7 +12,6 @@ import { DropdownModule } from 'primeng/dropdown';
 import { PanelModule } from 'primeng/panel';
 import { CardModule } from 'primeng/card';
 import { PaginatorModule } from 'primeng/paginator';
-import { SelectButtonModule } from 'primeng/selectbutton';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
 import { AuthService } from '../../auth/auth.service';
@@ -38,7 +37,7 @@ import { AuthService } from '../../auth/auth.service';
   template: `
     <p-card class="mb-5">
       <!-- Submit Button -->
-      <div class="flex justify-content-start gap-2 mb-4 align-items-center">
+      <div class="flex justify-content-between gap-2 mb-4 align-items-center">
         <div class="flex align-items-center">
           <span class="text-base font-medium text-primary">My Ideas</span>
           <p-inputSwitch [(ngModel)]="showMyIdeas"
