@@ -1,55 +1,43 @@
-.login-dialog {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.dialog-header {
-  padding: 16px 24px;
-  border-bottom: 1px solid #e0e0e0;
-  h2 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 500;
-    color: #333;
-  }
-}
-
-.dialog-content {
-  padding: 24px;
-}
-
-.input-field {
-  margin-bottom: 20px;
-  
-  label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #555;
-  }
-  
-  input {
+/* 使用PrimeNG类，无需自定义样式 */
+:host ::ng-deep {
+  .p-inputtext {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      border-color: var(--primary-200);
+    }
     
     &:focus {
-      border-color: #3b82f6;
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+      box-shadow: 0 0 0 2px var(--primary-100);
+      border-color: var(--primary-color);
     }
+  }
+  
+  .p-button {
+    transition: all 0.2s ease;
+    
+    &.p-button-outlined:hover {
+      background: var(--surface-100);
+    }
+    
+    &.p-button-primary:hover {
+      background: var(--primary-600);
+    }
+  }
+  
+  .p-dialog {
+    .p-dialog-content {
+      border-radius: 0 0 6px 6px;
+    }
+  }
+  
+  input::placeholder {
+    color: var(--text-color-secondary);
+    opacity: 0.6;
   }
 }
 
-.dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 24px;
-  
-  button {
-    min-width: 85px;
-  }
-} 
+.w-full {
+  width: 100%;
+}

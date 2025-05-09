@@ -47,98 +47,103 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       styleClass="idea-details-sidebar"
       (onHide)="onSidebarHide()">
       <ng-template pTemplate="header">
-        <div class="flex items-center justify-content-between py-1 w-full">
-          <h3 class="text-lg font-semibold m-0 text-900">Idea Details</h3>
+        <div class="flex align-items-center justify-content-between py-2 w-full">
+          <h3 class="text-xl font-semibold m-0 text-900">Idea Details</h3>
+       
         </div>
       </ng-template>
       
       <div class="p-fluid idea-container">
-        <!-- Idea Details -->
-        <div *ngIf="isLoading" class="flex justify-content-center items-center h-full px-3">
+        <div *ngIf="isLoading" class="flex justify-content-center align-items-center h-full">
           <i class="pi pi-spin pi-spinner text-3xl text-primary"></i>
         </div>
         
-        <div *ngIf="!isLoading && !idea" class="text-center px-4 py-2 surface-ground border-round">
-          <i class="pi pi-exclamation-circle text-3xl text-500 mb-2"></i>
+        <div *ngIf="!isLoading && !idea" class="text-center surface-ground border-round p-4">
+          <i class="pi pi-exclamation-circle text-3xl text-500 mb-3"></i>
           <p class="m-0 font-medium">Idea not found or failed to load.</p>
         </div>
         
         <div *ngIf="!isLoading && idea" class="idea-details">
-          <!-- Main content card -->
-          <div class="surface-card shadow-3 border-round px-3 py-2">
-            <!-- Title Section -->
-            <div class="flex items-center gap-2 mb-2">
-              <h2 class="text-xl font-semibold m-0 text-900 mr-1">{{idea.title}}</h2>
-              <p-chip 
-                [label]="idea.category || 'Idea'" 
-                [style]="getCategoryStyle(idea.category || 'Idea')"
-                styleClass="category-chip mx-1">
-              </p-chip>
-            </div>
-            
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-1 mb-2">
-              <p-tag *ngFor="let tag of idea.tag_details" 
-                    [value]="tag.tag_name"
-                    [severity]="getTagSeverity(tag.tag_name)"
-                    styleClass="tag-item">
-              </p-tag>
-            </div>
-            
-            <!-- Creator info and date -->
-            <div class="flex items-center text-sm text-600 mb-2 creator-info px-3 py-2 border-round">
-              <p-avatar 
-                icon="pi pi-user" 
-                shape="circle" 
-                styleClass="flex-shrink-0"
-                [style]="{'width': '32px', 'height': '32px', 'background': '#e3f2fd', 'color': '#0ea5e9'}">
-              </p-avatar>
-              <div class="flex flex-column ml-2">
-                <span class="font-medium text-700 px-1">{{idea.creator_name}}</span>
-                <div class="flex items-center gap-2">
-                  <span class="text-sm text-500 px-1">{{idea.created_at | date:'medium'}}</span>
-                  <div class="flex items-center gap-1">
-                    <i [class]="idea.hasVoted ? 'pi pi-thumbs-up-fill text-primary fill-icon' : 'pi pi-thumbs-up text-primary'" 
-                       [pTooltip]="idea.hasVoted ? 'You voted for this idea' : 'Vote for this idea'"></i>
-                    <span class="font-medium">{{idea.total_votes}} votes</span>
-                  </div>
+          <!-- Main content -->
+          <div class="surface-card shadow-1 border-round p-4 mb-3">
+            <!-- Title and Category -->
+            <div class="flex align-items-center justify-content-between mb-2">
+              <h2 class="text-2xl font-semibold m-0 text-900">{{idea.title}}</h2>
+              <div class="flex align-items-center">
+                <p-chip 
+                  [label]="idea.category || 'Idea'" 
+                  [style]="getCategoryStyle(idea.category || 'Idea')"
+                  styleClass="category-chip mr-2">
+                </p-chip>
+                <div class="flex align-items-center">
+                  <button pButton pRipple 
+                          [class]="idea.hasVoted ? 'p-button-primary' : 'p-button-outlined'"
+                          icon="pi pi-thumbs-up"
+                          [label]="idea.total_votes.toString()"
+                          class="p-button-sm mr-2">
+                  </button>
+                  <button pButton pRipple 
+                          icon="pi pi-comments"
+                          [label]="idea.total_comments.toString()"
+                          class="p-button-outlined p-button-sm">
+                  </button>
                 </div>
               </div>
             </div>
             
-            <!-- Description with improved styling -->
-            <div class="px-3 py-2 border-round description-container">
-              <p class="line-height-3 m-0 text-700">{{idea.description}}</p>
+            <!-- Tags -->
+            <div class="flex flex-wrap mb-2">
+              <p-tag *ngFor="let tag of idea.tag_details" 
+                    [value]="tag.tag_name"
+                    [severity]="getTagSeverity(tag.tag_name)"
+                    styleClass="tag-item mr-2 mb-1">
+              </p-tag>
+            </div>
+            
+            <!-- Creator info -->
+            <div class="flex align-items-center mb-2 creator-info p-2 border-round">
+              <p-avatar 
+                icon="pi pi-user" 
+                shape="circle"
+                [style]="{'width': '2rem', 'height': '2rem'}"
+                class="mr-2">
+              </p-avatar>
+              <span class="font-medium text-900 mr-2">{{idea.creator_name}}</span>
+              <span class="text-xs text-400">{{idea.created_at | date:'medium'}}</span>
+            </div>
+            
+            <!-- Description -->
+            <div class="description-container p-2 border-round">
+              <p class="line-height-3 m-0 text-700 white-space-pre-line">{{idea.description}}</p>
             </div>
           </div>
           
           <!-- Comments Section -->
-          <div class="surface-card shadow-3 border-round px-3 py-2 mt-2">
-            <div class="flex items-center justify-content-between mb-2">
-              <h3 class="text-lg font-medium m-0 text-900">
+          <div class="surface-card shadow-1 border-round p-3">
+            <div class="flex align-items-center justify-content-between mb-2">
+              <h3 class="text-xl font-medium m-0 text-900">
                 Comments
-                <span *ngIf="comments.length > 0" class="comment-count">({{idea.total_comments}})</span>
+                <span *ngIf="comments.length > 0" class="text-xl text-500">({{idea.total_comments}})</span>
               </h3>
             </div>
             
+            <!-- Comment Input -->
             <div class="comment-input-container mb-3">
               <form [formGroup]="commentForm" class="relative">
-                <div class="field mb-0">
-                  <textarea 
-                    id="comment"
-                    pInputTextarea 
-                    formControlName="comment" 
-                    [rows]="2" 
-                    [autoResize]="false"
-                    placeholder="Share your comment here"
-                    class="w-full comment-textarea">
-                  </textarea>
-                </div>
+                <textarea 
+                  pInputTextarea 
+                  formControlName="comment" 
+                  [rows]="2" 
+                  [autoResize]="false"
+                  placeholder="Share your comments here"
+                  class="w-full comment-textarea">
+                </textarea>
                 <div class="comment-actions">
                   <button pButton pRipple
                           label="Submit" 
                           icon="pi pi-send"
-                          [disabled]="!commentForm.valid"
+                          [disabled]="!commentForm.valid || isSubmitting"
+                          [loading]="isSubmitting"
                           class="p-button-primary p-button-sm"
                           (click)="submitComment()">
                   </button>
@@ -146,50 +151,43 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
               </form>
             </div>
             
+            <!-- Comments List -->
             <div *ngIf="commentsLoading" class="flex justify-content-center py-2">
               <i class="pi pi-spin pi-spinner text-xl text-primary"></i>
             </div>
             
-            <div *ngIf="!commentsLoading && (!comments || comments.length === 0)" class="text-center px-4 py-2 surface-ground border-round empty-comments">
-              <i class="pi pi-comments text-2xl mb-2 text-500"></i>
-              <p class="m-0 text-700">No comments yet. Be the first to share your thoughts!</p>
+            <div *ngIf="!commentsLoading && (!comments || comments.length === 0)" 
+                 class="text-center surface-ground border-round p-3">
+              <i class="pi pi-comments text-2xl text-500 mb-2"></i>
+              <p class="m-0 text-700">No comments yet. Be the first to share your comments!</p>
             </div>
             
-            <div *ngIf="!commentsLoading && comments && comments.length > 0" class="comment-list-container">
+            <div *ngIf="!commentsLoading && comments.length > 0" class="comments-section">
               <div class="comment-list">
-                <div *ngFor="let comment of displayedComments; let last = last" 
-                     [class.mb-2]="!last" 
-                     class="comment-item">
-                  <div class="flex items-center mb-1">
+                <div *ngFor="let comment of displayedComments" class="comment-item p-2 mb-2">
+                  <div class="flex align-items-center mb-1">
                     <p-avatar 
                       icon="pi pi-user" 
-                      shape="circle" 
-                      styleClass="flex-shrink-0"
-                      [style]="{'width': '24px', 'height': '24px', 'background': '#e3f2fd', 'color': '#0ea5e9'}">
+                      shape="circle"
+                      [style]="{'width': '2rem', 'height': '2rem'}"
+                      class="mr-2">
                     </p-avatar>
-                    <div class="flex flex-column ml-2">
-                      <div class="flex items-center">
-                        <span class="font-medium text-700 text-sm">{{ comment.creator_name }}</span>
-                        <span class="text-xs text-500 ml-2">{{ comment.created_at | date:'medium' }}</span>
-                      </div>
-                    </div>
+                    <span class="font-medium text-900 mr-2">{{comment.creator_name}}</span>
+                    <span class="text-xs text-400">{{comment.created_at | date:'medium'}}</span>
                   </div>
-                  <div class="comment-content">
-                    <p class="m-0 line-height-3 px-2 py-1 text-sm">{{ comment.description }}</p>
-                  </div>
+                  <p class="m-0 line-height-3 text-700 pl-4">{{comment.description}}</p>
                 </div>
               </div>
               
-              <div class="flex justify-center mt-2">
-                <p-paginator 
-                  [rows]="commentPageSize" 
-                  [totalRecords]="comments.length"
-                  [rowsPerPageOptions]="[5, 10, 20]"
-                  [alwaysShow]="true"
-                  styleClass="custom-paginator"
-                  (onPageChange)="onCommentPageChange($event)">
-                </p-paginator>
-              </div>
+              <p-paginator
+                [rows]="commentPageSize" 
+                [totalRecords]="comments.length"
+                [rowsPerPageOptions]="[5, 10, 20]"
+                [showCurrentPageReport]="true"
+                currentPageReportTemplate="{first}-{last} of {totalRecords}"
+                styleClass="border-none mt-2"
+                (onPageChange)="onCommentPageChange($event)">
+              </p-paginator>
             </div>
           </div>
         </div>
@@ -202,210 +200,136 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
     }
     
     .idea-container {
-      padding: 0.5rem 0.75rem;
       height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .comment-list-container {
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .comment-list {
-      max-height: 400px;
+      padding: 0 1.25rem 1.25rem 1.25rem;
       overflow-y: auto;
-      padding-right: 0.5rem;
-    }
-    
-    @media (max-width: 768px) {
-      .idea-container {
-        padding: 0.25rem 0.75rem;
-      }
-      
-      .comment-list {
-        max-height: 300px;
-      }
-    }
-    
-    @media (min-width: 1600px) {
-      .comment-list {
-        max-height: 500px;
-      }
-    }
-    
-    :host ::ng-deep .p-inputtextarea {
-      width: 100%;
-      min-height: 70px;
-      border-color: #e2e8f0;
-      font-size: 1rem;
-      transition: all 0.2s;
-      padding-bottom: 2.5rem !important;
-    }
-    
-    :host ::ng-deep .p-inputtextarea:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
-    }
-    
-    :host ::ng-deep .p-avatar {
-      display: flex;
-      justify-content: center;
-      items-center: center;
-    }
-    
-    .comment-input-container {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      background-color: #ffffff;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      transition: all 0.2s;
-      position: relative;
-    }
-    
-    .comment-input-container:focus-within {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-    }
-    
-    :host ::ng-deep .comment-textarea {
-      border: none !important;
-      border-radius: 0 !important;
-      padding: 0.75rem 1rem !important;
-      font-size: 1rem;
-      box-shadow: none !important;
-      background-color: #ffffff;
     }
     
     .idea-details {
-      flex: 1;
-      overflow-y: auto;
-      padding-right: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
     }
     
-    :host ::ng-deep .p-chip {
-      height: 24px !important;
-      min-width: 60px;
-      justify-content: center;
+    .white-space-pre-line {
+      white-space: pre-line;
     }
     
-    .line-height-3 {
-      line-height: 1.5rem;
+    .creator-info {
+      background-color: var(--surface-ground);
+    }
+    
+    .description-container {
+      background-color: var(--surface-ground);
+    }
+    
+    .comment-input-container {
+      position: relative;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    
+    .comment-input-container:focus-within {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 1px var(--primary-color);
+    }
+    
+    .comment-textarea {
+      border: none !important;
+      background: transparent !important;
+      padding: 0.75rem !important;
+      padding-bottom: 2.5rem !important;
+      resize: none !important;
     }
     
     .comment-actions {
       position: absolute;
       bottom: 0.5rem;
-      right: 1rem;
+      right: 0.75rem;
     }
     
-    /* Custom scrollbar styles */
-    :host ::ng-deep ::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    :host ::ng-deep ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 4px;
-    }
-    
-    :host ::ng-deep ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    
-    :host ::ng-deep ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    
-    /* Custom styles */
-    :host ::ng-deep .p-sidebar-header {
-      background-color: #ffffff;
-      padding: 0.5rem 1rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    
-    :host ::ng-deep .p-sidebar-content {
-      padding: 0 !important;
-      background-color: #f8fafc;
-    }
-    
-    .creator-info {
-      background-color: #f8fafc;
-      border: 1px solid #e2e8f0;
-    }
-    
-    .description-container {
-      background-color: #f8fafc;
-      border: 1px solid #e2e8f0;
+    .comment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
     
     .comment-item {
-      background-color: #ffffff;
+      background: var(--surface-ground);
       border-radius: 6px;
-      padding: 0.5rem 0.75rem;
-      margin-bottom: 0.5rem;
-      border: 1px solid #e2e8f0;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.2s;
     }
     
     .comment-item:hover {
       transform: translateY(-1px);
-      box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+      box-shadow: var(--shadow-1);
     }
     
-    .comment-content {
-      background-color: #f8fafc;
-      border-radius: 4px;
-    }
-    
-    .category-chip {
-      font-weight: 500;
-      background-color: #e3f2fd !important;
-      color: #0ea5e9 !important;
-    }
-    
-    :host ::ng-deep .tag-item {
-      border-radius: 6px;
-      padding: 0.25rem 0.7rem;
-      font-weight: 500;
-      margin-right: 0.5rem;
-    }
-    
-    :host ::ng-deep .custom-paginator {
+    :host ::ng-deep {
+      .p-sidebar-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--surface-border);
+      }
+      
+      .p-sidebar-content {
+        padding: 0 !important;
+      }
+      
+      .p-chip {
+        height: 28px;
+        border-radius: 12px;
+        background: var(--surface-200);
+        color: var(--surface-900);
+        font-weight: 500;
+      }
+      
+      .tag-item {
+        border-radius: 4px;
+        padding: 0.25rem 0.75rem;
+        font-weight: 500;
+      }
+      
+      .p-button.p-button-sm {
+        padding: 0.2rem 0.75rem;
+        min-width: 70px;
+        
+        .p-button-icon {
+          font-size: 0.875rem;
+        }
+      }
+      
       .p-paginator {
-        padding: 0.25rem;
-        border-radius: 6px;
-        background-color: #f8fafc;
+        padding: 0.5rem 0;
+        
+        .p-paginator-element {
+          min-width: 2rem;
+          height: 2rem;
+        }
+
+        .p-paginator-current {
+          font-size: 1rem;
+          color: var(--text-color-secondary);
+        }
+
+        .p-paginator-page-options {
+          .p-dropdown {
+            height: 2rem;
+            min-width: 4rem;
+          }
+        }
       }
       
-      .p-paginator-page {
-        min-width: 1.75rem;
-        height: 1.75rem;
-        margin: 0 0.1rem;
-        font-size: 0.875rem;
-      }
-      
-      .p-paginator-page.p-highlight {
-        background-color: #2563eb;
-        color: #ffffff;
-      }
-      
-      .p-paginator-first, 
-      .p-paginator-prev, 
-      .p-paginator-next, 
-      .p-paginator-last {
-        min-width: 1.75rem;
-        height: 1.75rem;
-        font-size: 0.875rem;
+      .text-xs {
+        font-size: 0.75rem !important;
       }
     }
     
-    .fill-icon {
-      color: #2563eb !important;
-      font-weight: bold;
+    @media screen and (max-width: 768px) {
+      .idea-container {
+        padding: 0 1rem 1rem 1rem;
+      }
     }
   `]
 })

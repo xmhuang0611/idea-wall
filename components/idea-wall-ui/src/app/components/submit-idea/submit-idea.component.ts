@@ -8,6 +8,7 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { SliderModule } from 'primeng/slider';
+import { CardModule } from 'primeng/card';
 import { TagService } from '../../services/tag.service';
 import { IdeaService } from '../../services/idea.service';
 import { Tag } from '../../models/tag.model';
@@ -25,139 +26,175 @@ import { AuthService } from '../../auth/auth.service';
     InputTextareaModule,
     DropdownModule,
     MultiSelectModule,
-    SliderModule
+    SliderModule,
+    CardModule
   ],
   template: `
-    <div class="bg-white rounded-lg shadow-sm p-6 max-w-3xl mx-auto mt-8">
-      <div class="mb-6">
-        <h2 class="text-2xl font-semibold text-gray-900">{{isEditMode ? 'Edit Idea' : 'Submit Your Idea'}}</h2>
-        <p class="text-gray-600 mt-2">{{isEditMode ? 'Update your idea details' : 'Share your innovative ideas with the community'}}</p>
-      </div>
-
-      <form [formGroup]="ideaForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        <!-- Title -->
-        <div class="form-group">
-          <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-          <input pInputText
-                 id="title"
-                 formControlName="title"
-                 placeholder="Enter a descriptive title"
-                 class="w-full">
-          <small class="text-red-500" *ngIf="ideaForm.get('title')?.invalid && ideaForm.get('title')?.touched">
-            Title is required and must be at least 3 characters long
-          </small>
-        </div>
-
-        <!-- Description -->
-        <div class="form-group">
-          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea pInputTextarea
-                    id="description"
-                    formControlName="description"
-                    [rows]="5"
-                    [autoResize]="true"
-                    placeholder="Describe your idea in detail"
-                    class="w-full"></textarea>
-          <small class="text-red-500" *ngIf="ideaForm.get('description')?.invalid && ideaForm.get('description')?.touched">
-            Description is required and must be at least 10 characters long
-          </small>
-        </div>
-
-        <!-- Category -->
-        <div class="form-group">
-          <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-          <p-dropdown id="category"
-                     formControlName="category"
-                     [options]="categories"
-                     placeholder="Select a category"
-                     styleClass="w-full"
-                     [style]="{'width': '100%'}"></p-dropdown>
-          <small class="text-red-500" *ngIf="ideaForm.get('category')?.invalid && ideaForm.get('category')?.touched">
-            Please select a category
-          </small>
-        </div>
-
-        <!-- Feeling -->
-        <div class="form-group">
-          <label for="feeling" class="block text-sm font-medium text-gray-700 mb-1">Feeling Level</label>
-          <p-slider id="feeling"
-                   formControlName="feeling"
-                   [min]="1"
-                   [max]="5"
-                   [step]="1"
-                   styleClass="w-full"></p-slider>
-          <div class="flex justify-between text-sm text-gray-500 mt-1">
-            <span>1</span>
-            <span>2</span>
-            <span>3</span>
-            <span>4</span>
-            <span>5</span>
+    <div class="surface-ground py-2 px-4 md:px-6 lg:px-8 flex justify-content-center w-full">
+      <p-card [style]="{'max-width': '1200px', 'width': '100%'}" class="mx-auto">
+        <ng-template pTemplate="header">
+          <div class="bg-primary-50 p-4 border-round-top">
+            <h2 class="text-2xl font-semibold text-900 m-0">
+              {{isEditMode ? 'Edit Idea' : 'Submit Your Idea'}}
+            </h2>
+            <p class="text-600 mt-2 mb-0">
+              {{isEditMode ? 'Update your idea details' : 'Share your innovative ideas with the community'}}
+            </p>
           </div>
-          <small class="text-red-500" *ngIf="ideaForm.get('feeling')?.invalid && ideaForm.get('feeling')?.touched">
-            Please select a feeling level between 1 and 5
-          </small>
-        </div>
+        </ng-template>
 
-        <!-- Tags -->
-        <div class="form-group">
-          <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-          <p-multiSelect id="tags"
-                        formControlName="tags"
-                        [options]="availableTags"
-                        optionLabel="tag_name"
-                        optionValue="tag_id"
-                        [showToggleAll]="false"
-                        placeholder="Select relevant tags"
-                        styleClass="w-full"
-                        [style]="{'width': '100%'}"
-                        [maxSelectedLabels]="3"></p-multiSelect>
-          <small class="text-gray-500">Select tags that best describe your idea (optional)</small>
-        </div>
+        <form [formGroup]="ideaForm" (ngSubmit)="onSubmit()" class="flex flex-column w-full">
+          <!-- Title -->
+          <div class="field mb-4">
+            <label for="title" class="block text-900 font-medium mb-2">Title</label>
+            <div class="p-input-filled">
+              <input pInputText
+                     id="title"
+                     formControlName="title"
+                     placeholder="Enter a descriptive title"
+                     class="w-full">
+            </div>
+            <small class="p-error block mt-1" *ngIf="ideaForm.get('title')?.invalid && ideaForm.get('title')?.touched">
+              Title is required and must be at least 3 characters long
+            </small>
+          </div>
 
-        <!-- Submit Button -->
-        <div class="flex justify-end space-x-4">
-          <button pButton
-                  type="button"
-                  label="Cancel"
-                  class="p-button-text"
-                  (click)="onCancel()"></button>
-          <button pButton
-                  type="submit"
-                  [label]="isEditMode ? 'Update Idea' : 'Submit Idea'"
-                  [loading]="isSubmitting"
-                  [disabled]="ideaForm.invalid || isSubmitting || !authService.isLoggedIn()"></button>
-        </div>
-      </form>
+          <!-- Description -->
+          <div class="field mb-4">
+            <label for="description" class="block text-900 font-medium mb-2">Description</label>
+            <div class="p-input-filled">
+              <textarea pInputTextarea
+                        id="description"
+                        formControlName="description"
+                        [rows]="5"
+                        [autoResize]="true"
+                        placeholder="Describe your idea in detail"
+                        class="w-full"></textarea>
+            </div>
+            <small class="p-error block mt-1" *ngIf="ideaForm.get('description')?.invalid && ideaForm.get('description')?.touched">
+              Description is required and must be at least 10 characters long
+            </small>
+          </div>
+
+          <!-- Category -->
+          <div class="field mb-4">
+            <label for="category" class="block text-900 font-medium mb-2">Category</label>
+            <p-dropdown id="category"
+                       formControlName="category"
+                       [options]="categories"
+                       placeholder="Select a category"
+                       [style]="{'width': '100%'}"
+                       styleClass="w-full"></p-dropdown>
+            <small class="p-error block mt-1" *ngIf="ideaForm.get('category')?.invalid && ideaForm.get('category')?.touched">
+              Please select a category
+            </small>
+          </div>
+
+          <!-- Feeling -->
+          <div class="field mb-4">
+            <label for="feeling" class="block text-900 font-medium mb-2">Feeling Level</label>
+            <div class="surface-50 p-3 border-round">
+              <p-slider id="feeling"
+                       formControlName="feeling"
+                       [min]="1"
+                       [max]="5"
+                       [step]="1"
+                       styleClass="w-full"></p-slider>
+              <div class="flex justify-content-between text-sm text-600 mt-2">
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+                <span>4</span>
+                <span>5</span>
+              </div>
+            </div>
+            <small class="p-error block mt-1" *ngIf="ideaForm.get('feeling')?.invalid && ideaForm.get('feeling')?.touched">
+              Please select a feeling level between 1 and 5
+            </small>
+          </div>
+
+          <!-- Tags -->
+          <div class="field mb-4">
+            <label for="tags" class="block text-900 font-medium mb-2">Tags</label>
+            <p-multiSelect id="tags"
+                          formControlName="tags"
+                          [options]="availableTags"
+                          optionLabel="tag_name"
+                          optionValue="tag_id"
+                          [showToggleAll]="false"
+                          placeholder="Select relevant tags"
+                          [style]="{'width': '100%'}"
+                          styleClass="w-full"
+                          [maxSelectedLabels]="3"></p-multiSelect>
+            <small class="text-600 block mt-1">Select tags that best describe your idea (optional)</small>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex justify-content-end gap-2 pt-3">
+            <button pButton
+                    type="button"
+                    label="Cancel"
+                    class="p-button-outlined"
+                    (click)="onCancel()"></button>
+            <button pButton
+                    type="submit"
+                    [label]="isEditMode ? 'Update Idea' : 'Submit Idea'"
+                    [loading]="isSubmitting"
+                    [disabled]="ideaForm.invalid || isSubmitting || !authService.isLoggedIn()"
+                    class="p-button-primary"></button>
+          </div>
+        </form>
+      </p-card>
     </div>
   `,
   styles: [`
     :host {
       display: block;
-      padding: 1rem;
     }
     
     :host ::ng-deep {
+      .p-card.p-component {
+        width: 1600px !important;
+      }
+
+      .p-card {
+        .p-card-body {
+          padding: 2rem;
+          width: 100%;
+        }
+
+        .p-card-content {
+          padding: 0;
+          width: 100%;
+        }
+      }
+      
       .p-inputtext,
       .p-dropdown,
       .p-multiselect {
         width: 100%;
       }
       
-      .p-dropdown-panel .p-dropdown-items {
-        padding: 0.5rem 0;
-      }
-      
+      .p-dropdown-panel .p-dropdown-items,
       .p-multiselect-panel .p-multiselect-items {
         padding: 0.5rem 0;
       }
       
       .p-dropdown-item,
       .p-multiselect-item {
-        padding: 0.5rem 1rem;
+        padding: 0.75rem 1.25rem;
       }
 
       .p-slider {
-        width: 100%;
+        .p-slider-handle {
+          transition: background-color 0.2s;
+        }
+      }
+      
+      @media screen and (max-width: 576px) {
+        .p-card .p-card-body {
+          padding: 1rem;
+        }
       }
     }
   `]

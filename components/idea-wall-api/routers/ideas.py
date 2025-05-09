@@ -18,6 +18,7 @@ async def get_ideas(
     sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
     search: Optional[str] = None,
     tags: Optional[List[int]] = Query(None),
+    creator_id: Optional[str] = None,
     current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     ideas = await idea_service.get_ideas(
@@ -27,12 +28,14 @@ async def get_ideas(
         sort_by=sort_by,
         sort_order=sort_order,
         search=search,
-        tags=tags
+        tags=tags,
+        creator_id=creator_id
     )
     total = await idea_service.get_total_ideas(
         category=category,
         search=search,
-        tags=tags
+        tags=tags,
+        creator_id=creator_id
     )
     
     # 如果用户已登录，获取用户点赞状态
