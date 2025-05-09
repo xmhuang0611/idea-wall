@@ -128,7 +128,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
                     id="comment"
                     pInputTextarea 
                     formControlName="comment" 
-                    [rows]="3" 
+                    [rows]="2" 
                     [autoResize]="false"
                     placeholder="Share your comment here"
                     class="w-full comment-textarea">
