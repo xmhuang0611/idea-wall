@@ -49,7 +49,6 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       <ng-template pTemplate="header">
         <div class="flex align-items-center justify-content-between py-2 w-full">
           <h3 class="text-xl font-semibold m-0 text-900">Idea Details</h3>
-       
         </div>
       </ng-template>
       
@@ -73,19 +72,19 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
                 <p-chip 
                   [label]="idea.category || 'Idea'" 
                   [style]="getCategoryStyle(idea.category || 'Idea')"
-                  styleClass="category-chip mr-2">
+                  styleClass="idea-details-chip mr-2">
                 </p-chip>
                 <div class="flex align-items-center">
                   <button pButton pRipple 
                           [class]="idea.hasVoted ? 'p-button-primary' : 'p-button-outlined'"
                           icon="pi pi-thumbs-up"
                           [label]="idea.total_votes.toString()"
-                          class="p-button-sm mr-2">
+                          class="idea-details-button mr-2">
                   </button>
                   <button pButton pRipple 
                           icon="pi pi-comments"
                           [label]="idea.total_comments.toString()"
-                          class="p-button-outlined p-button-sm">
+                          class="idea-details-button p-button-outlined">
                   </button>
                 </div>
               </div>
@@ -185,7 +184,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
                 [rowsPerPageOptions]="[5, 10, 20]"
                 [showCurrentPageReport]="true"
                 currentPageReportTemplate="{first}-{last} of {totalRecords}"
-                styleClass="border-none mt-2"
+                styleClass="idea-details-paginator border-none mt-2"
                 (onPageChange)="onCommentPageChange($event)">
               </p-paginator>
             </div>
@@ -266,8 +265,8 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       transform: translateY(-1px);
       box-shadow: var(--shadow-1);
     }
-    
-    :host ::ng-deep {
+
+    .idea-details-sidebar {
       .p-sidebar-header {
         padding: 1rem 1.5rem;
         border-bottom: 1px solid var(--surface-border);
@@ -276,54 +275,54 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
       .p-sidebar-content {
         padding: 0 !important;
       }
+    }
+    
+    .idea-details-chip {
+      height: 28px;
+      border-radius: 12px;
+      background: var(--surface-200);
+      color: var(--surface-900);
+      font-weight: 500;
+    }
+    
+    .tag-item {
+      border-radius: 4px;
+      padding: 0.25rem 0.75rem;
+      font-weight: 500;
+    }
+    
+    .idea-details-button {
+      padding: 0.2rem 0.75rem;
+      min-width: 70px;
       
-      .p-chip {
-        height: 28px;
-        border-radius: 12px;
-        background: var(--surface-200);
-        color: var(--surface-900);
-        font-weight: 500;
+      .p-button-icon {
+        font-size: 0.875rem;
       }
+    }
+    
+    .idea-details-paginator {
+      padding: 0.5rem 0;
       
-      .tag-item {
-        border-radius: 4px;
-        padding: 0.25rem 0.75rem;
-        font-weight: 500;
+      .p-paginator-element {
+        min-width: 2rem;
+        height: 2rem;
       }
-      
-      .p-button.p-button-sm {
-        padding: 0.2rem 0.75rem;
-        min-width: 70px;
-        
-        .p-button-icon {
-          font-size: 0.875rem;
-        }
+
+      .p-paginator-current {
+        font-size: 1rem;
+        color: var(--text-color-secondary);
       }
-      
-      .p-paginator {
-        padding: 0.5rem 0;
-        
-        .p-paginator-element {
-          min-width: 2rem;
+
+      .p-paginator-page-options {
+        .p-dropdown {
           height: 2rem;
-        }
-
-        .p-paginator-current {
-          font-size: 1rem;
-          color: var(--text-color-secondary);
-        }
-
-        .p-paginator-page-options {
-          .p-dropdown {
-            height: 2rem;
-            min-width: 4rem;
-          }
+          min-width: 4rem;
         }
       }
-      
-      .text-xs {
-        font-size: 0.75rem !important;
-      }
+    }
+    
+    .text-xs {
+      font-size: 0.75rem !important;
     }
     
     @media screen and (max-width: 768px) {

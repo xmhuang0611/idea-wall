@@ -35,7 +35,7 @@ import { AuthService } from '../../auth/auth.service';
     IdeaDetailsDrawerComponent
   ],
   template: `
-    <p-card class="mb-5">
+    <p-card class="mb-5 idea-wall-card">
       <!-- Submit Button -->
       <div class="flex justify-content-between gap-2 mb-4 align-items-center">
         <div class="flex align-items-center">
@@ -201,119 +201,103 @@ import { AuthService } from '../../auth/auth.service';
       display: block;
     }
     
-    :host ::ng-deep {
+    .idea-wall-card {
       .flex-2 {
         flex: 2;
       }
 
-      .p-card {
-        .p-card-body {
-          padding: 2rem;
-          width: 100%;
-        }
-
-        .p-card-content {
-          padding: 0;
-          width: 100%;
-        }
-      }
-
-      .p-dropdown {
+      .p-card-body {
+        padding: 2rem;
         width: 100%;
+      }
+
+      .p-card-content {
+        padding: 0;
+        width: 100%;
+      }
+    }
+
+    .idea-wall-dropdown {
+      width: 100%;
+      
+      .p-dropdown-label {
+        padding-right: 2.5rem;
+      }
+    }
+
+    .ideas-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .idea-card {
+      .p-card-body {
+        padding: 1.5rem;
+      }
+    }
+    
+    .idea-wall-paginator {
+      padding: 0.5rem 0;
+      
+      .p-paginator-element {
+        min-width: 2rem;
+        height: 2rem;
+      }
+
+      .p-paginator-current {
+        font-size: 1rem;
+        color: var(--text-color-secondary);
+      }
+
+      .p-paginator-page-options {
+        .p-dropdown {
+          height: 2rem;
+          min-width: 4rem;
+        }
+      }
+    }
+
+    .idea-wall-selectbutton {
+      .p-button {
+        padding: 0.5rem 1rem;
         
-        .p-dropdown-label {
-          padding-right: 2.5rem;
+        &.p-highlight {
+          background: var(--primary-color);
+          border-color: var(--primary-color);
         }
       }
+    }
 
-      .ideas-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-      }
-
-      .idea-card {
-        .p-card-body {
-          padding: 1.5rem;
-        }
+    .idea-wall-inputswitch {
+      .p-inputswitch-slider {
+        background: var(--surface-200);
       }
       
-      @media screen and (max-width: 576px) {
-        .p-card .p-card-body {
-          padding: 1rem;
-        }
-        
-        .idea-card .p-card-body {
-          padding: 1rem;
-        }
-        
-        .ideas-container {
-          gap: 1rem;
-        }
-      }
-
-      .p-paginator {
-        padding: 0.5rem 0;
-        
-        .p-paginator-element {
-          min-width: 2rem;
-          height: 2rem;
-        }
-
-        .p-paginator-current {
-          font-size: 1rem;
-          color: var(--text-color-secondary);
-        }
-
-        .p-paginator-page-options {
-          .p-dropdown {
-            height: 2rem;
-            min-width: 4rem;
-          }
-        }
-      }
-
-      .p-selectbutton {
-        .p-button {
-          padding: 0.5rem 1rem;
-          
-          &.p-highlight {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-          }
-        }
-      }
-
-      .p-inputswitch {
+      &.p-inputswitch-checked {
         .p-inputswitch-slider {
-          background: var(--surface-200);
-        }
-        
-        &.p-inputswitch-checked {
-          .p-inputswitch-slider {
-            background: var(--primary-color);
-          }
-        }
-
-        &.ml-2 {
-          margin-left: 0.5rem;
+          background: var(--primary-color);
         }
       }
 
-      .creator-name {
-        font-size: 0.875rem;
+      &.ml-2 {
+        margin-left: 0.5rem;
       }
+    }
 
-      .text-500 {
-        color: var(--text-color-secondary);
-        font-size: 0.75rem;
-        text-transform: uppercase;
-      }
+    .creator-name {
+      font-size: 0.875rem;
+    }
 
-      .text-600 {
-        color: var(--text-color);
-        font-size: 0.875rem;
-      }
+    .text-500 {
+      color: var(--text-color-secondary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .text-600 {
+      color: var(--text-color);
+      font-size: 0.875rem;
     }
     
     .idea-title {
@@ -330,6 +314,20 @@ import { AuthService } from '../../auth/auth.service';
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    @media screen and (max-width: 576px) {
+      .idea-wall-card .p-card-body {
+        padding: 1rem;
+      }
+      
+      .idea-card .p-card-body {
+        padding: 1rem;
+      }
+      
+      .ideas-container {
+        gap: 1rem;
       }
     }
   `]

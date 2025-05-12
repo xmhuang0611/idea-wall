@@ -1,7 +1,7 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { OAuthModuleConfig, provideOAuthClient } from 'angular-oauth2-oidc';
+import { provideOAuthClient } from 'angular-oauth2-oidc';
 import { routes } from './app.routes';
 import { authInterceptor } from './auth/auth.interceptor';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -11,13 +11,6 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
-export const oauthModuleConfig: OAuthModuleConfig = {
-  resourceServer: {
-    allowedUrls: ['http://localhost:8080'],
-    sendAccessToken: true
-  }
-};
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
@@ -25,7 +18,6 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([authInterceptor])
     ),
     provideOAuthClient(),
-    { provide: OAuthModuleConfig, useValue: oauthModuleConfig },
     DialogService,
     DynamicDialogRef,
     DynamicDialogConfig,
