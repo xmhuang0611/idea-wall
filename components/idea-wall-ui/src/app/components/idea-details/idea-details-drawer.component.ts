@@ -65,7 +65,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
         <div *ngIf="!isLoading && idea" class="idea-details">
           <!-- Main content -->
           <div class="surface-card shadow-1 border-round p-4 mb-3">
-            <!-- Title and Category -->
+            <!-- Title and Actions -->
             <div class="flex align-items-center justify-content-between mb-2">
               <div class="flex align-items-center gap-2">
                 <div class="feeling-image-container">
@@ -77,24 +77,17 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
                 <h2 class="text-2xl font-semibold m-0 text-900">{{idea.title}}</h2>
               </div>
               <div class="flex align-items-center">
-                <p-chip 
-                  [label]="idea.category || 'Idea'" 
-                  [style]="getCategoryStyle(idea.category || 'Idea')"
-                  styleClass="idea-details-chip mr-2">
-                </p-chip>
-                <div class="flex align-items-center">
-                  <button pButton pRipple 
-                          [class]="idea.hasVoted ? 'p-button-primary' : 'p-button-outlined'"
-                          icon="pi pi-thumbs-up"
-                          [label]="idea.total_votes.toString()"
-                          class="idea-details-button mr-2">
-                  </button>
-                  <button pButton pRipple 
-                          icon="pi pi-comments"
-                          [label]="idea.total_comments.toString()"
-                          class="idea-details-button p-button-outlined">
-                  </button>
-                </div>
+                <button pButton pRipple 
+                        [class]="idea.hasVoted ? 'p-button-primary' : 'p-button-outlined'"
+                        icon="pi pi-thumbs-up"
+                        [label]="idea.total_votes.toString()"
+                        class="idea-details-button mr-2">
+                </button>
+                <button pButton pRipple 
+                        icon="pi pi-comments"
+                        [label]="idea.total_comments.toString()"
+                        class="idea-details-button p-button-outlined">
+                </button>
               </div>
             </div>
             
@@ -587,19 +580,6 @@ export class IdeaDetailsDrawerComponent implements OnInit, OnChanges, OnDestroy 
     return 'info';
   }
   
-  getCategoryStyle(category: string): any {
-    switch (category) {
-      case 'Idea':
-        return { background: '#e3f2fd', color: '#1565c0' };
-      case 'Pain':
-        return { background: '#ffebee', color: '#c62828' };
-      case 'Thought':
-        return { background: '#e8f5e9', color: '#2e7d32' };
-      default:
-        return { background: '#f5f5f5', color: '#616161' };
-    }
-  }
-
   getFeelingImage(feeling: number): string {
     return `assets/images/${feeling}-${this.getFeelingEmoji(feeling)}.png`;
   }

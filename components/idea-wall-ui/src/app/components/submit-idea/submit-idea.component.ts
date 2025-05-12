@@ -80,21 +80,6 @@ interface FeelingOption {
             </small>
           </div>
 
-          <!-- Category -->
-          <div class="field mb-4">
-            <label for="category" class="block text-900 font-medium mb-2">Category</label>
-            <p-dropdown id="category"
-                       formControlName="category"
-                       [options]="categories"
-                       placeholder="Select a category"
-                       [style]="{'width': '100%'}"
-                       styleClass="w-full submit-idea-dropdown-panel">
-            </p-dropdown>
-            <small class="p-error block mt-1" *ngIf="ideaForm.get('category')?.invalid && ideaForm.get('category')?.touched">
-              Please select a category
-            </small>
-          </div>
-
           <!-- Feeling -->
           <div class="field mb-4">
             <label class="block text-900 font-medium mb-2">How do you feel about this idea?</label>
@@ -273,7 +258,6 @@ interface FeelingOption {
 export class SubmitIdeaComponent implements OnInit {
   ideaForm: FormGroup;
   isSubmitting = false;
-  categories = ['Idea', 'Pain', 'Thought'];
   availableTags: Tag[] = [];
   isEditMode = false;
   ideaId: string | null = null;
@@ -297,7 +281,6 @@ export class SubmitIdeaComponent implements OnInit {
     this.ideaForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
-      category: ['', Validators.required],
       feeling: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
       tags: [[]]
     });
@@ -348,7 +331,6 @@ export class SubmitIdeaComponent implements OnInit {
           this.ideaForm.patchValue({
             title: idea.title,
             description: idea.description,
-            category: idea.category,
             feeling: Number(idea.feeling),
             tags: idea.tags || []
           });
@@ -373,7 +355,6 @@ export class SubmitIdeaComponent implements OnInit {
     const ideaData = {
       title: formValue.title,
       description: formValue.description,
-      category: formValue.category,
       feeling: Number(formValue.feeling),
       tags: formValue.tags || []
     };
