@@ -7,12 +7,17 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { SliderModule } from 'primeng/slider';
 import { CardModule } from 'primeng/card';
 import { TagService } from '../../services/tag.service';
 import { IdeaService } from '../../services/idea.service';
 import { Tag } from '../../models/tag.model';
 import { AuthService } from '../../auth/auth.service';
+
+interface FeelingOption {
+  value: number;
+  label: string;
+  image: string;
+}
 
 @Component({
   selector: 'app-submit-idea',
@@ -26,12 +31,11 @@ import { AuthService } from '../../auth/auth.service';
     InputTextareaModule,
     DropdownModule,
     MultiSelectModule,
-    SliderModule,
     CardModule
   ],
   template: `
     <div class="surface-ground py-2 px-4 md:px-6 lg:px-8 flex justify-content-center w-full">
-      <p-card [style]="{'max-width': '1200px', 'width': '100%'}" class="mx-auto submit-idea-card">
+      <p-card [style]="{'width': '100%'}" class="mx-auto submit-idea-card">
         <ng-template pTemplate="header">
           <div class="bg-primary-50 p-4 border-round-top">
             <h2 class="text-2xl font-semibold text-900 m-0">
@@ -93,24 +97,28 @@ import { AuthService } from '../../auth/auth.service';
 
           <!-- Feeling -->
           <div class="field mb-4">
-            <label for="feeling" class="block text-900 font-medium mb-2">Feeling Level</label>
-            <div class="surface-50 p-3 border-round">
-              <p-slider id="feeling"
-                       formControlName="feeling"
-                       [min]="1"
-                       [max]="5"
-                       [step]="1"
-                       styleClass="w-full submit-idea-slider"></p-slider>
-              <div class="flex justify-content-between text-sm text-600 mt-2">
-                <span>1</span>
-                <span>2</span>
-                <span>3</span>
-                <span>4</span>
-                <span>5</span>
+            <label class="block text-900 font-medium mb-2">How do you feel about this idea?</label>
+            <div class="feeling-selector surface-ground p-3 border-round">
+              <div class="flex justify-content-between align-items-center">
+                <div *ngFor="let option of feelingOptions" 
+                     class="feeling-option flex flex-column align-items-center cursor-pointer"
+                     [class.selected]="ideaForm.get('feeling')?.value === option.value"
+                     (click)="selectFeeling(option.value)">
+                  <div class="feeling-image-container mb-2">
+                    <img [src]="option.image" 
+                         [alt]="option.label"
+                         class="feeling-image"
+                         [class.selected]="ideaForm.get('feeling')?.value === option.value">
+                  </div>
+                  <span class="feeling-label text-sm text-600"
+                        [class.selected]="ideaForm.get('feeling')?.value === option.value">
+                    {{option.label}}
+                  </span>
+                </div>
               </div>
             </div>
             <small class="p-error block mt-1" *ngIf="ideaForm.get('feeling')?.invalid && ideaForm.get('feeling')?.touched">
-              Please select a feeling level between 1 and 5
+              Please select a feeling level
             </small>
           </div>
 
@@ -183,15 +191,81 @@ import { AuthService } from '../../auth/auth.service';
       }
     }
 
-    .submit-idea-slider {
-      .p-slider-handle {
-        transition: background-color 0.2s;
+    .feeling-selector {
+      .feeling-option {
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background-color: var(--surface-hover);
+        }
+        
+        &.selected {
+          background-color: var(--primary-100);
+        }
+      }
+      
+      .feeling-image-container {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .feeling-image {
+        width: 48px;
+        height: 48px;
+        transition: all 0.2s ease;
+        
+        &.selected {
+          width: 56px;
+          height: 56px;
+          transform: scale(1.15);
+        }
+      }
+
+      .feeling-label {
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+        
+        &.selected {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--primary-700);
+        }
       }
     }
     
     @media screen and (max-width: 576px) {
       .submit-idea-card .p-card-body {
         padding: 1rem;
+      }
+      
+      .feeling-selector {
+        .feeling-image-container {
+          width: 48px;
+          height: 48px;
+        }
+        
+        .feeling-image {
+          width: 40px;
+          height: 40px;
+          
+          &.selected {
+            width: 48px;
+            height: 48px;
+          }
+        }
+
+        .feeling-label {
+          font-size: 0.75rem;
+          
+          &.selected {
+            font-size: 0.875rem;
+          }
+        }
       }
     }
   `]
@@ -203,6 +277,14 @@ export class SubmitIdeaComponent implements OnInit {
   availableTags: Tag[] = [];
   isEditMode = false;
   ideaId: string | null = null;
+
+  feelingOptions: FeelingOption[] = [
+    { value: 1, label: 'Unhappy', image: 'assets/images/1-1f92c.png' },
+    { value: 2, label: 'Terrible', image: 'assets/images/2-1f621.png' },
+    { value: 3, label: 'Thoughtable', image: 'assets/images/3-1f615.png' },
+    { value: 4, label: 'Happy', image: 'assets/images/4-1f604.png' },
+    { value: 5, label: 'Unbelievable', image: 'assets/images/5-1f929.png' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -327,5 +409,9 @@ export class SubmitIdeaComponent implements OnInit {
 
   onCancel(): void {
     this.router.navigate(['/']);
+  }
+
+  selectFeeling(value: number): void {
+    this.ideaForm.patchValue({ feeling: value });
   }
 } 

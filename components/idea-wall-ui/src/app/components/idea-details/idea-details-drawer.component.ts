@@ -67,7 +67,15 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
           <div class="surface-card shadow-1 border-round p-4 mb-3">
             <!-- Title and Category -->
             <div class="flex align-items-center justify-content-between mb-2">
-              <h2 class="text-2xl font-semibold m-0 text-900">{{idea.title}}</h2>
+              <div class="flex align-items-center gap-2">
+                <div class="feeling-image-container">
+                  <img [src]="getFeelingImage(idea.feeling)"
+                       [alt]="getFeelingLabel(idea.feeling)"
+                       class="feeling-image"
+                       [title]="getFeelingLabel(idea.feeling)">
+                </div>
+                <h2 class="text-2xl font-semibold m-0 text-900">{{idea.title}}</h2>
+              </div>
               <div class="flex align-items-center">
                 <p-chip 
                   [label]="idea.category || 'Idea'" 
@@ -330,6 +338,33 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
         padding: 0 1rem 1rem 1rem;
       }
     }
+
+    .feeling-image-container {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.5rem;
+    }
+    
+    .feeling-image {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+
+    @media screen and (max-width: 768px) {
+      .feeling-image-container {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .feeling-image {
+        width: 28px;
+        height: 28px;
+      }
+    }
   `]
 })
 export class IdeaDetailsDrawerComponent implements OnInit, OnChanges, OnDestroy {
@@ -563,5 +598,19 @@ export class IdeaDetailsDrawerComponent implements OnInit, OnChanges, OnDestroy 
       default:
         return { background: '#f5f5f5', color: '#616161' };
     }
+  }
+
+  getFeelingImage(feeling: number): string {
+    return `assets/images/${feeling}-${this.getFeelingEmoji(feeling)}.png`;
+  }
+
+  getFeelingLabel(feeling: number): string {
+    const labels = ['Unhappy', 'Terrible', 'Thoughtable', 'Happy', 'Unbelievable'];
+    return labels[feeling - 1] || '';
+  }
+
+  getFeelingEmoji(feeling: number): string {
+    const emojis = ['1f92c', '1f621', '1f615', '1f604', '1f929'];
+    return emojis[feeling - 1] || '';
   }
 }

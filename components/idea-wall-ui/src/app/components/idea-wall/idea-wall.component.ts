@@ -127,6 +127,12 @@ import { AuthService } from '../../auth/auth.service';
             <div class="flex-1">
               <div class="flex justify-content-between align-items-center mb-2">
                 <div class="flex align-items-center gap-2">
+                  <div class="feeling-image-container">
+                    <img [src]="getFeelingImage(idea.feeling)"
+                         [alt]="getFeelingLabel(idea.feeling)"
+                         class="feeling-image"
+                         [title]="getFeelingLabel(idea.feeling)">
+                  </div>
                   <h3 class="text-primary m-0">
                     {{idea.title}}
                   </h3>
@@ -317,6 +323,21 @@ import { AuthService } from '../../auth/auth.service';
       }
     }
 
+    .feeling-image-container {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.5rem;
+    }
+    
+    .feeling-image {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+
     @media screen and (max-width: 576px) {
       .idea-wall-card .p-card-body {
         padding: 1rem;
@@ -328,6 +349,16 @@ import { AuthService } from '../../auth/auth.service';
       
       .ideas-container {
         gap: 1rem;
+      }
+
+      .feeling-image-container {
+        width: 28px;
+        height: 28px;
+      }
+      
+      .feeling-image {
+        width: 24px;
+        height: 24px;
       }
     }
   `]
@@ -649,6 +680,20 @@ export class IdeaWallComponent implements OnInit {
   onMyIdeasChange(checked: boolean): void {
     this.currentPage = 1;
     this.loadIdeas();
+  }
+
+  getFeelingImage(feeling: number): string {
+    return `assets/images/${feeling}-${this.getFeelingEmoji(feeling)}.png`;
+  }
+
+  getFeelingLabel(feeling: number): string {
+    const labels = ['Unhappy', 'Terrible', 'Thoughtable', 'Happy', 'Unbelievable'];
+    return labels[feeling - 1] || '';
+  }
+
+  getFeelingEmoji(feeling: number): string {
+    const emojis = ['1f92c', '1f621', '1f615', '1f604', '1f929'];
+    return emojis[feeling - 1] || '';
   }
 
   protected readonly Math = Math;
