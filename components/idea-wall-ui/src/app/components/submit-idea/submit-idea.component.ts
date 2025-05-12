@@ -31,7 +31,7 @@ import { AuthService } from '../../auth/auth.service';
   ],
   template: `
     <div class="surface-ground py-2 px-4 md:px-6 lg:px-8 flex justify-content-center w-full">
-      <p-card [style]="{'max-width': '1200px', 'width': '100%'}" class="mx-auto">
+      <p-card [style]="{'max-width': '1200px', 'width': '100%'}" class="mx-auto submit-idea-card">
         <ng-template pTemplate="header">
           <div class="bg-primary-50 p-4 border-round-top">
             <h2 class="text-2xl font-semibold text-900 m-0">
@@ -52,7 +52,7 @@ import { AuthService } from '../../auth/auth.service';
                      id="title"
                      formControlName="title"
                      placeholder="Enter a descriptive title"
-                     class="w-full">
+                     class="w-full submit-idea-input">
             </div>
             <small class="p-error block mt-1" *ngIf="ideaForm.get('title')?.invalid && ideaForm.get('title')?.touched">
               Title is required and must be at least 3 characters long
@@ -69,7 +69,7 @@ import { AuthService } from '../../auth/auth.service';
                         [rows]="5"
                         [autoResize]="true"
                         placeholder="Describe your idea in detail"
-                        class="w-full"></textarea>
+                        class="w-full submit-idea-input"></textarea>
             </div>
             <small class="p-error block mt-1" *ngIf="ideaForm.get('description')?.invalid && ideaForm.get('description')?.touched">
               Description is required and must be at least 10 characters long
@@ -84,7 +84,8 @@ import { AuthService } from '../../auth/auth.service';
                        [options]="categories"
                        placeholder="Select a category"
                        [style]="{'width': '100%'}"
-                       styleClass="w-full"></p-dropdown>
+                       styleClass="w-full submit-idea-dropdown-panel">
+            </p-dropdown>
             <small class="p-error block mt-1" *ngIf="ideaForm.get('category')?.invalid && ideaForm.get('category')?.touched">
               Please select a category
             </small>
@@ -99,7 +100,7 @@ import { AuthService } from '../../auth/auth.service';
                        [min]="1"
                        [max]="5"
                        [step]="1"
-                       styleClass="w-full"></p-slider>
+                       styleClass="w-full submit-idea-slider"></p-slider>
               <div class="flex justify-content-between text-sm text-600 mt-2">
                 <span>1</span>
                 <span>2</span>
@@ -124,7 +125,7 @@ import { AuthService } from '../../auth/auth.service';
                           [showToggleAll]="false"
                           placeholder="Select relevant tags"
                           [style]="{'width': '100%'}"
-                          styleClass="w-full"
+                          styleClass="w-full submit-idea-input"
                           [maxSelectedLabels]="3"></p-multiSelect>
             <small class="text-600 block mt-1">Select tags that best describe your idea (optional)</small>
           </div>
@@ -152,31 +153,27 @@ import { AuthService } from '../../auth/auth.service';
       display: block;
     }
     
-    :host ::ng-deep {
-      .p-card.p-component {
-        width: 1600px !important;
-      }
+    .submit-idea-card {
+      width: 1600px !important;
 
-      .p-card {
-        .p-card-body {
-          padding: 2rem;
-          width: 100%;
-        }
-
-        .p-card-content {
-          padding: 0;
-          width: 100%;
-        }
-      }
-      
-      .p-inputtext,
-      .p-dropdown,
-      .p-multiselect {
+      .p-card-body {
+        padding: 2rem;
         width: 100%;
       }
-      
-      .p-dropdown-panel .p-dropdown-items,
-      .p-multiselect-panel .p-multiselect-items {
+
+      .p-card-content {
+        padding: 0;
+        width: 100%;
+      }
+    }
+    
+    .submit-idea-input {
+      width: 100%;
+    }
+    
+    .submit-idea-dropdown-panel {
+      .p-dropdown-items,
+      .p-multiselect-items {
         padding: 0.5rem 0;
       }
       
@@ -184,17 +181,17 @@ import { AuthService } from '../../auth/auth.service';
       .p-multiselect-item {
         padding: 0.75rem 1.25rem;
       }
+    }
 
-      .p-slider {
-        .p-slider-handle {
-          transition: background-color 0.2s;
-        }
+    .submit-idea-slider {
+      .p-slider-handle {
+        transition: background-color 0.2s;
       }
-      
-      @media screen and (max-width: 576px) {
-        .p-card .p-card-body {
-          padding: 1rem;
-        }
+    }
+    
+    @media screen and (max-width: 576px) {
+      .submit-idea-card .p-card-body {
+        padding: 1rem;
       }
     }
   `]

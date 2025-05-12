@@ -27,7 +27,7 @@ import { ToastModule } from 'primeng/toast';
         </div>
       </main>
       <app-footer></app-footer>
-      <p-toast position="bottom-right"></p-toast>
+      <p-toast position="bottom-right" class="global-toast"></p-toast>
     </div>
   `,
   styles: [`
@@ -50,37 +50,35 @@ import { ToastModule } from 'primeng/toast';
       padding: 0 0.5rem;
     }
 
-    :host ::ng-deep {
-      .p-toast {
-        z-index: 1000;
-      }
+    .global-toast {
+      z-index: 1000;
+    }
 
-      // 美化滚动条
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
+    /* 全局滚动条样式 */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
 
-      ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-      }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
 
-      ::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 4px;
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
 
-        &:hover {
-          background: #a8a8a8;
-        }
-      }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
 
-      // 优化文字渲染
-      * {
-        text-rendering: optimizeLegibility;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
+    /* 全局文字渲染优化 */
+    * {
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
   `]
 })
