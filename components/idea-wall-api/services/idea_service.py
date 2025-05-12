@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from core.database import get_database
-from models.idea import IdeaCreate, IdeaUpdate, IdeaInDB, Idea, IdeaCategory, IdeaTag
+from models.idea import IdeaCreate, IdeaUpdate, IdeaInDB, Idea, IdeaTag
 from bson import ObjectId
 from services.tag_service import tag_service
 
@@ -11,16 +11,11 @@ class IdeaService:
 
     def _build_filter_query(
         self,
-        category: Optional[IdeaCategory] = None,
         search: Optional[str] = None,
         tags: Optional[List[int]] = None,
         creator_id: Optional[str] = None
     ) -> Dict[str, Any]:
         filter_query = {}
-        
-        # 分类过滤
-        if category:
-            filter_query["category"] = category
             
         # 标签过滤
         if tags:
@@ -41,20 +36,18 @@ class IdeaService:
 
     async def get_total_ideas(
         self,
-        category: Optional[IdeaCategory] = None,
         search: Optional[str] = None,
         tags: Optional[List[int]] = None,
         creator_id: Optional[str] = None
     ) -> int:
         db = await get_database()
-        filter_query = self._build_filter_query(category, search, tags, creator_id)
+        filter_query = self._build_filter_query(search, tags, creator_id)
         return await db[self.collection_name].count_documents(filter_query)
 
     async def get_ideas(
         self,
         skip: int = 0,
         limit: int = 20,
-        category: Optional[IdeaCategory] = None,
         sort_by: Optional[str] = None,
         sort_order: Optional[str] = None,
         search: Optional[str] = None,
@@ -64,7 +57,7 @@ class IdeaService:
         db = await get_database()
         
         # 构建过滤条件
-        filter_query = self._build_filter_query(category, search, tags, creator_id)
+        filter_query = self._build_filter_query(search, tags, creator_id)
             
         # 构建排序条件
         sort_options = {}

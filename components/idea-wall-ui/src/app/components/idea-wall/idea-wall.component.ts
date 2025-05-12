@@ -13,6 +13,7 @@ import { PanelModule } from 'primeng/panel';
 import { CardModule } from 'primeng/card';
 import { PaginatorModule } from 'primeng/paginator';
 import { InputSwitchModule } from 'primeng/inputswitch';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
 import { AuthService } from '../../auth/auth.service';
 
@@ -32,6 +33,7 @@ import { AuthService } from '../../auth/auth.service';
     CardModule,
     PaginatorModule,
     InputSwitchModule,
+    ProgressSpinnerModule,
     IdeaDetailsDrawerComponent
   ],
   template: `
@@ -75,19 +77,6 @@ import { AuthService } from '../../auth/auth.service';
           </div>
         </div>
 
-        <!-- Category Filter -->
-        <div class="flex-1">
-          <label class="block mb-1">Category</label>
-          <p-dropdown 
-            [options]="categoryOptions"
-            [(ngModel)]="selectedCategory"
-            (onChange)="onCategorySelect(selectedCategory)"
-            placeholder="All Categories"
-            [showClear]="true"
-            class="w-full">
-          </p-dropdown>
-        </div>
-
         <!-- Sort -->
         <div class="flex-1">
           <label class="block mb-1">Sort By</label>
@@ -103,8 +92,18 @@ import { AuthService } from '../../auth/auth.service';
         </div>
       </div>
 
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-5">
+        <p-progressSpinner 
+          [style]="{width: '50px', height: '50px'}" 
+          strokeWidth="4"
+          fill="var(--surface-ground)" 
+          animationDuration=".5s">
+        </p-progressSpinner>
+      </div>
+
       <!-- Ideas List -->
-      <div class="ideas-container">
+      <div *ngIf="!isLoading" class="ideas-container">
         <p-card *ngFor="let idea of ideas"
              class="idea-card"
              (click)="openDetails(idea.id)">
@@ -136,7 +135,6 @@ import { AuthService } from '../../auth/auth.service';
                   <h3 class="text-primary m-0">
                     {{idea.title}}
                   </h3>
-                  <p-tag [value]="idea.category" [severity]="getCategoryStyle(idea.category)"></p-tag>
                 </div>
                 <button *ngIf="idea.creator_id === currentUserId"
                         pButton
@@ -181,13 +179,14 @@ import { AuthService } from '../../auth/auth.service';
       </div>
 
       <!-- Pagination -->
-      <div class="mt-4">
+      <div *ngIf="!isLoading" class="mt-4">
         <p-paginator
           [rows]="pageSize"
           [totalRecords]="totalItems"
           [rowsPerPageOptions]="pageSizeOptions"
           [showCurrentPageReport]="true"
           currentPageReportTemplate="{first}-{last} of {totalRecords}"
+          [first]="(currentPage - 1) * pageSize"
           styleClass="border-none"
           (onPageChange)="onPageChange($event)">
         </p-paginator>
@@ -235,6 +234,7 @@ import { AuthService } from '../../auth/auth.service';
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      min-height: 200px;
     }
 
     .idea-card {
@@ -370,26 +370,23 @@ export class IdeaWallComponent implements OnInit {
   
   // Search and filter conditions
   searchQuery = '';
-  selectedCategory: string | null = null;
   sortBy = 'created_at';
   sortOrder: 'asc' | 'desc' = 'desc';
 
   // Pagination
   currentPage = 1;
-  pageSize = 20;
+  pageSize = 10;
   totalItems = 0;
   pageSizeOptions = [5, 10, 20, 50, 100];
 
-  // Category options
-  categories = ['Idea', 'Pain', 'Thought'];
-  categoryOptions = this.categories.map(cat => ({label: cat, value: cat}));
-  
   // Idea Details drawer
   ideaDetailsVisible = false;
   selectedIdeaId = '';
 
   // 保存每个idea的评论数，用于更新列表显示
   commentCounts: { [ideaId: string]: number } = {};
+
+  isLoading: boolean = false;
 
   constructor(
     private ideaService: IdeaService,
@@ -405,12 +402,12 @@ export class IdeaWallComponent implements OnInit {
   }
 
   loadIdeas(): void {
+    this.isLoading = true;
     const skip = (this.currentPage - 1) * this.pageSize;
     
     const params: any = {
       skip: skip,
       limit: this.pageSize,
-      category: this.selectedCategory || undefined,
       search: this.searchQuery,
       sort_by: this.sortBy,
       sort_order: this.sortOrder
@@ -440,20 +437,17 @@ export class IdeaWallComponent implements OnInit {
             console.error('Failed to load ideas:', response.error);
             this.ideas = [];
           }
+          this.isLoading = false;
         },
         error: (error) => {
           console.error('Error loading ideas:', error);
           this.ideas = [];
+          this.isLoading = false;
         }
       });
   }
 
   onSearch(): void {
-    this.currentPage = 1;
-    this.loadIdeas();
-  }
-
-  onFilterChange(): void {
     this.currentPage = 1;
     this.loadIdeas();
   }
@@ -494,65 +488,27 @@ export class IdeaWallComponent implements OnInit {
     });
   }
 
-  getCategoryClass(category: string): string {
-    switch (category) {
-      case 'Idea':
-        return 'bg-blue-100 text-blue-800';
-      case 'Pain':
-        return 'bg-red-100 text-red-800';
-      case 'Thought':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  }
-
-  onCategorySelect(category: string | null): void {
-    this.selectedCategory = category;
-    this.currentPage = 1;
-    this.loadIdeas();
-  }
-
-  onPageSizeChange(): void {
-    this.currentPage = 1;
-    this.loadIdeas();
-  }
-
-  getTotalPages(): number {
-    return Math.ceil(this.totalItems / this.pageSize);
-  }
-
-  getPageNumbers(): (string | number)[] {
-    const totalPages = this.getTotalPages();
-    const current = this.currentPage;
-    const pages: (string | number)[] = [];
+  getTagSeverity(tag: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {
+    // Return different severities based on tag content to achieve different colors
+    const tagMap: {[key: string]: 'success' | 'info' | 'warning' | 'danger' | 'secondary'} = {
+      'urgent': 'danger',
+      'important': 'warning',
+      'feature': 'info',
+      'enhancement': 'success',
+      'bug': 'danger',
+      'documentation': 'info',
+      'discussion': 'secondary'
+    };
     
-    if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const lowerTag = tag.toLowerCase();
+    for (const key in tagMap) {
+      if (lowerTag.includes(key)) {
+        return tagMap[key];
+      }
     }
-
-    // Always show first page
-    pages.push(1);
     
-    if (current > 3) {
-      pages.push('...');
-    }
-
-    // Page numbers around current page
-    for (let i = Math.max(2, current - 1); i <= Math.min(current + 1, totalPages - 1); i++) {
-      pages.push(i);
-    }
-
-    if (current < totalPages - 2) {
-      pages.push('...');
-    }
-
-    // Always show last page
-    if (totalPages > 1) {
-      pages.push(totalPages);
-    }
-
-    return pages;
+    // Default color
+    return 'info';
   }
 
   /**
@@ -636,50 +592,9 @@ export class IdeaWallComponent implements OnInit {
     }
   }
   
-  getTagSeverity(tag: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {
-    // Return different severities based on tag content to achieve different colors
-    const tagMap: {[key: string]: 'success' | 'info' | 'warning' | 'danger' | 'secondary'} = {
-      'urgent': 'danger',
-      'important': 'warning',
-      'feature': 'info',
-      'enhancement': 'success',
-      'bug': 'danger',
-      'documentation': 'info',
-      'discussion': 'secondary'
-    };
-    
-    const lowerTag = tag.toLowerCase();
-    for (const key in tagMap) {
-      if (lowerTag.includes(key)) {
-        return tagMap[key];
-      }
-    }
-    
-    // Default color
-    return 'info';
-  }
-
   // 添加编辑Idea方法
   editIdea(ideaId: string): void {
     this.router.navigate(['/submit-idea', ideaId]);
-  }
-
-  getCategoryStyle(category: string): 'info' | 'danger' | 'success' {
-    switch (category) {
-      case 'Idea':
-        return 'info';  // blue
-      case 'Pain':
-        return 'danger';  // red
-      case 'Thought':
-        return 'success';  // green
-      default:
-        return 'info';
-    }
-  }
-
-  onMyIdeasChange(checked: boolean): void {
-    this.currentPage = 1;
-    this.loadIdeas();
   }
 
   getFeelingImage(feeling: number): string {
@@ -694,6 +609,11 @@ export class IdeaWallComponent implements OnInit {
   getFeelingEmoji(feeling: number): string {
     const emojis = ['1f92c', '1f621', '1f615', '1f604', '1f929'];
     return emojis[feeling - 1] || '';
+  }
+
+  onMyIdeasChange(checked: boolean): void {
+    this.currentPage = 1;
+    this.loadIdeas();
   }
 
   protected readonly Math = Math;
