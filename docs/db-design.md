@@ -92,6 +92,19 @@ Stores operation logs for all system operations.
 | object_id   | String      | Operating object id          | ObjectId or Number           |
 | object_data | String      | Operating object json        | { id: 1, tag: "Innovation" } |
 
+### Notifications
+
+Store notifications for all users.
+
+| Field           | Type        | Description                  | Example Value                             |
+|-----------------|-------------|------------------------------|-------------------------------------------|
+| notification_id | ObjectId    | Id of notification           | "234d234g234g34524g234233"                |
+| user_id         | ObjectId    | Id of receiver               | "user123"                                 |
+| is_readed       | Boolean     | If notification is readed    | True                                      |
+| context         | String      | Context of notification      | "New comments you have"                   |
+| read_at         | DateTime    | Date time when read          | 2024-03-20T10:30:00Z                      |
+| notify_status   | Object      | Status of notifaction        | {"channel": "email", "status": "success"} |
+
 ## Indexes
 
 ### Users Collection
