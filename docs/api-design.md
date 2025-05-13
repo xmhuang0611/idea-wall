@@ -345,6 +345,30 @@ Response:
 }
 ```
 
+### Notification Endpoints
+
+#### Mark as readed
+
+```http
+PUT /api/notification/{id}
+```
+
+Request Body:
+
+```json
+{
+  "is_readed": True
+}
+```
+
+Response:
+
+```json
+{
+  "success": true
+}
+```
+
 ## 3. Security Considerations
 
 ### 3.1 Authentication and Authorization
