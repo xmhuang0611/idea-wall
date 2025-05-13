@@ -47,4 +47,24 @@ async def update_user_roles(
     return StandardResponse(
         success=True,
         data=updated_user
+    )
+
+@router.get("/{user_id}", response_model=StandardResponse[User])
+async def get_user(
+    user_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    user = await user_service.get_user(user_id)
+    if not user:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=404,
+                message="User not found"
+            )
+        )
+    
+    return StandardResponse(
+        success=True,
+        data=user
     ) 

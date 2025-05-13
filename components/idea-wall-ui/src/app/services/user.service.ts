@@ -31,6 +31,13 @@ export class UserService {
       );
   }
 
+  getUser(userId: string): Observable<ApiResponse<User>> {
+    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/${userId}`)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
   private handleError = (error: HttpErrorResponse) => {
     let errorMessage = '';
     

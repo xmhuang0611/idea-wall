@@ -188,8 +188,9 @@ export class HeaderComponent implements OnInit {
     this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
       this.userName = this.authService.getUserName();
-      this.isAdmin = true
-      // this.isAdmin = this.authService.getUserRoles().includes('ADMIN');
+      this.authService.getUserRoles().subscribe(roles => {
+        this.isAdmin = roles.includes('ADMIN');
+      });
     }
   }
   
@@ -204,7 +205,16 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    this.authService.logout();
+    // First navigate to home if not already there
+    if (this.router.url !== '/') {
+      this.router.navigate(['/']).then(() => {
+        // After navigation is complete, perform logout
+        this.authService.logout();
+      });
+    } else {
+      // If already on home page, just logout
+      this.authService.logout();
+    }
   }
 
   goToSettings(): void {

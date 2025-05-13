@@ -6,6 +6,7 @@ import { AuthService } from './auth/auth.service';
 import { LoginDialogComponent } from './auth/login-dialog/login-dialog.component';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
+import { UserService } from './services/user.service';
 
 @Component({
   selector: 'app-root',
@@ -35,10 +36,27 @@ import { ToastModule } from 'primeng/toast';
   `]
 })
 export class AppComponent implements OnInit {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService
+  ) {}
 
   ngOnInit() {
     // Initialize the authentication service
-    this.authService.isLoggedIn();
+    if (this.authService.isLoggedIn()) {
+      const userId = this.authService.getId();
+      if (userId) {
+        this.userService.getUser(userId).subscribe({
+          next: (response) => {
+            if (response.success && response.data) {
+              console.log('Current user information:', response.data);
+            }
+          },
+          error: (error) => {
+            console.error('Error fetching user information:', error);
+          }
+        });
+      }
+    }
   }
 } 
