@@ -56,11 +56,19 @@ export class AuthService {
     } else {
       this.dialogRef = this.dialogService.open(LoginDialogComponent, {
         header: 'Login',
-        width: '350px',
-        contentStyle: { overflow: 'hidden' },
+        width: '400px',
+        contentStyle: { 
+          overflow: 'hidden',
+          padding: '0'
+        },
         dismissableMask: true,
         baseZIndex: 1000,
-        styleClass: 'login-dialog-container'
+        styleClass: 'login-dialog-container',
+        showHeader: true,
+        modal: true,
+        breakpoints: {
+          '576px': '90vw'
+        }
       });
 
       this.dialogRef.onClose.subscribe(result => {

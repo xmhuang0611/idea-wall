@@ -7,37 +7,59 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [RouterModule, CommonModule],
   template: `
-    <footer class="bg-gray-900 text-white py-8">
-      <div class="container mx-auto px-4">
-        <div class="flex flex-col md:flex-row justify-between items-center">
-          <div class="mb-4 md:mb-0">
-            <p class="text-sm">
-              Idea Wall - your idea library, visit our 
-              <a href="https://github.com" 
-                 target="_blank" 
-                 class="text-blue-400 hover:text-blue-300">
-                GitHub repository
-              </a> 
-              to learn more.
-            </p>
+    <div class="footer-wrapper">
+      <div class="container">
+        <div class="flex justify-content-between align-items-center">
+          <!-- Left Side -->
+          <div class="flex align-items-center">
+            <span>Idea Wall - your idea library, visit our</span>
+            <a href="https://github.com/your-repo" target="_blank">GitHub repository</a>
+            <span>to learn more.</span>
           </div>
           
-          <div class="flex space-x-6">
-            <a routerLink="/home" class="text-sm text-gray-300 hover:text-white">Home</a>
-            <a routerLink="/ideas" class="text-sm text-gray-300 hover:text-white">Ideas</a>
-            <a routerLink="/about" class="text-sm text-gray-300 hover:text-white">About</a>
-          </div>
-          
-          <div class="mt-4 md:mt-0">
-            <p class="text-sm text-gray-400">© 2025 Idea Wall</p>
+          <!-- Right Side -->
+          <div class="flex align-items-center">
+            <span>© 2025 Idea Wall</span>
           </div>
         </div>
       </div>
-    </footer>
+    </div>
   `,
   styles: [`
-    :host {
-      display: block;
+    .footer-wrapper {
+      background: #212529;
+      color: #ffffff;
+      height: 48px;
+      display: flex;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      height: 100%;
+
+      > div {
+        height: 100%;
+      }
+    }
+
+    span {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    a {
+      color: #2196F3;
+      text-decoration: none;
+      font-size: 14px;
+      margin: 0 4px;
+      transition: color 0.2s;
+
+      &:hover {
+        color: #1976D2;
+      }
     }
   `]
 })

@@ -20,18 +20,66 @@ import { UserService } from './services/user.service';
     ToastModule
   ],
   template: `
-    <div class="min-h-screen flex flex-col bg-gray-50">
+    <div class="app-wrapper">
       <app-header></app-header>
-      <main class="flex-grow container mx-auto px-4 py-8">
-        <router-outlet></router-outlet>
+      <main class="main-content">
+        <div class="container">
+            <router-outlet></router-outlet>
+        </div>
       </main>
       <app-footer></app-footer>
-      <p-toast position="bottom-right"></p-toast>
+      <p-toast position="bottom-right" class="global-toast"></p-toast>
     </div>
   `,
   styles: [`
-    :host {
-      display: block;
+    .app-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #f8f9fa;
+    }
+
+    .main-content {
+      flex: 1;
+      margin-top: 48px;
+      padding: 24px 0;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 0.5rem;
+    }
+
+    .global-toast {
+      z-index: 1000;
+    }
+
+    /* 全局滚动条样式 */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    /* 全局文字渲染优化 */
+    * {
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
   `]
 })

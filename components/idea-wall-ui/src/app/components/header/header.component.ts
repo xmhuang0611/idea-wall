@@ -2,96 +2,124 @@ import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/auth.service';
+import { ButtonModule } from 'primeng/button';
+import { AvatarModule } from 'primeng/avatar';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterModule, CommonModule, OverlayPanelModule],
+  imports: [RouterModule, CommonModule, ButtonModule, AvatarModule, OverlayPanelModule],
   template: `
-    <header class="bg-white shadow-sm">
-      <nav class="container mx-auto px-4 py-3">
-        <div class="flex items-center justify-between">
-          <!-- Logo and Brand -->
-          <div class="flex items-center space-x-4">
-            <a routerLink="/" class="flex items-center space-x-2">
-              <span class="text-xl font-bold text-blue-600">Idea Wall</span>
-            </a>
-            
-            <!-- Navigation Links -->
-            <div class="hidden md:flex space-x-6">
-              <a routerLink="/" class="text-gray-600 hover:text-blue-600">Home</a>
-              <a routerLink="/ideas" class="text-gray-600 hover:text-blue-600">Ideas</a>
-              <div class="relative group">
-                <button class="text-gray-600 hover:text-blue-600">
-                  Useful Links
-                </button>
-              </div>
-              <a routerLink="/about" class="text-gray-600 hover:text-blue-600">About</a>
+    <div class="header-wrapper">
+      <div class="container">
+        <nav class="flex align-items-center justify-content-between">
+          <!-- Left Side -->
+          <div class="flex align-items-center">
+            <a routerLink="/" class="logo-link">Idea Wall</a>
+            <div class="nav-links">
+              <a routerLink="/">Home</a>
+              <a routerLink="/ideas">Ideas</a>
+              <a routerLink="/useful-links">Useful Links</a>
+              <a routerLink="/about">About</a>
             </div>
           </div>
-
+          
           <!-- Right Side -->
-          <div class="flex items-center space-x-4">
-            <button *ngIf="!isLoggedIn" 
-                    (click)="login()"
-                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-              Login
-            </button>
-            
-            <!-- User Avatar with Dropdown -->
-            <div *ngIf="isLoggedIn" class="flex items-center space-x-2">
-              <button *ngIf="isAdmin" class="settings-button" (click)="goToSettings()">
-                <i class="pi pi-cog"></i>
+          <div class="flex">
+            <p-avatar 
+              *ngIf="isAdmin"
+              icon="pi pi-cog"
+              shape="circle"
+              [style]="{'color': 'var(--primary-color)'}"
+              class="cursor-pointer mr-2"
+              (click)="goToSettings()">
+            </p-avatar>
+            <ng-container *ngIf="!isLoggedIn; else userIcon">
+              <button pButton
+                      label="Login"
+                      class="login-button"
+                      (click)="login()">
               </button>
-              <div class="relative user-avatar">
-                <div class="avatar-circle" (click)="op.toggle($event)">
-                  {{ getUserInitials() }}
-                </div>
-                
-                <p-overlayPanel #op [showCloseIcon]="false" [style]="{width: '220px'}" styleClass="user-dropdown">
-                  <div class="user-dropdown-content">
-                    <div class="user-info">
-                      <span class="user-name">{{ userName }}</span>
-                    </div>
-                    <div class="dropdown-divider"></div>
-                    <button class="logout-button" (click)="logout()">
-                      <i class="pi pi-sign-out logout-icon"></i>
-                      Logout
+            </ng-container>
+            <ng-template #userIcon>
+              <p-avatar 
+                icon="pi pi-user"
+                shape="circle"
+                [style]="{'color': 'var(--primary-color)'}"
+                class="cursor-pointer"
+                (click)="op.toggle($event)">
+              </p-avatar>
+              <p-overlayPanel #op [style]="{'padding': '0'}" styleClass="user-dropdown">
+                <div class="user-menu">
+                  <div class="menu-item">
+                    <span class="username">{{ username }}</span>
+                  </div>
+                  <div class="menu-item">
+                    <button 
+                      pButton 
+                      type="button"
+                      class="p-button-text p-button-plain logout-btn"
+                      (click)="logout(); op.hide()">
+                      <i class="pi pi-sign-out mr-2"></i>
+                      <span>Logout</span>
                     </button>
                   </div>
-                </p-overlayPanel>
-              </div>
-            </div>
+                </div>
+              </p-overlayPanel>
+            </ng-template>
           </div>
-        </div>
-      </nav>
-    </header>
+        </nav>
+      </div>
+    </div>
   `,
   styles: [`
     :host {
-      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
     }
-    
-    .user-avatar {
-      position: relative;
+
+    .header-wrapper {
+      background: #ffffff;
+      border-bottom: 1px solid #dee2e6;
+      width: 100%;
     }
-    
-    .avatar-circle {
+
+    .container {
+      margin: 0 20px;
+      padding: 0 0.5rem;
+      height: 48px;
+    }
+
+    nav {
+      height: 100%;
+    }
+
+    .logo-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-right: 32px;
+    }
+
+    .nav-links {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: #3b82f6;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      
-      &:hover {
-        background-color: #2563eb;
+      gap: 24px;
+
+      a {
+        color: var(--text-color);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: color 0.2s;
+
+        &:hover {
+          color: var(--primary-color);
+        }
       }
     }
 
@@ -117,57 +145,77 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
         font-size: 1.2rem;
       }
     }
-    
-    :host ::ng-deep .user-dropdown {
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      padding: 0;
-      
-      .p-overlaypanel-content {
-        padding: 0;
+
+    .user-menu {
+      min-width: 180px;
+    }
+
+    .menu-item {
+      padding: 0.75rem 1rem;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid var(--surface-200);
       }
     }
-    
-    .user-dropdown-content {
-      display: flex;
-      flex-direction: column;
-      
-      .user-info {
-        padding: 16px;
-        
-        .user-name {
-          font-weight: 500;
-          font-size: 16px;
-          color: #1f2937;
+
+    .username {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-color-secondary);
+    }
+
+    :host ::ng-deep {
+      .login-button {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        background: var(--primary-color);
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+
+        &:hover {
+          background: var(--primary-600);
         }
       }
-      
-      .dropdown-divider {
-        height: 1px;
-        background-color: #e5e7eb;
-        margin: 0;
+
+      .p-avatar {
+        width: 2rem;
+        height: 2rem;
+
+        &:hover {
+          opacity: 0.9;
+        }
       }
-      
-      .logout-button {
+
+      .user-dropdown {
+        .p-overlaypanel-content {
+          padding: 0;
+        }
+      }
+
+      .logout-btn {
+        width: 100%;
+        padding: 0;
+        margin: 0;
         display: flex;
         align-items: center;
-        background: none;
-        border: none;
-        padding: 12px 16px;
-        cursor: pointer;
-        color: #4b5563;
-        font-size: 14px;
+        color: #ef4444;
+        font-size: 0.875rem;
+        font-weight: 400;
         text-align: left;
-        transition: background-color 0.2s;
-        
-        &:hover {
-          background-color: #f3f4f6;
-          color: #1f2937;
+
+        .pi-sign-out {
+          font-size: 0.875rem;
+          margin-right: 0.5rem;
         }
-        
-        .logout-icon {
-          margin-right: 8px;
-          font-size: 16px;
+
+        &:hover {
+          background: transparent;
+          color: #dc2626;
+        }
+
+        &:focus {
+          box-shadow: none;
         }
       }
     }
@@ -175,33 +223,26 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
 })
 export class HeaderComponent implements OnInit {
   isLoggedIn = false;
-  userName = '';
   isAdmin = false;
   
   constructor(private authService: AuthService, private router: Router) {}
+  username = '';
+
   
   ngOnInit() {
-    this.updateLoginStatus();
-  }
-  
-  updateLoginStatus() {
     this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
-      this.userName = this.authService.getUserName();
       this.authService.getUserRoles().subscribe(roles => {
         this.isAdmin = roles.includes('ADMIN');
       });
+      this.username = this.authService.getUserName() || 'User';
     }
   }
-  
-  getUserInitials(): string {
-    if (!this.userName) return '?';
-    
-    return this.userName.charAt(0).toUpperCase();
-  }
 
-  login(): void {
+  login() {
     this.authService.login();
+    this.isLoggedIn = true;
+    this.username = this.authService.getUserName() || 'User';
   }
 
   logout(): void {
@@ -215,9 +256,11 @@ export class HeaderComponent implements OnInit {
       // If already on home page, just logout
       this.authService.logout();
     }
+    this.isLoggedIn = false;
+    this.username = '';
   }
 
   goToSettings(): void {
     this.router.navigate(['/settings']);
-  }
 } 
+}

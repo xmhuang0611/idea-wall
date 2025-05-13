@@ -27,6 +27,7 @@ export class IdeaService {
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
     tags?: number[];
+    creator_id?: string;
   } = {}): Observable<ApiResponse<Idea[]>> {
     let httpParams = new HttpParams();
     
@@ -52,6 +53,9 @@ export class IdeaService {
       params.tags.forEach(tag => {
         httpParams = httpParams.append('tags', tag.toString());
       });
+    }
+    if (params.creator_id) {
+      httpParams = httpParams.set('creator_id', params.creator_id);
     }
 
     return this.http.get<ApiResponse<Idea[]>>(this.apiUrl, { params: httpParams })

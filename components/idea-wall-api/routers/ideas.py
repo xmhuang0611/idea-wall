@@ -3,7 +3,7 @@ from typing import List, Optional
 from core.deps import get_current_user, get_current_user_optional
 from services.idea_service import idea_service
 from services.vote_service import vote_service
-from models.idea import Idea, IdeaCreate, IdeaCategory, IdeaUpdate
+from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaTag
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
 
@@ -13,26 +13,26 @@ router = APIRouter()
 async def get_ideas(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    category: Optional[IdeaCategory] = None,
     sort_by: Optional[str] = Query(None, regex="^(created_at|title|feeling|total_votes)$"),
     sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
     search: Optional[str] = None,
     tags: Optional[List[int]] = Query(None),
+    creator_id: Optional[str] = None,
     current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     ideas = await idea_service.get_ideas(
         skip=skip,
         limit=limit,
-        category=category,
         sort_by=sort_by,
         sort_order=sort_order,
         search=search,
-        tags=tags
+        tags=tags,
+        creator_id=creator_id
     )
     total = await idea_service.get_total_ideas(
-        category=category,
         search=search,
-        tags=tags
+        tags=tags,
+        creator_id=creator_id
     )
     
     # 如果用户已登录，获取用户点赞状态
