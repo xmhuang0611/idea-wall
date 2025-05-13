@@ -68,7 +68,7 @@ API 根路径：http://localhost:8000/api
 
 ### 安装nodejs依赖包
 ```bash
-npm run install
+npm install
 ```
 
 ### 启动UI
@@ -81,4 +81,3 @@ npm start
 访问：http://localhost:4200/
 /api/* 接口会通过代理转发到 http://localhost:8000，代理的设置在 \components\idea-wall-ui\proxy.conf.json
 ```
-
