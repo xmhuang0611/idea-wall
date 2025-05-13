@@ -62,6 +62,10 @@ exit /b 1
         cd components\idea-wall-ui
         call npm install
         cd ..\..
+    ) else (
+        cd components\idea-wall-ui
+        call npm install
+        cd ..\..
     )
 
     :: Start backend service
