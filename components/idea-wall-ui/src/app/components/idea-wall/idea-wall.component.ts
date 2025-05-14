@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { IdeaService } from '../../services/idea.service';
 import { Idea } from '../../models/idea.model';
 import { TagModule } from 'primeng/tag';
@@ -392,14 +392,30 @@ export class IdeaWallComponent implements OnInit {
   constructor(
     private ideaService: IdeaService,
     private router: Router,
-    public authService: AuthService
+    public authService: AuthService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
       this.currentUserId = this.authService.getId();
     }
+
     this.loadIdeas();
+    
+    // 从路由参数中获取 idea ID 并打开 idea details drawer
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.openDetails(params['id']);
+      }
+    });
+    
+    // 检查当前 URL 是否包含 idea ID
+    const currentPath = window.location.pathname;
+    const ideaIdMatch = currentPath.match(/\/idea\/([^\/]+)/);
+    if (ideaIdMatch && ideaIdMatch[1]) {
+      this.openDetails(ideaIdMatch[1]);
+    }
   }
 
   loadIdeas(): void {
@@ -519,6 +535,9 @@ export class IdeaWallComponent implements OnInit {
   openDetails(ideaId: string): void {
     this.selectedIdeaId = ideaId;
     this.ideaDetailsVisible = false;
+    
+    // 使用 history API 更新 URL，避免页面重新加载导致的闪动
+    window.history.replaceState({}, '', `/idea/${ideaId}`);
     
     // 直接获取评论数据
     this.ideaService.getComments(ideaId).subscribe({

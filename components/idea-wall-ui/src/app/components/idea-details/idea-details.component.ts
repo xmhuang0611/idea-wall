@@ -17,6 +17,7 @@ import { IdeaService } from '../../services/idea.service';
 import { Comment } from '../../models/comment.model';
 import { Idea } from '../../models/idea.model';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-idea-details-drawer',
@@ -378,7 +379,8 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   
   constructor(
     private ideaService: IdeaService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     this.commentForm = this.fb.group({
       comment: ['', Validators.required]
@@ -555,6 +557,8 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   
   onSidebarHide(): void {
     this.visibleChange.emit(false);
+    // 使用 history API 直接修改 URL，避免页面重新加载导致的闪动
+    window.history.replaceState({}, '', '/');
   }
   
   getTagSeverity(tag: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {
