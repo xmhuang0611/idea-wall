@@ -21,8 +21,10 @@ class IdeaUpdate(IdeaBase):
 class IdeaInDB(IdeaBase, AuditModel):
     total_votes: int = 0
     total_comments: int = 0
+    total_bookmarks: int = 0
 
 class Idea(IdeaInDB):
     id: str
     tag_details: Optional[List[IdeaTag]] = None
-    has_voted: bool = False 
+    has_voted: bool = False
+    has_bookmarked: bool = False 

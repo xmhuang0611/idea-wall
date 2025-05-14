@@ -70,7 +70,7 @@ export class IdeaWallComponent implements OnInit {
   ideaDetailsVisible = false;
   selectedIdeaId = '';
 
-  // 保存每个idea的评论数，用于更新列表显示
+  // Store comment counts for each idea to update list display
   commentCounts: { [ideaId: string]: number } = {};
 
   isLoading: boolean = false;
@@ -93,14 +93,14 @@ export class IdeaWallComponent implements OnInit {
     this.loadTags();
     this.loadIdeas();
     
-    // 从路由参数中获取 idea ID 并打开 idea details drawer
+    // Get idea ID from route params and open idea details drawer
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.openDetails(params['id']);
       }
     });
     
-    // 检查当前 URL 是否包含 idea ID
+    // Check if current URL contains idea ID
     const currentPath = window.location.pathname;
     const ideaIdMatch = currentPath.match(/\/idea\/([^\/]+)/);
     if (ideaIdMatch && ideaIdMatch[1]) {
@@ -237,25 +237,25 @@ export class IdeaWallComponent implements OnInit {
   }
 
   /**
-   * 打开idea详情抽屉
+   * Open idea details drawer
    * @param ideaId 
    */
   openDetails(ideaId: string): void {
     this.selectedIdeaId = ideaId;
     this.ideaDetailsVisible = false;
     
-    // 使用 history API 更新 URL，避免页面重新加载导致的闪动
+    // Use history API to update URL to avoid page flicker
     window.history.replaceState({}, '', `/idea/${ideaId}`);
     
-    // 直接获取评论数据
+    // Get comments data directly
     this.ideaService.getComments(ideaId).subscribe({
       next: (commentsResponse) => {
         if (commentsResponse.success && Array.isArray(commentsResponse.data)) {
           const commentCount = commentsResponse.data.length;
-          // 更新评论数缓存
+          // Update comment count cache
           this.commentCounts[ideaId] = commentCount;
           
-          // 更新当前列表中的评论数
+          // Update comment count in current list
           const idea = this.ideas.find(i => i.id === ideaId);
           if (idea && idea.total_comments !== commentCount) {
             console.log(`Updating comment count before opening details: ${commentCount}`);
@@ -263,13 +263,13 @@ export class IdeaWallComponent implements OnInit {
           }
         }
         
-        // 打开详情抽屉
+        // Open details drawer
         setTimeout(() => {
           this.ideaDetailsVisible = true;
         }, 0);
       },
       error: () => {
-        // 即使获取评论失败，也要打开详情页
+        // Open details even if comments fetch fails
         setTimeout(() => {
           this.ideaDetailsVisible = true;
         }, 0);
@@ -278,11 +278,11 @@ export class IdeaWallComponent implements OnInit {
   }
 
   /**
-   * 处理评论数量变化事件
+   * Handle comment count change event
    * @param event {ideaId: string, count: number} 
    */
   onCommentCountChange(event: {ideaId: string, count: number}): void {
-    // 更新指定idea的评论数
+    // Update comment count for specified idea
     const idea = this.ideas.find(i => i.id === event.ideaId);
     if (idea && idea.total_comments !== event.count) {
       console.log(`Updating comment count for idea ${event.ideaId}: ${event.count}`);
@@ -291,11 +291,11 @@ export class IdeaWallComponent implements OnInit {
   }
 
   /**
-   * 处理来自idea-details组件的点赞状态变化事件
-   * @param event 包含ideaId、has_voted和totalVotes的事件对象
+   * Handle vote status change event from idea-details component
+   * @param event Event object containing ideaId, has_voted and totalVotes
    */
   onVoteStatusChange(event: {ideaId: string, has_voted: boolean, totalVotes: number}): void {
-    // 更新指定idea的点赞状态和点赞数
+    // Update vote status and count for specified idea
     const idea = this.ideas.find(i => i.id === event.ideaId);
     if (idea) {
       console.log(`Updating vote status for idea ${event.ideaId}: has_voted=${event.has_voted}, totalVotes=${event.totalVotes}`);
@@ -304,7 +304,10 @@ export class IdeaWallComponent implements OnInit {
     }
   }
   
-  // 添加编辑Idea方法
+  /**
+   * Edit idea
+   * @param ideaId 
+   */
   editIdea(ideaId: string): void {
     this.router.navigate(['/submit-idea', ideaId]);
   }
@@ -329,15 +332,15 @@ export class IdeaWallComponent implements OnInit {
   }
 
   /**
-   * 分享idea链接
+   * Share idea link
    * @param ideaId 
    */
   shareIdea(ideaId: string): void {
-    // 构建idea的完整URL
+    // Build complete URL for the idea
     const baseUrl = window.location.origin;
     const ideaUrl = `${baseUrl}/idea/${ideaId}`;
     
-    // 使用Clipboard API复制链接
+    // Use Clipboard API to copy link
     navigator.clipboard.writeText(ideaUrl)
       .then(() => {
         this.toastService.showSuccess('Link copied to clipboard');
@@ -346,5 +349,31 @@ export class IdeaWallComponent implements OnInit {
         console.error('Failed to copy link: ', err);
         this.toastService.showError('Failed to copy link');
       });
+  }
+
+  /**
+   * Handle bookmark/unbookmark operation
+   * @param idea The idea to bookmark/unbookmark
+   */
+  onBookmark(idea: Idea): void {
+    // Toggle bookmark status: if already bookmarked then unbookmark (0), otherwise bookmark (1)
+    const bookmarkStatus = idea.has_bookmarked ? 0 : 1;
+    
+    this.ideaService.bookmarkIdea(idea.id, bookmarkStatus).subscribe({
+      next: () => {
+        // Update bookmark status
+        idea.has_bookmarked = !idea.has_bookmarked;
+        
+        // Update bookmark count
+        if (idea.has_bookmarked) {
+          idea.total_bookmarks += 1;
+        } else {
+          idea.total_bookmarks -= 1;
+        }
+      },
+      error: (error: any) => {
+        console.error('Bookmark failed', error);
+      }
+    });
   }
 } 

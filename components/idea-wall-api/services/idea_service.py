@@ -17,18 +17,18 @@ class IdeaService:
     ) -> Dict[str, Any]:
         filter_query = {}
             
-        # 标签过滤
+        # Filter by tags
         if tags:
             filter_query["tags"] = {"$all": tags}
             
-        # 搜索过滤
+        # Filter by search text
         if search:
             filter_query["$or"] = [
                 {"title": {"$regex": search, "$options": "i"}},
                 {"description": {"$regex": search, "$options": "i"}}
             ]
 
-        # 创建者过滤
+        # Filter by creator
         if creator_id:
             filter_query["creator_id"] = creator_id
             
@@ -56,21 +56,21 @@ class IdeaService:
     ) -> List[Idea]:
         db = await get_database()
         
-        # 构建过滤条件
+        # Build filter conditions
         filter_query = self._build_filter_query(search, tags, creator_id)
             
-        # 构建排序条件
+        # Build sort conditions
         sort_options = {}
         if sort_by:
             sort_options[sort_by] = -1 if sort_order == "desc" else 1
         
         cursor = db[self.collection_name].find(filter_query)
         
-        # 应用排序
+        # Apply sorting
         if sort_options:
             cursor = cursor.sort(list(sort_options.items()))
             
-        # 应用分页
+        # Apply pagination
         cursor = cursor.skip(skip).limit(limit)
         
         ideas = []
@@ -122,12 +122,12 @@ class IdeaService:
         db = await get_database()
         idea_dict = idea.model_dump()
         
-        # 获取原始idea以保留一些字段
+        # Get original idea to preserve some fields
         original_idea = await self.get_idea(idea_id)
         if not original_idea:
             return None
             
-        # 更新idea
+        # Update idea
         result = await db[self.collection_name].update_one(
             {"_id": ObjectId(idea_id)},
             {
@@ -141,7 +141,7 @@ class IdeaService:
         )
         
         if result.modified_count > 0:
-            # 获取更新后的idea
+            # Get updated idea
             return await self.get_idea(idea_id)
         return None
 
@@ -150,6 +150,14 @@ class IdeaService:
         result = await db[self.collection_name].update_one(
             {"_id": ObjectId(idea_id)},
             {"$inc": {"total_votes": vote_change}}
+        )
+        return result.modified_count > 0
+
+    async def update_bookmarks(self, idea_id: str, bookmark_change: int) -> bool:
+        db = await get_database()
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$inc": {"total_bookmarks": bookmark_change}}
         )
         return result.modified_count > 0
 

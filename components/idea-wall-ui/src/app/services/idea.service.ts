@@ -14,6 +14,7 @@ import { ApiErrorHandlerService } from '../shared/services/api-error-handler.ser
 export class IdeaService {
   private apiUrl = '/api/ideas';
   private voteUrl = '/api/votes';
+  private bookmarkUrl = '/api/bookmarks';
 
   constructor(
     private http: HttpClient, 
@@ -160,6 +161,31 @@ export class IdeaService {
     
     return this.http.get<ApiResponse<Comment[]>>(`/api/comments`, { params })
       .pipe(
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  /**
+   * Bookmark or unbookmark an idea
+   * @param id Idea ID
+   * @param bookmarkStatus 1 means bookmark, 0 means unbookmark
+   * @returns Observable with operation result
+   */
+  bookmarkIdea(id: string, bookmarkStatus: number): Observable<ApiResponse<void>> {
+    const bookmarkData = {
+      bookmark_status: bookmarkStatus,
+      target_id: id,
+      target_type: 'Idea'
+    };
+
+    return this.http.post<ApiResponse<void>>(this.bookmarkUrl, bookmarkData)
+      .pipe(
+        tap(response => {
+          if (response.success) {
+            const message = bookmarkStatus === 1 ? 'Bookmarked successfully' : 'Unbookmarked successfully';
+            this.toastService.showSuccess(message);
+          }
+        }),
         catchError(this.errorHandler.handleError)
       );
   }
