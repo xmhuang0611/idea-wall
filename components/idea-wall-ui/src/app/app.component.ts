@@ -51,10 +51,6 @@ import { UserService } from './services/user.service';
       padding: 0 0.5rem;
     }
 
-    .global-toast {
-      z-index: 1000;
-    }
-
     /* 全局滚动条样式 */
     ::-webkit-scrollbar {
       width: 8px;
