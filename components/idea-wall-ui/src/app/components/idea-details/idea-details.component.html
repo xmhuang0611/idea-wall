@@ -1,0 +1,155 @@
+<p-sidebar 
+  [(visible)]="visible" 
+  position="right" 
+  [style]="{ width: sidebarWidth, maxWidth: '1000px' }"
+  [baseZIndex]="10000"
+  styleClass="idea-details-sidebar"
+  (onHide)="onSidebarHide()">
+  <ng-template pTemplate="header">
+    <div class="flex align-items-center justify-content-between py-2 w-full">
+      <h3 class="text-xl font-semibold m-0 text-900">Idea Details</h3>
+    </div>
+  </ng-template>
+  
+  <div class="p-fluid idea-container">
+    <div *ngIf="isLoading" class="flex justify-content-center align-items-center h-full">
+      <i class="pi pi-spin pi-spinner text-3xl text-primary"></i>
+    </div>
+    
+    <div *ngIf="!isLoading && !idea" class="text-center surface-ground border-round p-4">
+      <i class="pi pi-exclamation-circle text-3xl text-500 mb-3"></i>
+      <p class="m-0 font-medium">Idea not found or failed to load.</p>
+    </div>
+    
+    <div *ngIf="!isLoading && idea" class="idea-details">
+      <!-- Main content -->
+      <div class="surface-card shadow-1 border-round p-4 mb-3">
+        <!-- Title and Actions -->
+        <div class="flex align-items-center justify-content-between mb-2">
+          <div class="flex align-items-center gap-2">
+            <div>
+              <img [src]="getFeelingImage(idea.feeling)"
+                   [alt]="getFeelingLabel(idea.feeling)"
+                   width="36"
+                   height="36"
+                   [title]="getFeelingLabel(idea.feeling)">
+            </div>
+            <h2 class="text-2xl font-semibold m-0 text-900">{{idea.title}}</h2>
+          </div>
+          <div class="flex align-items-center">
+            <button pButton pRipple 
+                    [class]="idea.hasVoted ? 'p-button-primary' : 'p-button-outlined'"
+                    icon="pi pi-thumbs-up"
+                    [label]="idea.total_votes.toString()"
+                    class="p-button-rounded p-button-sm mr-2">
+            </button>
+            <button pButton pRipple 
+                    icon="pi pi-comments"
+                    [label]="idea.total_comments.toString()"
+                    class="p-button-rounded p-button-outlined p-button-sm">
+            </button>
+          </div>
+        </div>
+        
+        <!-- Tags -->
+        <div class="flex flex-wrap mb-2">
+          <p-tag *ngFor="let tag of idea.tag_details" 
+                [value]="tag.tag_name"
+                [severity]="getTagSeverity(tag.tag_name)"
+                styleClass="p-tag-rounded mr-2 mb-1">
+          </p-tag>
+        </div>
+        
+        <!-- Creator info -->
+        <div class="flex align-items-center mb-2 creator-info p-2 border-round">
+          <p-avatar 
+            icon="pi pi-user" 
+            shape="circle"
+            [style]="{'width': '2rem', 'height': '2rem'}"
+            class="mr-2">
+          </p-avatar>
+          <span class="font-medium text-900 mr-2">{{idea.creator_name}}</span>
+          <span class="text-xs text-400">{{idea.created_at | date:'medium'}}</span>
+        </div>
+        
+        <!-- Description -->
+        <div class="description-container p-2 border-round">
+          <p class="line-height-3 m-0 text-700 white-space-pre-line">{{idea.description}}</p>
+        </div>
+      </div>
+      
+      <!-- Comments Section -->
+      <div class="surface-card shadow-1 border-round p-3">
+        <div class="flex align-items-center justify-content-between mb-2">
+          <h3 class="text-xl font-medium m-0 text-900">
+            Comments
+            <span *ngIf="comments.length > 0" class="text-xl text-500">({{idea.total_comments}})</span>
+          </h3>
+        </div>
+        
+        <!-- Comment Input -->
+        <div class="comment-input-container mb-3">
+          <form [formGroup]="commentForm" class="relative">
+            <textarea 
+              pInputTextarea 
+              formControlName="comment" 
+              [rows]="2" 
+              [autoResize]="false"
+              placeholder="Share your comments here"
+              class="w-full comment-textarea">
+            </textarea>
+            <div class="comment-actions">
+              <button pButton pRipple
+                      label="Submit" 
+                      icon="pi pi-send"
+                      [disabled]="!commentForm.valid || isSubmitting"
+                      [loading]="isSubmitting"
+                      class="p-button-rounded p-button-primary p-button-sm"
+                      (click)="submitComment()">
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Comments List -->
+        <div *ngIf="commentsLoading" class="flex justify-content-center py-2">
+          <i class="pi pi-spin pi-spinner text-xl text-primary"></i>
+        </div>
+        
+        <div *ngIf="!commentsLoading && (!comments || comments.length === 0)" 
+             class="text-center surface-ground border-round p-3">
+          <i class="pi pi-comments text-2xl text-500 mb-2"></i>
+          <p class="m-0 text-700">No comments yet. Be the first to share your comments!</p>
+        </div>
+        
+        <div *ngIf="!commentsLoading && comments.length > 0" class="comments-section">
+          <div class="comment-list">
+            <div *ngFor="let comment of displayedComments" class="comment-item p-2 mb-2">
+              <div class="flex align-items-center mb-1">
+                <p-avatar 
+                  icon="pi pi-user" 
+                  shape="circle"
+                  [style]="{'width': '2rem', 'height': '2rem'}"
+                  class="mr-2">
+                </p-avatar>
+                <span class="font-medium text-900 mr-2">{{comment.creator_name}}</span>
+                <span class="text-xs text-400">{{comment.created_at | date:'medium'}}</span>
+              </div>
+              <p class="m-0 line-height-3 text-700 pl-4">{{comment.description}}</p>
+            </div>
+          </div>
+          
+          <p-paginator
+            [rows]="commentPageSize" 
+            [totalRecords]="comments.length"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="{first}-{last} of {totalRecords}"
+            styleClass="border-none mt-2"
+            (onPageChange)="onCommentPageChange($event)">
+          </p-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-sidebar> 

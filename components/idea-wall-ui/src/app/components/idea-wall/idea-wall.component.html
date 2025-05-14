@@ -1,0 +1,165 @@
+<p-card class="mb-5">
+  <!-- Submit Button -->
+  <div class="flex justify-content-between gap-2 mb-4 align-items-center">
+    <div class="flex align-items-center">
+      <span class="text-base font-medium text-primary">My Ideas</span>
+      <p-inputSwitch [(ngModel)]="showMyIdeas"
+                    [disabled]="!authService.isLoggedIn()"
+                    (ngModelChange)="onMyIdeasChange($event)"
+                    class="ml-2">
+      </p-inputSwitch>
+    </div>
+    <button pButton
+            pRipple
+            icon="pi pi-plus"
+            label="Submit Your Idea"
+            routerLink="/submit-idea"
+            [disabled]="!authService.isLoggedIn()"
+            class="p-button-rounded ml-4"
+            (click)="!authService.isLoggedIn() && $event.preventDefault()">
+    </button>
+  </div>
+
+  <!-- Filters Row -->
+  <div class="flex gap-4 mb-5">
+    <!-- Search -->
+    <div class="flex-2">
+      <label class="block mb-1">Search</label>
+      <div class="p-inputgroup">
+        <input type="text"
+               pInputText
+               [(ngModel)]="searchQuery"
+               (input)="onSearch()"
+               placeholder="Search ideas..."
+               class="w-full">
+        <span class="p-inputgroup-addon">
+          <i class="pi pi-search"></i>
+        </span>
+      </div>
+    </div>
+
+    <!-- Sort -->
+    <div class="flex-1">
+      <label class="block mb-1">Sort By</label>
+      <p-dropdown 
+        [options]="[
+          {label: 'Latest Created', value: 'created_at'},
+          {label: 'Latest Updated', value: 'updated_at'},
+          {label: 'Most Popular', value: 'total_votes'}
+        ]"
+        [(ngModel)]="sortBy"
+        (onChange)="onSortChange()"
+        class="w-full">
+      </p-dropdown>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-5">
+    <p-progressSpinner 
+      [style]="{width: '50px', height: '50px'}" 
+      strokeWidth="4"
+      fill="var(--surface-ground)" 
+      animationDuration=".5s">
+    </p-progressSpinner>
+  </div>
+
+  <!-- Ideas List -->
+  <div *ngIf="!isLoading" class="ideas-container">
+    <p-card *ngFor="let idea of ideas"
+         class="idea-card mb-3"
+         (click)="openDetails(idea.id)">
+      <div class="flex">
+        <!-- Vote Column -->
+        <div class="flex flex-column align-items-center mr-3" style="width: 80px">
+          <button pButton
+                  pRipple
+                  (click)="$event.stopPropagation(); onVote(idea)"
+                  class="p-button-rounded p-button-text"
+                  [class.p-button-secondary]="!idea.hasVoted"
+                  [class.p-button-primary]="idea.hasVoted"
+                  icon="pi pi-thumbs-up-fill"
+                  title="{{idea.hasVoted ? 'Unvote' : 'Vote'}}">
+          </button>
+          <span class="mt-1 font-bold">{{idea.total_votes}}</span>
+        </div>
+
+        <!-- Content Column -->
+        <div class="flex-1">
+          <div class="flex justify-content-between align-items-center mb-2">
+            <div class="flex align-items-center gap-2">
+              <div>
+                <img [src]="getFeelingImage(idea.feeling)"
+                     [alt]="getFeelingLabel(idea.feeling)"
+                     width="28"
+                     height="28"
+                     [title]="getFeelingLabel(idea.feeling)">
+              </div>
+              <h3 class="text-primary m-0">
+                {{idea.title}}
+              </h3>
+            </div>
+            <button *ngIf="idea.creator_id === currentUserId"
+                    pButton
+                    icon="pi pi-pencil"
+                    class="p-button-rounded p-button-text p-button-sm"
+                    (click)="$event.stopPropagation(); editIdea(idea.id)"
+                    title="Edit Idea">
+            </button>
+          </div>
+          <p class="mb-3">{{idea.description}}</p>
+          
+          <!-- Tags -->
+          <div class="flex flex-wrap mb-3">
+            <p-tag *ngFor="let tag of idea.tag_details" 
+                  [value]="tag.tag_name"
+                  [severity]="getTagSeverity(tag.tag_name)"
+                  styleClass="p-tag-rounded mr-1 mb-1">
+            </p-tag>
+          </div>
+          
+          <p-divider></p-divider>
+          
+          <div class="flex justify-content-between align-items-center">
+            <div>
+              <button pButton
+                      pRipple
+                      icon="pi pi-comment"
+                      (click)="$event.stopPropagation(); openDetails(idea.id)" 
+                      label="{{ idea.total_comments || 0 }}"
+                      class="p-button-rounded p-button-text p-button-sm">
+              </button>
+            </div>
+            <div class="flex align-items-center gap-2">
+              <span class="font-bold">{{idea.creator_name}}</span>
+              <span class="hidden sm:inline text-500">{{idea.created_at | date:'MMM d, y h:mm a'}}</span>
+              <span class="sm:hidden text-500">{{idea.created_at | date:'short'}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!isLoading" class="mt-4">
+    <p-paginator
+      [rows]="pageSize"
+      [totalRecords]="totalItems"
+      [rowsPerPageOptions]="pageSizeOptions"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first}-{last} of {totalRecords}"
+      [first]="(currentPage - 1) * pageSize"
+      styleClass="border-none"
+      (onPageChange)="onPageChange($event)">
+    </p-paginator>
+  </div>
+</p-card>
+
+<!-- Idea Details Drawer -->
+<app-idea-details-drawer
+  [ideaId]="selectedIdeaId"
+  [visible]="ideaDetailsVisible"
+  (visibleChange)="ideaDetailsVisible = $event"
+  (commentCountChange)="onCommentCountChange($event)">
+</app-idea-details-drawer> 

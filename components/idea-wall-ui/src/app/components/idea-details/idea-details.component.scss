@@ -1,0 +1,77 @@
+:host {
+  display: block;
+}
+
+.idea-container {
+  height: 100%;
+  padding: 0 1.25rem 1.25rem 1.25rem;
+  overflow-y: auto;
+}
+
+.idea-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.white-space-pre-line {
+  white-space: pre-line;
+}
+
+.creator-info, .description-container {
+  background-color: var(--surface-ground);
+}
+
+.comment-input-container {
+  position: relative;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  transition: all 0.2s;
+  
+  &:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
+  }
+}
+
+.comment-textarea {
+  border: none !important;
+  background: transparent !important;
+  padding: 0.75rem !important;
+  padding-bottom: 2.5rem !important;
+  resize: none !important;
+}
+
+.comment-actions {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.75rem;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.comment-item {
+  background: var(--surface-ground);
+  border-radius: 6px;
+  transition: all 0.2s;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-1);
+  }
+}
+
+.text-xs {
+  font-size: 0.75rem !important;
+}
+
+@media screen and (max-width: 768px) {
+  .idea-container {
+    padding: 0 1rem 1rem 1rem;
+  }
+} 
