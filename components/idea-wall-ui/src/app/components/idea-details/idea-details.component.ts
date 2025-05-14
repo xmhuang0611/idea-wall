@@ -47,6 +47,7 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() visible: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() commentCountChange = new EventEmitter<{ideaId: string, count: number}>();
+  @Output() voteStatusChange = new EventEmitter<{ideaId: string, hasVoted: boolean, totalVotes: number}>();
   
   idea: Idea | null = null;
   comments: Comment[] = [];
@@ -240,6 +241,44 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.visibleChange.emit(false);
     // 使用 history API 直接修改 URL，避免页面重新加载导致的闪动
     window.history.replaceState({}, '', '/');
+  }
+  
+  /**
+   * 处理点赞/取消点赞操作
+   */
+  onVote(): void {
+    if (!this.idea) {
+      return;
+    }
+    
+    // 切换点赞状态: 如果已点赞则取消 (0), 否则点赞 (1)
+    const voteStatus = this.idea.hasVoted ? 0 : 1;
+    
+    this.ideaService.voteIdea(this.idea.id, voteStatus).subscribe({
+      next: () => {
+        // 更新点赞状态
+        if (this.idea) {
+          this.idea.hasVoted = !this.idea.hasVoted;
+          
+          // 更新点赞数
+          if (this.idea.hasVoted) {
+            this.idea.total_votes += 1;
+          } else {
+            this.idea.total_votes -= 1;
+          }
+          
+          // 通知父组件更新点赞状态
+          this.voteStatusChange.emit({
+            ideaId: this.idea.id,
+            hasVoted: this.idea.hasVoted,
+            totalVotes: this.idea.total_votes
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Vote failed', error);
+      }
+    });
   }
   
   getTagSeverity(tag: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {

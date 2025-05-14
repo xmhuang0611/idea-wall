@@ -169,5 +169,6 @@
   [ideaId]="selectedIdeaId"
   [visible]="ideaDetailsVisible"
   (visibleChange)="ideaDetailsVisible = $event"
-  (commentCountChange)="onCommentCountChange($event)">
+  (commentCountChange)="onCommentCountChange($event)"
+  (voteStatusChange)="onVoteStatusChange($event)">
 </app-idea-details-drawer> 

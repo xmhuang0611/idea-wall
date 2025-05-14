@@ -41,7 +41,8 @@
                     [class]="idea.hasVoted ? 'p-button-primary' : 'p-button-outlined'"
                     icon="pi pi-thumbs-up"
                     [label]="idea.total_votes.toString()"
-                    class="p-button-rounded p-button-sm mr-2">
+                    class="p-button-rounded p-button-sm mr-2"
+                    (click)="onVote()">
             </button>
             <button pButton pRipple 
                     icon="pi pi-comments"

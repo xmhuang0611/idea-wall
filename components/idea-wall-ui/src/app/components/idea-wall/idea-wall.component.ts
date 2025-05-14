@@ -253,41 +253,25 @@ export class IdeaWallComponent implements OnInit {
    * @param event {ideaId: string, count: number} 
    */
   onCommentCountChange(event: {ideaId: string, count: number}): void {
-    console.log('Comment count change event received:', event);
-    
-    // 更新本地评论数缓存
-    this.commentCounts[event.ideaId] = event.count;
-    
-    // 更新当前显示列表中的评论数
-    if (this.ideas && this.ideas.length) {
-      const idea = this.ideas.find(i => i.id === event.ideaId);
-      if (idea) {
-        // 仅当评论数不同时才更新
-        if (idea.total_comments !== event.count) {
-          console.log(`Updating idea ${idea.id} comment count from ${idea.total_comments} to ${event.count}`);
-          idea.total_comments = event.count;
-          
-          // 可选：如果需要确保与后端同步，可以直接更新数据库中的评论计数
-          // 通常不需要这样做，因为后端在添加或删除评论时会自动更新total_comments字段
-          // 但如果发现数据不一致，可以考虑调用API更新
-          this.ideaService.getIdeaById(event.ideaId).subscribe({
-            next: (response) => {
-              if (response.success && response.data) {
-                // 再次验证评论数是否同步
-                if (idea.total_comments !== response.data.total_comments) {
-                  console.log(`Syncing comment count with server: ${response.data.total_comments}`);
-                  idea.total_comments = response.data.total_comments;
-                }
-              }
-            },
-            error: (error) => {
-              console.error('Failed to sync comment count with server', error);
-            }
-          });
-        }
-      } else {
-        console.log(`Idea ${event.ideaId} not found in current list`);
-      }
+    // 更新指定idea的评论数
+    const idea = this.ideas.find(i => i.id === event.ideaId);
+    if (idea && idea.total_comments !== event.count) {
+      console.log(`Updating comment count for idea ${event.ideaId}: ${event.count}`);
+      idea.total_comments = event.count;
+    }
+  }
+
+  /**
+   * 处理来自idea-details组件的点赞状态变化事件
+   * @param event 包含ideaId、hasVoted和totalVotes的事件对象
+   */
+  onVoteStatusChange(event: {ideaId: string, hasVoted: boolean, totalVotes: number}): void {
+    // 更新指定idea的点赞状态和点赞数
+    const idea = this.ideas.find(i => i.id === event.ideaId);
+    if (idea) {
+      console.log(`Updating vote status for idea ${event.ideaId}: hasVoted=${event.hasVoted}, totalVotes=${event.totalVotes}`);
+      idea.hasVoted = event.hasVoted;
+      idea.total_votes = event.totalVotes;
     }
   }
   
