@@ -43,7 +43,7 @@ async def get_ideas(
         # 为每个 idea 添加用户点赞状态
         for idea in ideas:
             if idea.id in user_voted_ideas:
-                idea.hasVoted = user_voted_ideas[idea.id] == 1
+                idea.has_voted = user_voted_ideas[idea.id] == 1
     
     return StandardResponse(
         success=True,
@@ -78,7 +78,7 @@ async def get_idea(
             user_id=current_user.user_id
         )
         if vote:
-            idea.hasVoted = vote.vote_status == 1
+            idea.has_voted = vote.vote_status == 1
     
     return StandardResponse(
         success=True,

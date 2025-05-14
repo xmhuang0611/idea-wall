@@ -41,7 +41,7 @@ import { UserService } from './services/user.service';
 
     .main-content {
       flex: 1;
-      margin-top: 48px;
+      margin-top: 56px;
       padding: 24px 0;
     }
 

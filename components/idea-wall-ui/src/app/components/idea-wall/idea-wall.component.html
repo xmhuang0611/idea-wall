@@ -96,10 +96,10 @@
                   pRipple
                   (click)="$event.stopPropagation(); onVote(idea)"
                   class="p-button-rounded p-button-text"
-                  [class.p-button-secondary]="!idea.hasVoted"
-                  [class.p-button-primary]="idea.hasVoted"
+                  [class.p-button-secondary]="!idea.has_voted"
+                  [class.p-button-primary]="idea.has_voted"
                   icon="pi pi-thumbs-up-fill"
-                  title="{{idea.hasVoted ? 'Unvote' : 'Vote'}}">
+                  title="{{idea.has_voted ? 'Unvote' : 'Vote'}}">
           </button>
           <span class="mt-1 font-bold">{{idea.total_votes}}</span>
         </div>

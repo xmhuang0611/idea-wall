@@ -193,15 +193,15 @@ export class IdeaWallComponent implements OnInit {
    */
   onVote(idea: Idea): void {
     // Toggle vote status: if already voted then unvote (0), otherwise vote (1)
-    const voteStatus = idea.hasVoted ? 0 : 1;
+    const voteStatus = idea.has_voted ? 0 : 1;
     
     this.ideaService.voteIdea(idea.id, voteStatus).subscribe({
       next: () => {
         // Update vote status
-        idea.hasVoted = !idea.hasVoted;
+        idea.has_voted = !idea.has_voted;
         
         // Update vote count
-        if (idea.hasVoted) {
+        if (idea.has_voted) {
           idea.total_votes += 1;
         } else {
           idea.total_votes -= 1;
@@ -292,14 +292,14 @@ export class IdeaWallComponent implements OnInit {
 
   /**
    * 处理来自idea-details组件的点赞状态变化事件
-   * @param event 包含ideaId、hasVoted和totalVotes的事件对象
+   * @param event 包含ideaId、has_voted和totalVotes的事件对象
    */
-  onVoteStatusChange(event: {ideaId: string, hasVoted: boolean, totalVotes: number}): void {
+  onVoteStatusChange(event: {ideaId: string, has_voted: boolean, totalVotes: number}): void {
     // 更新指定idea的点赞状态和点赞数
     const idea = this.ideas.find(i => i.id === event.ideaId);
     if (idea) {
-      console.log(`Updating vote status for idea ${event.ideaId}: hasVoted=${event.hasVoted}, totalVotes=${event.totalVotes}`);
-      idea.hasVoted = event.hasVoted;
+      console.log(`Updating vote status for idea ${event.ideaId}: has_voted=${event.has_voted}, totalVotes=${event.totalVotes}`);
+      idea.has_voted = event.has_voted;
       idea.total_votes = event.totalVotes;
     }
   }
