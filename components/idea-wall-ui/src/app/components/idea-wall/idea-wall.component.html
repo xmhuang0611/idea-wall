@@ -38,6 +38,26 @@
       </div>
     </div>
 
+    <!-- Tag Filter -->
+    <div class="flex-1">
+      <label class="block mb-1">Tags</label>
+      <p-multiSelect 
+        [options]="availableTags"
+        [(ngModel)]="selectedTags"
+        optionLabel="label"
+        optionValue="tag_id"
+        [showToggleAll]="false"
+        placeholder="Filter by tags"
+        [style]="{'width': '100%'}"
+        [display]="'chip'"
+        [maxSelectedLabels]="3"
+        [resetFilterOnHide]="true"
+        [filter]="true"
+        filterBy="label"
+        (onChange)="onTagFilterChange()">
+      </p-multiSelect>
+    </div>
+
     <!-- Sort -->
     <div class="flex-1">
       <label class="block mb-1">Sort By</label>
@@ -48,8 +68,8 @@
           {label: 'Most Popular', value: 'total_votes'}
         ]"
         [(ngModel)]="sortBy"
-        (onChange)="onSortChange()"
-        class="w-full">
+        [style]="{'width': '100%'}"
+        (onChange)="onSortChange()">
       </p-dropdown>
     </div>
   </div>
@@ -111,9 +131,9 @@
           
           <!-- Tags -->
           <div class="flex flex-wrap mb-3">
-            <p-tag *ngFor="let tag of idea.tag_details" 
-                  [value]="tag.tag_name"
-                  [severity]="getTagSeverity(tag.tag_name)"
+            <p-tag *ngFor="let tag of idea.tag_details || []" 
+                  [value]="tag?.tag_name || ''"
+                  [severity]="getTagSeverity(tag?.tag_name || '')"
                   styleClass="mr-1 mb-1"
                   [rounded]="true">
             </p-tag>

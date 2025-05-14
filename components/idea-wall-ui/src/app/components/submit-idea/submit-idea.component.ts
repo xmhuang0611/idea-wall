@@ -12,6 +12,7 @@ import { TagService } from '../../services/tag.service';
 import { IdeaService } from '../../services/idea.service';
 import { Tag } from '../../models/tag.model';
 import { AuthService } from '../../auth/auth.service';
+import { TagUtilService, TagOption } from '../../shared/services/tag-util.service';
 
 interface FeelingOption {
   value: number;
@@ -40,6 +41,7 @@ export class SubmitIdeaComponent implements OnInit {
   ideaForm: FormGroup;
   isSubmitting = false;
   availableTags: Tag[] = [];
+  formattedTags: TagOption[] = [];
   isEditMode = false;
   ideaId: string | null = null;
   
@@ -57,7 +59,8 @@ export class SubmitIdeaComponent implements OnInit {
     private route: ActivatedRoute,
     private tagService: TagService,
     private ideaService: IdeaService,
-    public authService: AuthService
+    public authService: AuthService,
+    private tagUtilService: TagUtilService
   ) {
     this.ideaForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
@@ -68,21 +71,29 @@ export class SubmitIdeaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadTags();
-    
-    // Check if we're in edit mode
-    this.route.paramMap.subscribe(params => {
-      this.ideaId = params.get('id');
-      if (this.ideaId) {
-        this.isEditMode = true;
-        this.loadIdea(this.ideaId);
-      }
+    // 先加载标签数据，然后再加载idea数据
+    this.loadTags().then(() => {
+      // Check if we're in edit mode
+      this.route.paramMap.subscribe(params => {
+        this.ideaId = params.get('id');
+        if (this.ideaId) {
+          this.isEditMode = true;
+          this.loadIdea(this.ideaId);
+        }
+      });
     });
   }
 
-  loadTags(): void {
-    this.tagService.getTags().subscribe(tags => {
-      this.availableTags = tags;
+  loadTags(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      this.tagService.getTags().subscribe(tags => {
+        this.availableTags = tags;
+        this.formattedTags = this.tagUtilService.formatTagsForDisplay(tags, true);
+        resolve();
+      }, error => {
+        console.error('Error loading tags:', error);
+        resolve(); // 即使出错也继续
+      });
     });
   }
 
@@ -93,13 +104,18 @@ export class SubmitIdeaComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           const idea = response.data;
+          console.log('Loaded idea data:', idea);
+          
+          // 正确提取标签ID
+          let tagIds: number[] = [];
+          tagIds = idea.tags;
           
           // Update form with idea data
           this.ideaForm.patchValue({
             title: idea.title,
             description: idea.description,
             feeling: idea.feeling,
-            tags: idea.tags ? idea.tags.map((tag: any) => tag.tag_id) : []
+            tags: tagIds
           });
         } else {
           console.error('Failed to load idea:', response.error);
@@ -121,7 +137,7 @@ export class SubmitIdeaComponent implements OnInit {
     this.isSubmitting = true;
     const formData = this.ideaForm.value;
     
-    // Create payload
+    // Create payload - tags are already tag_ids as specified by optionValue in the template
     const payload = {
       title: formData.title,
       description: formData.description,

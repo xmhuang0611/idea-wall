@@ -77,13 +77,14 @@
         <label for="tags" class="block text-900 font-medium mb-2">Tags</label>
         <p-multiSelect id="tags"
                       formControlName="tags"
-                      [options]="availableTags"
-                      optionLabel="tag_name"
+                      [options]="formattedTags"
+                      optionLabel="label"
                       optionValue="tag_id"
                       [showToggleAll]="false"
                       placeholder="Select relevant tags"
                       [style]="{'width': '100%'}"
                       styleClass="w-full submit-idea-input"
+                      [display]="'chip'"
                       [maxSelectedLabels]="3"></p-multiSelect>
         <small class="text-600 block mt-1">Select tags that best describe your idea (optional)</small>
       </div>

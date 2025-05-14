@@ -15,9 +15,12 @@ import { PaginatorModule } from 'primeng/paginator';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { IdeaDetailsComponent } from '../idea-details/idea-details.component';
 import { AuthService } from '../../auth/auth.service';
 import { ToastService } from '../../shared/services/toast.service';
+import { TagService } from '../../services/tag.service';
+import { TagUtilService, TagOption } from '../../shared/services/tag-util.service';
 
 @Component({
   selector: 'app-idea-wall',
@@ -37,6 +40,7 @@ import { ToastService } from '../../shared/services/toast.service';
     InputSwitchModule,
     ProgressSpinnerModule,
     TooltipModule,
+    MultiSelectModule,
     IdeaDetailsComponent
   ],
   templateUrl: './idea-wall.component.html',
@@ -51,6 +55,10 @@ export class IdeaWallComponent implements OnInit {
   searchQuery = '';
   sortBy = 'created_at';
   sortOrder: 'asc' | 'desc' = 'desc';
+  
+  // Tag filter
+  availableTags: TagOption[] = [];
+  selectedTags: number[] = [];
 
   // Pagination
   currentPage = 1;
@@ -72,14 +80,17 @@ export class IdeaWallComponent implements OnInit {
     private router: Router,
     public authService: AuthService,
     private route: ActivatedRoute,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private tagService: TagService,
+    private tagUtilService: TagUtilService
   ) {}
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
       this.currentUserId = this.authService.getId();
     }
-
+    
+    this.loadTags();
     this.loadIdeas();
     
     // 从路由参数中获取 idea ID 并打开 idea details drawer
@@ -96,6 +107,12 @@ export class IdeaWallComponent implements OnInit {
       this.openDetails(ideaIdMatch[1]);
     }
   }
+  
+  loadTags(): void {
+    this.tagService.getTags().subscribe(tags => {
+      this.availableTags = this.tagUtilService.formatTagsForDisplay(tags, true);
+    });
+  }
 
   loadIdeas(): void {
     this.isLoading = true;
@@ -111,6 +128,11 @@ export class IdeaWallComponent implements OnInit {
 
     if (this.showMyIdeas) {
       params.creator_id = this.currentUserId;
+    }
+    
+    // Add tags filter if selected
+    if (this.selectedTags && this.selectedTags.length > 0) {
+      params.tags = this.selectedTags;
     }
     
     this.ideaService
@@ -149,6 +171,11 @@ export class IdeaWallComponent implements OnInit {
   }
 
   onSortChange(): void {
+    this.loadIdeas();
+  }
+  
+  onTagFilterChange(): void {
+    this.currentPage = 1;
     this.loadIdeas();
   }
 
