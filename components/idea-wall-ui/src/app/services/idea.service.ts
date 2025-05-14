@@ -22,7 +22,6 @@ export class IdeaService {
   getIdeas(params: {
     skip?: number;
     limit?: number;
-    category?: string;
     search?: string;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
@@ -36,9 +35,6 @@ export class IdeaService {
     }
     if (params.limit !== undefined) {
       httpParams = httpParams.set('limit', params.limit.toString());
-    }
-    if (params.category) {
-      httpParams = httpParams.set('category', params.category);
     }
     if (params.search) {
       httpParams = httpParams.set('search', params.search);

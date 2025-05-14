@@ -36,7 +36,6 @@ Stores all ideas submitted to the platform.
 |----------------|----------|--------------------------------------|----------------------------------------|
 | title          | String   | Idea title                           | "Improve User Experience"              |
 | description    | String   | Detailed description                 | "We should optimize the login flow..." |
-| category       | String   | Idea category                        | "Idea"                                 |
 | feeling        | Number   | Feeling score                        | 8                                      |
 | tags           | Array    | Array of tag IDs                     | [1,2]                                  |
 | total_votes    | Number   | Total number of votes                | 42                                     |
@@ -114,11 +113,9 @@ Store notifications for all users.
 
 ### Ideas Collection
 
-- `category`: Index for category-based queries
 - `tags`: Index for tag-based queries
 - `creator_id`: Index for user's ideas
 - `total_votes`: Index for sorting
-- Compound index: `[category, total_votes]` for filtered searches and sorting
 
 ### Comments Collection
 
@@ -180,17 +177,9 @@ Store notifications for all users.
 - The `role` field indicates the user's role in the system, such as USER, IDEA_SESSION_PANNEL_REVIEWER, IDEA_INCUBATOR_REVIEWER, or ADMIN.
 
 
-
 #### Indexes
 
 - `user_id`: Unique index
-
-
-### Idea Categories
-
-- Idea
-- Pain
-- Thought
 
 ### Vote Target Types
 

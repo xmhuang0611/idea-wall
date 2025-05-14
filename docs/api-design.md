@@ -191,7 +191,6 @@ Request Body:
 {
   "title": "Improve User Experience",
   "description": "We should optimize the login flow...",
-  "category": "Idea",
   "feeling": 8,
   "tags": [1, 2]
 }
@@ -209,7 +208,6 @@ Request Body:
 {
   "title": "Improve User Experience",
   "description": "Updated description...",
-  "category": "Idea",
   "feeling": 9,
   "tags": [1, 3]
 }

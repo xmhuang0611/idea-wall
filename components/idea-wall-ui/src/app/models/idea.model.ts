@@ -4,7 +4,6 @@ export interface Idea {
   id: string;
   title: string;
   description: string;
-  category: 'Idea' | 'Pain' | 'Thought';
   feeling: number;
   tags: number[];
   tag_details?: Tag[];

@@ -108,7 +108,6 @@ def generate_random_date(start_date, end_date):
 
 # New idea data
 # Generate more ideas
-idea_categories = ["Idea", "Pain", "Thought"]
 idea_titles = [
     "Improve Remote Work Experience",
     "Cybersecurity Awareness Training Program",
@@ -178,13 +177,11 @@ for i in range(20):
     user = random.choice(idea_users)
     title = idea_titles[i % len(idea_titles)]
     desc = idea_descs[i % len(idea_descs)]
-    category = random.choice(idea_categories)
     feeling = random.randint(1, 5)
     tags = random.sample([t[0] for t in base_tags], random.randint(1, 3))
     new_test_ideas.append({
         "title": title,
         "description": desc,
-        "category": category,
         "feeling": feeling,
         "tags": tags,
         "total_votes": 0,
@@ -219,7 +216,6 @@ async def insert_test_data():
             prepared_ideas.append({
                 "title": idea["title"],
                 "description": idea["description"],
-                "category": idea["category"],
                 "feeling": idea["feeling"],
                 "tags": idea["tags"],
                 "total_votes": 0,
