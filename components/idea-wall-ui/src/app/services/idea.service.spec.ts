@@ -112,6 +112,23 @@ describe('IdeaService', () => {
     req.flush(mockApiResponse);
   });
 
+  it('should get ideas sorted by updated_at', () => {
+    const params = {
+      sort_by: 'updated_at',
+      sort_order: 'desc' as const
+    };
+
+    service.getIdeas(params).subscribe(response => {
+      expect(response.success).toBe(true);
+      expect(response.data?.length).toBe(2);
+      expect(response.data).toEqual(mockIdeas);
+    });
+
+    const req = httpMock.expectOne('/api/ideas?sort_by=updated_at&sort_order=desc');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockApiResponse);
+  });
+
   it('should get idea by id', () => {
     const ideaId = '1';
     const mockResponse = {

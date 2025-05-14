@@ -13,7 +13,7 @@ router = APIRouter()
 async def get_ideas(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    sort_by: Optional[str] = Query(None, regex="^(created_at|title|feeling|total_votes)$"),
+    sort_by: Optional[str] = Query(None, regex="^(created_at|updated_at|title|feeling|total_votes)$"),
     sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
     search: Optional[str] = None,
     tags: Optional[List[int]] = Query(None),

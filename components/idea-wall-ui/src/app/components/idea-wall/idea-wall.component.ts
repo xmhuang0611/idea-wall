@@ -83,6 +83,7 @@ import { AuthService } from '../../auth/auth.service';
           <p-dropdown 
             [options]="[
               {label: 'Latest Created', value: 'created_at'},
+              {label: 'Latest Updated', value: 'updated_at'},
               {label: 'Most Popular', value: 'total_votes'}
             ]"
             [(ngModel)]="sortBy"
