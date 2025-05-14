@@ -121,13 +121,21 @@
           <p-divider></p-divider>
           
           <div class="flex justify-content-between align-items-center">
-            <div>
+            <div class="flex align-items-center">
               <button pButton
                       pRipple
                       icon="pi pi-comment"
                       (click)="$event.stopPropagation(); openDetails(idea.id)" 
                       label="{{ idea.total_comments || 0 }}"
                       class="p-button-rounded p-button-text p-button-sm">
+              </button>
+              <button pButton
+                      pRipple
+                      icon="pi pi-share-alt"
+                      (click)="$event.stopPropagation(); shareIdea(idea.id)" 
+                      class="p-button-rounded p-button-text p-button-sm"
+                      pTooltip="Share this idea"
+                      tooltipPosition="top">
               </button>
             </div>
             <div class="flex align-items-center gap-2">

@@ -14,8 +14,10 @@ import { CardModule } from 'primeng/card';
 import { PaginatorModule } from 'primeng/paginator';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
 import { IdeaDetailsComponent } from '../idea-details/idea-details.component';
 import { AuthService } from '../../auth/auth.service';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-idea-wall',
@@ -34,6 +36,7 @@ import { AuthService } from '../../auth/auth.service';
     PaginatorModule,
     InputSwitchModule,
     ProgressSpinnerModule,
+    TooltipModule,
     IdeaDetailsComponent
   ],
   templateUrl: './idea-wall.component.html',
@@ -68,7 +71,8 @@ export class IdeaWallComponent implements OnInit {
     private ideaService: IdeaService,
     private router: Router,
     public authService: AuthService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -309,5 +313,25 @@ export class IdeaWallComponent implements OnInit {
   onMyIdeasChange(checked: boolean): void {
     this.currentPage = 1;
     this.loadIdeas();
+  }
+
+  /**
+   * 分享idea链接
+   * @param ideaId 
+   */
+  shareIdea(ideaId: string): void {
+    // 构建idea的完整URL
+    const baseUrl = window.location.origin;
+    const ideaUrl = `${baseUrl}/idea/${ideaId}`;
+    
+    // 使用Clipboard API复制链接
+    navigator.clipboard.writeText(ideaUrl)
+      .then(() => {
+        this.toastService.showSuccess('Link copied to clipboard');
+      })
+      .catch(err => {
+        console.error('Failed to copy link: ', err);
+        this.toastService.showError('Failed to copy link');
+      });
   }
 } 
