@@ -309,7 +309,7 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getFeelingLabel(feeling: number): string {
-    const labels = ['Unhappy', 'Terrible', 'Thoughtable', 'Happy', 'Unbelievable'];
+    const labels = ['Terrible', 'Unhappy', 'Thoughtable', 'Happy', 'Unbelievable'];
     return labels[feeling - 1] || '';
   }
 

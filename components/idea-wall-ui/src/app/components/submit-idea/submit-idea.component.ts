@@ -46,8 +46,8 @@ export class SubmitIdeaComponent implements OnInit {
   ideaId: string | null = null;
   
   feelingOptions: FeelingOption[] = [
-    { value: 1, label: 'Unhappy', image: 'assets/images/1-1f92c.png' },
-    { value: 2, label: 'Terrible', image: 'assets/images/2-1f621.png' },
+    { value: 1, label: 'Terrible', image: 'assets/images/1-1f92c.png' },
+    { value: 2, label: 'Unhappy', image: 'assets/images/2-1f621.png' },
     { value: 3, label: 'Thoughtable', image: 'assets/images/3-1f615.png' },
     { value: 4, label: 'Happy', image: 'assets/images/4-1f604.png' },
     { value: 5, label: 'Unbelievable', image: 'assets/images/5-1f929.png' }
