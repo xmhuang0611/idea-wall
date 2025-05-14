@@ -90,43 +90,32 @@
          class="idea-card mb-3"
          (click)="openDetails(idea.id)">
       <div class="flex">
-        <!-- Vote Column -->
-        <div class="flex flex-column align-items-center mr-3" style="width: 80px">
-          <button pButton
-                  pRipple
-                  (click)="$event.stopPropagation(); onVote(idea)"
-                  class="p-button-rounded p-button-text"
-                  [class.p-button-secondary]="!idea.has_voted"
-                  [class.p-button-primary]="idea.has_voted"
-                  icon="pi pi-thumbs-up-fill"
-                  title="{{idea.has_voted ? 'Unvote' : 'Vote'}}">
-          </button>
-          <span class="mt-1 font-bold">{{idea.total_votes}}</span>
+        <!-- Feeling Column -->
+        <div class="flex flex-column align-items-center mr-3" style="width: 64px">
+          <div class="feeling-image-container">
+            <img [src]="getFeelingImage(idea.feeling)"
+                 [alt]="getFeelingLabel(idea.feeling)"
+                 class="feeling-image"
+                 [title]="getFeelingLabel(idea.feeling)">
+          </div>
         </div>
 
         <!-- Content Column -->
         <div class="flex-1">
+          <!-- Title and Edit Button -->
           <div class="flex justify-content-between align-items-center mb-2">
-            <div class="flex align-items-center gap-2">
-              <div>
-                <img [src]="getFeelingImage(idea.feeling)"
-                     [alt]="getFeelingLabel(idea.feeling)"
-                     width="28"
-                     height="28"
-                     [title]="getFeelingLabel(idea.feeling)">
-              </div>
-              <h3 class="text-primary m-0">
-                {{idea.title}}
-              </h3>
-            </div>
+            <h3 class="text-primary m-0">{{idea.title}}</h3>
             <button *ngIf="idea.creator_id === currentUserId"
                     pButton
                     icon="pi pi-pencil"
                     class="p-button-rounded p-button-text p-button-sm"
                     (click)="$event.stopPropagation(); editIdea(idea.id)"
-                    title="Edit Idea">
+                    pTooltip="Edit Idea"
+                    tooltipPosition="top">
             </button>
           </div>
+
+          <!-- Description -->
           <p class="mb-3 white-space-pre-line">{{idea.description}}</p>
           
           <!-- Tags -->
@@ -141,24 +130,41 @@
           
           <p-divider></p-divider>
           
+          <!-- Bottom Bar -->
           <div class="flex justify-content-between align-items-center">
-            <div class="flex align-items-center">
+            <!-- Action Buttons -->
+            <div class="flex align-items-center gap-2">
+              <button pButton
+                      pRipple
+                      (click)="$event.stopPropagation(); onVote(idea)"
+                      class="p-button-rounded p-button-text p-button-sm"
+                      [class.p-button-secondary]="!idea.has_voted"
+                      [class.p-button-primary]="idea.has_voted"
+                      icon="pi pi-thumbs-up-fill"
+                      [label]="idea.total_votes.toString()"
+                      pTooltip="{{idea.has_voted ? 'Unvote' : 'Vote'}}"
+                      tooltipPosition="top">
+              </button>
               <button pButton
                       pRipple
                       icon="pi pi-comment"
                       (click)="$event.stopPropagation(); openDetails(idea.id)" 
-                      label="{{ idea.total_comments || 0 }}"
-                      class="p-button-rounded p-button-text p-button-sm">
+                      [label]="idea.total_comments.toString()"
+                      class="p-button-rounded p-button-text p-button-sm"
+                      pTooltip="View Comments"
+                      tooltipPosition="top">
               </button>
               <button pButton
                       pRipple
                       icon="pi pi-share-alt"
-                      (click)="$event.stopPropagation(); shareIdea(idea.id)" 
+                      (click)="$event.stopPropagation(); shareIdea(idea.id)"
                       class="p-button-rounded p-button-text p-button-sm"
-                      pTooltip="Share this idea"
+                      pTooltip="Share Idea"
                       tooltipPosition="top">
               </button>
             </div>
+
+            <!-- Creator Info -->
             <div class="flex align-items-center gap-2">
               <span class="font-bold">{{idea.creator_name}}</span>
               <span class="hidden sm:inline text-500">{{idea.created_at | date:'MMM d, y h:mm a'}}</span>
