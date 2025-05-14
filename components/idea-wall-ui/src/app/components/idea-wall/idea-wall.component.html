@@ -136,6 +136,15 @@
             <div class="flex align-items-center gap-2">
               <button pButton
                       pRipple
+                      icon="pi pi-comment"
+                      (click)="$event.stopPropagation(); openDetails(idea.id)" 
+                      [label]="idea.total_comments.toString()"
+                      class="p-button-rounded p-button-text p-button-sm"
+                      pTooltip="View Comments"
+                      tooltipPosition="top">
+              </button>
+              <button pButton
+                      pRipple
                       (click)="$event.stopPropagation(); onVote(idea)"
                       class="p-button-rounded p-button-text p-button-sm"
                       [class.p-button-secondary]="!idea.has_voted"
@@ -147,11 +156,13 @@
               </button>
               <button pButton
                       pRipple
-                      icon="pi pi-comment"
-                      (click)="$event.stopPropagation(); openDetails(idea.id)" 
-                      [label]="idea.total_comments.toString()"
+                      (click)="$event.stopPropagation(); onBookmark(idea)"
                       class="p-button-rounded p-button-text p-button-sm"
-                      pTooltip="View Comments"
+                      [class.p-button-secondary]="!idea.has_bookmarked"
+                      [class.p-button-primary]="idea.has_bookmarked"
+                      icon="pi pi-bookmark-fill"
+                      [label]="idea.total_bookmarks.toString()"
+                      pTooltip="{{idea.has_bookmarked ? 'Unbookmark' : 'Bookmark'}}"
                       tooltipPosition="top">
               </button>
               <button pButton

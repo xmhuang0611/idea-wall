@@ -71,7 +71,7 @@ export class SubmitIdeaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // 先加载标签数据，然后再加载idea数据
+    // Load tags first, then load idea data
     this.loadTags().then(() => {
       // Check if we're in edit mode
       this.route.paramMap.subscribe(params => {
@@ -81,6 +81,8 @@ export class SubmitIdeaComponent implements OnInit {
           this.loadIdea(this.ideaId);
         }
       });
+    }).catch(error => {
+      console.error('Failed to load tags:', error);
     });
   }
 
@@ -110,7 +112,7 @@ export class SubmitIdeaComponent implements OnInit {
           
           // 正确提取标签ID
           let tagIds: number[] = [];
-          tagIds = idea.tags;
+          tagIds = this.extractTagIds(idea.tags);
           
           // Update form with idea data
           this.ideaForm.patchValue({
@@ -174,5 +176,10 @@ export class SubmitIdeaComponent implements OnInit {
 
   selectFeeling(value: number): void {
     this.ideaForm.patchValue({ feeling: value });
+  }
+
+  private extractTagIds(tags: any[]): number[] {
+    // Correctly extract tag IDs
+    return tags.map(tag => typeof tag === 'object' ? tag.tag_id : tag);
   }
 } 

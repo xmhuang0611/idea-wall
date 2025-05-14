@@ -62,14 +62,15 @@ Stores user votes on ideas and comments.
 | target_id   | String   | ID of idea/comment           | "507f1f77bcf86cd799439015" |
 | target_type | String   | "Idea" or "Comment"          | "Idea"                     |
 
-### Favorites Collection
+### Bookmarks Collection
 
-Stores user's favorite ideas.
+Stores user's bookmark ideas.
 
 | Field           | Type     | Description                  | Example Value              |
 |-----------------|----------|------------------------------|----------------------------|
-| favorite_status | Number   | Favorite status (0 or 1)     | 1                          |
-| idea_id         | String   | ID of idea                   | "507f1f77bcf86cd799439015" |
+| bookmark_status | Number   | Bookmark status (0 or 1)     | 1                          |
+| target_id       | String   | ID of idea/comment           | "507f1f77bcf86cd799439015" |
+| target_type     | String   | "Idea" or "Comment"          | "Idea"                     |
 
 ### Tags Collection
 
@@ -128,9 +129,9 @@ Store notifications for all users.
 - `target_id`: Index for vote counts
 - Compound index: `[target_id, target_type, creator_id]`
 
-### Favorites Collection
+### Bookmarks Collection
 
-- `idea_id`: Index for favorite counts
+- `idea_id`: Index for bookmark counts
 - Compound index: `[idea_id, creator_id]`
 
 ### Tags Collection
@@ -191,6 +192,6 @@ Store notifications for all users.
 - Idea
 - Comment
 - Vote
-- Favorite
+- Bookmark
 - Tag
 - User

@@ -3,6 +3,7 @@ from typing import List, Optional
 from core.deps import get_current_user, get_current_user_optional
 from services.idea_service import idea_service
 from services.vote_service import vote_service
+from services.bookmark_service import bookmark_service
 from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaTag
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
@@ -13,7 +14,7 @@ router = APIRouter()
 async def get_ideas(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    sort_by: Optional[str] = Query(None, regex="^(created_at|updated_at|title|feeling|total_votes)$"),
+    sort_by: Optional[str] = Query(None, regex="^(created_at|updated_at|title|feeling|total_votes|total_bookmarks)$"),
     sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
     search: Optional[str] = None,
     tags: Optional[List[int]] = Query(None),
@@ -35,15 +36,22 @@ async def get_ideas(
         creator_id=creator_id
     )
     
-    # 如果用户已登录，获取用户点赞状态
+    # If user is logged in, get vote and bookmark status
     if current_user:
+        # Get vote status
         user_votes = await vote_service.get_votes_by_user(current_user.user_id, "Idea")
         user_voted_ideas = {vote.target_id: vote.vote_status for vote in user_votes}
         
-        # 为每个 idea 添加用户点赞状态
+        # Get bookmark status
+        user_bookmarks = await bookmark_service.get_bookmarks_by_user(current_user.user_id, "Idea")
+        user_bookmarkd_ideas = {bookmark.target_id: bookmark.bookmark_status for bookmark in user_bookmarks}
+        
+        # Add vote and bookmark status to each idea
         for idea in ideas:
             if idea.id in user_voted_ideas:
                 idea.has_voted = user_voted_ideas[idea.id] == 1
+            if idea.id in user_bookmarkd_ideas:
+                idea.has_bookmarked = user_bookmarkd_ideas[idea.id] == 1
     
     return StandardResponse(
         success=True,
@@ -70,8 +78,9 @@ async def get_idea(
             )
         )
     
-    # 如果用户已登录，获取用户点赞状态
+    # If user is logged in, get vote and bookmark status
     if current_user:
+        # Get vote status
         vote = await vote_service.get_vote(
             target_id=idea_id, 
             target_type="Idea",
@@ -79,6 +88,15 @@ async def get_idea(
         )
         if vote:
             idea.has_voted = vote.vote_status == 1
+            
+        # Get bookmark status
+        bookmark = await bookmark_service.get_bookmark(
+            target_id=idea_id,
+            target_type="Idea",
+            user_id=current_user.user_id
+        )
+        if bookmark:
+            idea.has_bookmarked = bookmark.bookmark_status == 1
     
     return StandardResponse(
         success=True,
@@ -106,7 +124,7 @@ async def update_idea(
     idea: IdeaUpdate,
     current_user: User = Depends(get_current_user)
 ):
-    # 检查idea是否存在
+    # Check if idea exists
     existing_idea = await idea_service.get_idea(idea_id)
     if not existing_idea:
         return StandardResponse(
@@ -117,7 +135,7 @@ async def update_idea(
             )
         )
     
-    # 检查是否是创建者
+    # Check if user is the creator
     if existing_idea.creator_id != current_user.user_id:
         return StandardResponse(
             success=False,
@@ -127,7 +145,7 @@ async def update_idea(
             )
         )
     
-    # 更新idea
+    # Update idea
     updated_idea = await idea_service.update_idea(
         idea_id,
         idea,

@@ -72,32 +72,32 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   
   ngOnInit(): void {
     this.loadIdeaDetails();
-    // 监听窗口大小变化
+    // Listen for window size changes
     window.addEventListener('resize', this.onResize.bind(this));
   }
   
   ngOnDestroy(): void {
-    // 清理事件监听器
+    // Clean up event listeners
     window.removeEventListener('resize', this.onResize.bind(this));
   }
   
-  // 窗口大小变化时调整抽屉宽度
+  // Adjust drawer width based on screen size
   onResize(): void {
     this.setResponsiveWidth();
   }
   
-  // 根据屏幕宽度设置响应式宽度
+  // Set responsive width based on screen width
   setResponsiveWidth(): void {
     const screenWidth = window.innerWidth;
     
     if (screenWidth < 768) {
-      // 移动设备上使用更大比例
+      // Use larger proportion on mobile devices
       this.sidebarWidth = '85vw';
     } else if (screenWidth < 1200) {
-      // 平板上使用中等比例
+      // Use medium proportion on tablets
       this.sidebarWidth = '65vw';
     } else {
-      // 桌面上使用一半宽度
+      // Use half width on desktop
       this.sidebarWidth = '50vw';
     }
   }
@@ -160,7 +160,7 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
               updated_at: comment.updated_at ? new Date(comment.updated_at) : new Date()
             }));
             
-            // 更新评论数并通知父组件
+            // Update comment count and notify parent component
             if (this.idea) {
               this.idea.total_comments = this.comments.length;
               this.commentCountChange.emit({
@@ -186,19 +186,19 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
       });
   }
   
-  // 更新当前页显示的评论
+  // Update currently displayed comments
   private updateDisplayedComments(): void {
-    // 默认显示第一页
+    // Show first page by default
     this.displayedComments = this.comments.slice(0, this.commentPageSize);
   }
   
-  // 处理分页变化
+  // Handle pagination changes
   onCommentPageChange(event: any): void {
     const pageIndex = event.page;
     const pageSize = event.rows;
     this.commentPageSize = pageSize;
     
-    // 计算当前页的评论数据
+    // Calculate comments for current page
     const startIndex = pageIndex * pageSize;
     this.displayedComments = this.comments.slice(startIndex, startIndex + pageSize);
   }
@@ -221,10 +221,10 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
         next: (response) => {
           this.isSubmitting = false;
           if (response.success) {
-            // 重置表单
+            // Reset form
             this.commentForm.reset();
             
-            // 重新加载评论
+            // Reload comments
             this.loadComments();
           } else {
             console.error('Failed to submit comment:', response.error);
@@ -239,35 +239,35 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   
   onSidebarHide(): void {
     this.visibleChange.emit(false);
-    // 使用 history API 直接修改 URL，避免页面重新加载导致的闪动
+    // Use history API to modify URL directly to avoid page flicker
     window.history.replaceState({}, '', '/');
   }
   
   /**
-   * 处理点赞/取消点赞操作
+   * Handle vote/unvote operation
    */
   onVote(): void {
     if (!this.idea) {
       return;
     }
     
-    // 切换点赞状态: 如果已点赞则取消 (0), 否则点赞 (1)
+    // Toggle vote status: if already voted then unvote (0), otherwise vote (1)
     const voteStatus = this.idea.has_voted ? 0 : 1;
     
     this.ideaService.voteIdea(this.idea.id, voteStatus).subscribe({
       next: () => {
-        // 更新点赞状态
+        // Update vote status
         if (this.idea) {
           this.idea.has_voted = !this.idea.has_voted;
           
-          // 更新点赞数
+          // Update vote count
           if (this.idea.has_voted) {
             this.idea.total_votes += 1;
           } else {
             this.idea.total_votes -= 1;
           }
           
-          // 通知父组件更新点赞状态
+          // Notify parent component of vote status change
           this.voteStatusChange.emit({
             ideaId: this.idea.id,
             has_voted: this.idea.has_voted,
@@ -277,6 +277,37 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
       },
       error: (error) => {
         console.error('Vote failed', error);
+      }
+    });
+  }
+  
+  /**
+   * Handle bookmark/unbookmark operation
+   */
+  onBookmark(): void {
+    if (!this.idea) {
+      return;
+    }
+    
+    // Toggle bookmark status: if already bookmarked then unbookmark (0), otherwise bookmark (1)
+    const bookmarkStatus = this.idea.has_bookmarked ? 0 : 1;
+    
+    this.ideaService.bookmarkIdea(this.idea.id, bookmarkStatus).subscribe({
+      next: () => {
+        // Update bookmark status
+        if (this.idea) {
+          this.idea.has_bookmarked = !this.idea.has_bookmarked;
+          
+          // Update bookmark count
+          if (this.idea.has_bookmarked) {
+            this.idea.total_bookmarks += 1;
+          } else {
+            this.idea.total_bookmarks -= 1;
+          }
+        }
+      },
+      error: (error: any) => {
+        console.error('Bookmark failed', error);
       }
     });
   }

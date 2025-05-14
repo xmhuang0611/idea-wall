@@ -38,6 +38,11 @@
           </div>
           <div class="flex align-items-center">
             <button pButton pRipple 
+                    icon="pi pi-comments"
+                    [label]="idea.total_comments.toString()"
+                    class="p-button-rounded p-button-outlined p-button-sm mr-2">
+            </button>
+            <button pButton pRipple 
                     [class]="idea.has_voted ? 'p-button-primary' : 'p-button-outlined'"
                     icon="pi pi-thumbs-up"
                     [label]="idea.total_votes.toString()"
@@ -45,9 +50,11 @@
                     (click)="onVote()">
             </button>
             <button pButton pRipple 
-                    icon="pi pi-comments"
-                    [label]="idea.total_comments.toString()"
-                    class="p-button-rounded p-button-outlined p-button-sm">
+                    [class]="idea.has_bookmarked ? 'p-button-primary' : 'p-button-outlined'"
+                    icon="pi pi-bookmark-fill"
+                    [label]="idea.total_bookmarks.toString()"
+                    class="p-button-rounded p-button-sm mr-2"
+                    (click)="onBookmark()">
             </button>
           </div>
         </div>
