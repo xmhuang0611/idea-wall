@@ -360,7 +360,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
     }
   `]
 })
-export class IdeaDetailsDrawerComponent implements OnInit, OnChanges, OnDestroy {
+export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() ideaId: string = '';
   @Input() visible: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>();

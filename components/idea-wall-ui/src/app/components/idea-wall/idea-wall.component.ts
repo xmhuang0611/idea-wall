@@ -14,7 +14,7 @@ import { CardModule } from 'primeng/card';
 import { PaginatorModule } from 'primeng/paginator';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
+import { IdeaDetailsComponent } from '../idea-details/idea-details.component';
 import { AuthService } from '../../auth/auth.service';
 
 @Component({
@@ -34,7 +34,7 @@ import { AuthService } from '../../auth/auth.service';
     PaginatorModule,
     InputSwitchModule,
     ProgressSpinnerModule,
-    IdeaDetailsDrawerComponent
+    IdeaDetailsComponent
   ],
   template: `
     <p-card class="mb-5 idea-wall-card">
