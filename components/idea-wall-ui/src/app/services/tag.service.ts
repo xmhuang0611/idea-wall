@@ -3,7 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { Tag } from '../models/tag.model';
 import { ApiResponse } from '../shared/models/api-response.model';
-import { map, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
+import { ApiErrorHandlerService } from '../shared/services/api-error-handler.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,12 +12,15 @@ import { map, catchError } from 'rxjs/operators';
 export class TagService {
   private apiUrl = '/api/tags';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private errorHandler: ApiErrorHandlerService
+  ) {}
 
   getTags(params: {
     skip?: number;
     limit?: number;
-  } = {}): Observable<Tag[]> {
+  } = {}): Observable<ApiResponse<Tag[]>> {
     let httpParams = new HttpParams();
     
     if (params.skip) {
@@ -28,20 +32,7 @@ export class TagService {
 
     return this.http.get<ApiResponse<Tag[]>>(this.apiUrl, { params: httpParams })
       .pipe(
-        map(response => response.data || [])
-      );
-  }
-
-  getTagById(id: number): Observable<Tag> {
-    return this.http.get<ApiResponse<Tag>>(`${this.apiUrl}/${id}`)
-      .pipe(
-        map(response => {
-          if (!response.data) {
-            throw new Error('Tag not found');
-          }
-          return response.data;
-        }),
-        catchError(error => throwError(() => error))
+        catchError(this.errorHandler.handleError)
       );
   }
 } 

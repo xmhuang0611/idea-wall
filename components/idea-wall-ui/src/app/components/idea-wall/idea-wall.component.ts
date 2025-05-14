@@ -109,8 +109,10 @@ export class IdeaWallComponent implements OnInit {
   }
   
   loadTags(): void {
-    this.tagService.getTags().subscribe(tags => {
-      this.availableTags = this.tagUtilService.formatTagsForDisplay(tags, true);
+    this.tagService.getTags().subscribe(response => {
+      if (response.success && response.data) {
+        this.availableTags = this.tagUtilService.formatTagsForDisplay(response.data, true);
+      }
     });
   }
 

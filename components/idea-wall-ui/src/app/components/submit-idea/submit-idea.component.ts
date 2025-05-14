@@ -86,9 +86,11 @@ export class SubmitIdeaComponent implements OnInit {
 
   loadTags(): Promise<void> {
     return new Promise<void>((resolve) => {
-      this.tagService.getTags().subscribe(tags => {
-        this.availableTags = tags;
-        this.formattedTags = this.tagUtilService.formatTagsForDisplay(tags, true);
+      this.tagService.getTags().subscribe(response => {
+        if (response.success && response.data) {
+          this.availableTags = response.data;
+          this.formattedTags = this.tagUtilService.formatTagsForDisplay(response.data, true);
+        }
         resolve();
       }, error => {
         console.error('Error loading tags:', error);
