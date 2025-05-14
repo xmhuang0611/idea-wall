@@ -18,10 +18,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      // if (error.status === 401) {
-      //   // Token expired or invalid, redirect to login
-      //   authService.logout();
-      // }
+      if (error.status === 401) {
+        authService.login();
+      }
       return throwError(() => error);
     })
   );

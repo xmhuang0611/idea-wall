@@ -41,7 +41,7 @@ import { UserService } from './services/user.service';
 
     .main-content {
       flex: 1;
-      margin-top: 48px;
+      margin-top: 56px;
       padding: 24px 0;
     }
 
@@ -49,10 +49,6 @@ import { UserService } from './services/user.service';
       max-width: 1600px;
       margin: 0 auto;
       padding: 0 0.5rem;
-    }
-
-    .global-toast {
-      z-index: 1000;
     }
 
     /* 全局滚动条样式 */

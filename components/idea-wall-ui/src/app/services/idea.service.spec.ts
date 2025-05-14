@@ -14,13 +14,11 @@ describe('IdeaService', () => {
       id: '1',
       title: 'Test Idea 1',
       description: 'Test Description 1',
-      category: 'Idea',
       feeling: 1,
       tags: [1, 2],
       total_votes: 10,
       total_comments: 0,
-      user_vote: 1,
-      hasVoted: true,
+      has_voted: true,
       created_at: new Date(),
       creator_id: 'user1',
       creator_name: 'User One',
@@ -32,13 +30,11 @@ describe('IdeaService', () => {
       id: '2',
       title: 'Test Idea 2',
       description: 'Test Description 2',
-      category: 'Pain',
       feeling: -1,
       tags: [3, 4],
       total_votes: 5,
       total_comments: 0,
-      user_vote: -1,
-      hasVoted: true,
+      has_voted: true,
       created_at: new Date(),
       creator_id: 'user2',
       creator_name: 'User Two',
@@ -98,7 +94,6 @@ describe('IdeaService', () => {
     const params = {
       skip: 10,
       limit: 20,
-      category: 'Idea',
       search: 'test',
       sort_by: 'created_at',
       sort_order: 'desc' as const
@@ -110,7 +105,24 @@ describe('IdeaService', () => {
       expect(response.data).toEqual(mockIdeas);
     });
 
-    const req = httpMock.expectOne('/api/ideas?skip=10&limit=20&category=Idea&search=test&sort_by=created_at&sort_order=desc');
+    const req = httpMock.expectOne('/api/ideas?skip=10&limit=20&search=test&sort_by=created_at&sort_order=desc');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockApiResponse);
+  });
+
+  it('should get ideas sorted by updated_at', () => {
+    const params = {
+      sort_by: 'updated_at',
+      sort_order: 'desc' as const
+    };
+
+    service.getIdeas(params).subscribe(response => {
+      expect(response.success).toBe(true);
+      expect(response.data?.length).toBe(2);
+      expect(response.data).toEqual(mockIdeas);
+    });
+
+    const req = httpMock.expectOne('/api/ideas?sort_by=updated_at&sort_order=desc');
     expect(req.request.method).toBe('GET');
     req.flush(mockApiResponse);
   });
@@ -136,7 +148,6 @@ describe('IdeaService', () => {
     const newIdea: Partial<Idea> = {
       title: 'New Idea',
       description: 'New Description',
-      category: 'Idea',
       feeling: 1,
       tags: [1, 2]
     };

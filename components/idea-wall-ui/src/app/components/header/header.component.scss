@@ -1,0 +1,109 @@
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.header-wrapper {
+  background: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+  width: 100%;
+}
+
+.container {
+  margin: 0 20px;
+  padding: 0 0.5rem;
+  height: 56px;
+}
+
+nav {
+  height: 100%;
+}
+
+.logo-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-right: 32px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+
+  a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+}
+
+.user-menu {
+  min-width: 180px;
+}
+
+.menu-item {
+  padding: 0.75rem 1rem;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--surface-200);
+  }
+}
+
+.username {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-color-secondary);
+}
+
+:host ::ng-deep {
+  .p-avatar {
+    width: 2rem;
+    height: 2rem;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  .user-dropdown {
+    .p-overlaypanel-content {
+      padding: 0;
+    }
+  }
+
+  .logout-btn {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    color: #ef4444;
+    font-size: 0.875rem;
+    font-weight: 400;
+    text-align: left;
+
+    .pi-sign-out {
+      font-size: 0.875rem;
+      margin-right: 0.5rem;
+    }
+
+    &:hover {
+      background: transparent;
+      color: #dc2626;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+} 

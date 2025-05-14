@@ -13,7 +13,7 @@ router = APIRouter()
 async def get_ideas(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    sort_by: Optional[str] = Query(None, regex="^(created_at|title|feeling|total_votes)$"),
+    sort_by: Optional[str] = Query(None, regex="^(created_at|updated_at|title|feeling|total_votes)$"),
     sort_order: Optional[str] = Query(None, regex="^(asc|desc)$"),
     search: Optional[str] = None,
     tags: Optional[List[int]] = Query(None),
@@ -43,7 +43,7 @@ async def get_ideas(
         # 为每个 idea 添加用户点赞状态
         for idea in ideas:
             if idea.id in user_voted_ideas:
-                idea.hasVoted = user_voted_ideas[idea.id] == 1
+                idea.has_voted = user_voted_ideas[idea.id] == 1
     
     return StandardResponse(
         success=True,
@@ -78,7 +78,7 @@ async def get_idea(
             user_id=current_user.user_id
         )
         if vote:
-            idea.hasVoted = vote.vote_status == 1
+            idea.has_voted = vote.vote_status == 1
     
     return StandardResponse(
         success=True,

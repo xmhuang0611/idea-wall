@@ -1,0 +1,67 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+### 项目结构
+- 使用Angular standalone组件
+- 组件结构遵循:HTML模板(.html)、样式(.scss)和TypeScript(.ts)分离原则
+- 共享服务放置在services目录下
+- 模型定义放置在models目录下
+- 共享组件放置在shared目录下
+
+### UI组件
+- 优先使用PrimeNG组件库
+- 按钮使用rounded风格(p-button-rounded)
+- 标签使用rounded风格([rounded]="true")
+- 使用PrimeNG提供的图标(pi pi-*)
+- 使用PrimeFlex网格系统和工具类进行布局
+- 利用PrimeFlex提供的工具类:
+  - 布局: flex, grid, flex-column, justify-content-*
+  - 间距: m-*, p-*, gap-*
+  - 对齐: align-items-*, align-self-*
+  - 响应式: hidden, block, sm:*, md:*, lg:*
+- 颜色使用PrimeNG的变量系统(var(--primary-color)等)
+- 避免直接使用硬编码颜色值,应使用CSS变量
+
+
+### 组件主题定制
+- 优先使用PrimeNG的CSS变量进行主题定制
+- 组件样式覆盖应遵循以下格式:
+  ```scss
+  :host ::ng-deep {
+    .p-component {
+      // 自定义样式
+    }
+  }
+  ```
+- 自定义全局样式变更应在styles.scss中定义
+- 尽量避免使用!important 
+
+### 状态管理
+- 组件间通信使用@Input/@Output装饰器
+- 复杂状态变更通过事件发射器(EventEmitter)同步
+- 服务层使用Observable进行异步数据处理
+
+### API交互
+- 所有API调用通过service层进行
+- 使用HttpClient进行API请求
+- 统一错误处理机制
+- 操作成功/失败后使用ToastService显示提示信息
+- 使用RxJS操作符(pipe, tap, catchError等)处理异步流
+
+### 代码规范
+- 方法不超过50行
+- 参数不超过4个
+- 使用类型注解提高代码可读性
+- 使用接口定义复杂数据结构
+- 组件方法添加适当的JSDoc注释
+- 避免直接在模板中使用复杂表达式
+
+### 性能优化
+- 使用OnPush变更检测策略减少不必要的渲染
+- 对频繁触发的事件使用防抖/节流
+- 大型列表使用虚拟滚动
+- 延迟加载非关键组件
+
+- 避免在模板中使用复杂计算

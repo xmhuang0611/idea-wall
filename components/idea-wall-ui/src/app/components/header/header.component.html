@@ -1,0 +1,61 @@
+<div class="header-wrapper">
+  <div class="container">
+    <nav class="flex align-items-center justify-content-between">
+      <!-- Left Side -->
+      <div class="flex align-items-center">
+        <a routerLink="/" class="logo-link">Idea Wall</a>
+        <div class="nav-links">
+          <a routerLink="/">Home</a>
+          <a routerLink="/ideas">Ideas</a>
+          <a routerLink="/useful-links">Useful Links</a>
+          <a routerLink="/about">About</a>
+        </div>
+      </div>
+      
+      <!-- Right Side -->
+      <div class="flex">
+        <p-avatar 
+          *ngIf="isAdmin"
+          icon="pi pi-cog"
+          shape="circle"
+          [style]="{'color': 'var(--primary-color)'}"
+          class="cursor-pointer mr-2"
+          (click)="goToSettings()">
+        </p-avatar>
+        <ng-container *ngIf="!isLoggedIn; else userIcon">
+          <button pButton
+                  label="Login"
+                  class="p-button-rounded p-button-sm"
+                  (click)="login()">
+          </button>
+        </ng-container>
+        <ng-template #userIcon>
+          <p-avatar 
+            icon="pi pi-user"
+            shape="circle"
+            [style]="{'color': 'var(--primary-color)'}"
+            class="cursor-pointer"
+            (click)="op.toggle($event)">
+          </p-avatar>
+          <p-overlayPanel #op [style]="{'padding': '0'}" styleClass="user-dropdown">
+            <div class="user-menu">
+              <div class="menu-item">
+                <span class="username">{{ username }}</span>
+              </div>
+              <div class="menu-item">
+                <button 
+                  pButton 
+                  type="button"
+                  class="p-button-text p-button-plain logout-btn"
+                  (click)="logout(); op.hide()">
+                  <i class="pi pi-sign-out mr-2"></i>
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          </p-overlayPanel>
+        </ng-template>
+      </div>
+    </nav>
+  </div>
+</div> 

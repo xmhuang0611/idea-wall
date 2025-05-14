@@ -4,14 +4,12 @@ export interface Idea {
   id: string;
   title: string;
   description: string;
-  category: 'Idea' | 'Pain' | 'Thought';
   feeling: number;
   tags: number[];
   tag_details?: Tag[];
   total_votes: number;
   total_comments: number;
-  user_vote?: number;
-  hasVoted?: boolean;
+  has_voted?: boolean;
   created_at: Date;
   creator_id: string;
   creator_name: string;

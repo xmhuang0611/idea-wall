@@ -11,7 +11,6 @@
 
 ### 系统首页
 1. 系统首页展示Ideas列表，分页展示，用户可选择每页展示多少条。
-2. 列表上方有一个Button Group，有Idea、Pain、Thought三个快速Categories Filter Button，点击只展示该类型的Ideas。
 3. 列表上方有搜索按钮，支持按关键字模糊匹配Idea Title搜索；搜索框右侧是排序选项，可以按发表时间、点赞数升序或降序排序。
 4. 如果用户没有登录，在首页右上方展示登录按钮，点击登录按钮调用OAuth登录。
 5. 如果用户登录成功，在首页右上方展示用户信息，点击用户头像有下拉菜单查看该用户发布的Ideas，该用户收藏的Ideas。
@@ -23,7 +22,6 @@
 ### 发表Idea功能
 1. 用户登录系统后，首页Ideas列表右上方的"发布"按钮为Enabled状态，点击该按钮弹出模态框发布Idea；
 2. Idea有一个Title字段，必填；
-3. Idea有一个category字段，可以选择Idea、Pain、Thought选项，必填；
 4. Idea有一个Feeling字段，表示发表该Idea的心情，是一个表情图案，数据库存number类型，展示时转换为表情图；
 5. 可以给Idea加上Tags，从Tags Collection表拉取Tags，数据库存Tags Id，是一个数组；
 6. Idea有一个Description字段，界面是一个富文本编辑器；

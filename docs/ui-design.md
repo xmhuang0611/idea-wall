@@ -112,10 +112,6 @@ Idea Wall is an enterprise-grade web application focused on idea management and 
 
 #### Ideas Display Area
 
-- Idea Categories
-  - Idea
-  - Pain
-  - Thought
 - Tag filters
 - Sort options:
   - Latest created

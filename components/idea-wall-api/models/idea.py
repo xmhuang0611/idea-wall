@@ -25,4 +25,4 @@ class IdeaInDB(IdeaBase, AuditModel):
 class Idea(IdeaInDB):
     id: str
     tag_details: Optional[List[IdeaTag]] = None
-    hasVoted: bool = False 
+    has_voted: bool = False 

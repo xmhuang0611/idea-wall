@@ -1,0 +1,30 @@
+:host {
+  display: block;
+}
+
+.flex-2 {
+  flex: 2;
+}
+
+.ideas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 200px;
+}
+
+.idea-card {
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .idea-card .p-card-body {
+    padding: 1rem;
+  }
+} 

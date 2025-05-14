@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { IdeaService } from '../../services/idea.service';
 import { Idea } from '../../models/idea.model';
 import { TagModule } from 'primeng/tag';
@@ -14,8 +14,13 @@ import { CardModule } from 'primeng/card';
 import { PaginatorModule } from 'primeng/paginator';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { IdeaDetailsDrawerComponent } from '../idea-details/idea-details-drawer.component';
+import { TooltipModule } from 'primeng/tooltip';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { IdeaDetailsComponent } from '../idea-details/idea-details.component';
 import { AuthService } from '../../auth/auth.service';
+import { ToastService } from '../../shared/services/toast.service';
+import { TagService } from '../../services/tag.service';
+import { TagUtilService, TagOption } from '../../shared/services/tag-util.service';
 
 @Component({
   selector: 'app-idea-wall',
@@ -34,334 +39,12 @@ import { AuthService } from '../../auth/auth.service';
     PaginatorModule,
     InputSwitchModule,
     ProgressSpinnerModule,
-    IdeaDetailsDrawerComponent
+    TooltipModule,
+    MultiSelectModule,
+    IdeaDetailsComponent
   ],
-  template: `
-    <p-card class="mb-5 idea-wall-card">
-      <!-- Submit Button -->
-      <div class="flex justify-content-between gap-2 mb-4 align-items-center">
-        <div class="flex align-items-center">
-          <span class="text-base font-medium text-primary">My Ideas</span>
-          <p-inputSwitch [(ngModel)]="showMyIdeas"
-                        [disabled]="!authService.isLoggedIn()"
-                        (ngModelChange)="onMyIdeasChange($event)"
-                        class="ml-2">
-          </p-inputSwitch>
-        </div>
-        <button pButton
-                pRipple
-                icon="pi pi-plus"
-                label="Submit Your Idea"
-                routerLink="/submit-idea"
-                [disabled]="!authService.isLoggedIn()"
-                class="p-button-rounded ml-4"
-                (click)="!authService.isLoggedIn() && $event.preventDefault()">
-        </button>
-      </div>
-
-      <!-- Filters Row -->
-      <div class="flex gap-4 mb-5">
-        <!-- Search -->
-        <div class="flex-2">
-          <label class="block mb-1">Search</label>
-          <div class="p-inputgroup">
-            <input type="text"
-                   pInputText
-                   [(ngModel)]="searchQuery"
-                   (input)="onSearch()"
-                   placeholder="Search ideas..."
-                   class="w-full">
-            <span class="p-inputgroup-addon">
-              <i class="pi pi-search"></i>
-            </span>
-          </div>
-        </div>
-
-        <!-- Sort -->
-        <div class="flex-1">
-          <label class="block mb-1">Sort By</label>
-          <p-dropdown 
-            [options]="[
-              {label: 'Latest Created', value: 'created_at'},
-              {label: 'Most Popular', value: 'total_votes'}
-            ]"
-            [(ngModel)]="sortBy"
-            (onChange)="onSortChange()"
-            class="w-full">
-          </p-dropdown>
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-5">
-        <p-progressSpinner 
-          [style]="{width: '50px', height: '50px'}" 
-          strokeWidth="4"
-          fill="var(--surface-ground)" 
-          animationDuration=".5s">
-        </p-progressSpinner>
-      </div>
-
-      <!-- Ideas List -->
-      <div *ngIf="!isLoading" class="ideas-container">
-        <p-card *ngFor="let idea of ideas"
-             class="idea-card"
-             (click)="openDetails(idea.id)">
-          <div class="flex">
-            <!-- Vote Column -->
-            <div class="flex flex-column align-items-center mr-3" style="width: 80px">
-              <button pButton
-                      pRipple
-                      (click)="$event.stopPropagation(); onVote(idea)"
-                      class="p-button-rounded p-button-text"
-                      [class.p-button-secondary]="!idea.hasVoted"
-                      [class.p-button-primary]="idea.hasVoted"
-                      icon="pi pi-thumbs-up-fill"
-                      title="{{idea.hasVoted ? 'Unvote' : 'Vote'}}">
-              </button>
-              <span class="mt-1 font-bold">{{idea.total_votes}}</span>
-            </div>
-
-            <!-- Content Column -->
-            <div class="flex-1">
-              <div class="flex justify-content-between align-items-center mb-2">
-                <div class="flex align-items-center gap-2">
-                  <div class="feeling-image-container">
-                    <img [src]="getFeelingImage(idea.feeling)"
-                         [alt]="getFeelingLabel(idea.feeling)"
-                         class="feeling-image"
-                         [title]="getFeelingLabel(idea.feeling)">
-                  </div>
-                  <h3 class="text-primary m-0">
-                    {{idea.title}}
-                  </h3>
-                </div>
-                <button *ngIf="idea.creator_id === currentUserId"
-                        pButton
-                        icon="pi pi-pencil"
-                        class="p-button-rounded p-button-text p-button-sm"
-                        (click)="$event.stopPropagation(); editIdea(idea.id)"
-                        title="Edit Idea">
-                </button>
-              </div>
-              <p class="mb-3">{{idea.description}}</p>
-              
-              <!-- Tags -->
-              <div class="flex flex-wrap mb-3">
-                <p-tag *ngFor="let tag of idea.tag_details" 
-                      [value]="tag.tag_name"
-                      [severity]="getTagSeverity(tag.tag_name)"
-                      class="mr-1 mb-1">
-                </p-tag>
-              </div>
-              
-              <p-divider></p-divider>
-              
-              <div class="flex justify-content-between align-items-center">
-                <div>
-                  <button pButton
-                          pRipple
-                          icon="pi pi-comment"
-                          (click)="$event.stopPropagation(); openDetails(idea.id)" 
-                          label="{{ idea.total_comments || 0 }}"
-                          class="p-button-text p-button-sm">
-                  </button>
-                </div>
-                <div class="flex align-items-center gap-2">
-                  <span class="creator-name font-bold">{{idea.creator_name}}</span>
-                  <span class="hidden sm:inline text-600">{{idea.created_at | date:'MMM d, y h:mm a'}}</span>
-                  <span class="sm:hidden text-600">{{idea.created_at | date:'short'}}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </p-card>
-      </div>
-
-      <!-- Pagination -->
-      <div *ngIf="!isLoading" class="mt-4">
-        <p-paginator
-          [rows]="pageSize"
-          [totalRecords]="totalItems"
-          [rowsPerPageOptions]="pageSizeOptions"
-          [showCurrentPageReport]="true"
-          currentPageReportTemplate="{first}-{last} of {totalRecords}"
-          [first]="(currentPage - 1) * pageSize"
-          styleClass="border-none"
-          (onPageChange)="onPageChange($event)">
-        </p-paginator>
-      </div>
-    </p-card>
-
-    <!-- Idea Details Drawer -->
-    <app-idea-details-drawer
-      [ideaId]="selectedIdeaId"
-      [visible]="ideaDetailsVisible"
-      (visibleChange)="ideaDetailsVisible = $event"
-      (commentCountChange)="onCommentCountChange($event)">
-    </app-idea-details-drawer>
-  `,
-  styles: [`
-    :host {
-      display: block;
-    }
-    
-    .idea-wall-card {
-      .flex-2 {
-        flex: 2;
-      }
-
-      .p-card-body {
-        padding: 2rem;
-        width: 100%;
-      }
-
-      .p-card-content {
-        padding: 0;
-        width: 100%;
-      }
-    }
-
-    .idea-wall-dropdown {
-      width: 100%;
-      
-      .p-dropdown-label {
-        padding-right: 2.5rem;
-      }
-    }
-
-    .ideas-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      min-height: 200px;
-    }
-
-    .idea-card {
-      .p-card-body {
-        padding: 1.5rem;
-      }
-    }
-    
-    .idea-wall-paginator {
-      padding: 0.5rem 0;
-      
-      .p-paginator-element {
-        min-width: 2rem;
-        height: 2rem;
-      }
-
-      .p-paginator-current {
-        font-size: 1rem;
-        color: var(--text-color-secondary);
-      }
-
-      .p-paginator-page-options {
-        .p-dropdown {
-          height: 2rem;
-          min-width: 4rem;
-        }
-      }
-    }
-
-    .idea-wall-selectbutton {
-      .p-button {
-        padding: 0.5rem 1rem;
-        
-        &.p-highlight {
-          background: var(--primary-color);
-          border-color: var(--primary-color);
-        }
-      }
-    }
-
-    .idea-wall-inputswitch {
-      .p-inputswitch-slider {
-        background: var(--surface-200);
-      }
-      
-      &.p-inputswitch-checked {
-        .p-inputswitch-slider {
-          background: var(--primary-color);
-        }
-      }
-
-      &.ml-2 {
-        margin-left: 0.5rem;
-      }
-    }
-
-    .creator-name {
-      font-size: 0.875rem;
-    }
-
-    .text-500 {
-      color: var(--text-color-secondary);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-    }
-
-    .text-600 {
-      color: var(--text-color);
-      font-size: 0.875rem;
-    }
-    
-    .idea-title {
-      color: var(--primary-color);
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    
-    .idea-card {
-      transition: all 0.2s ease;
-      cursor: pointer;
-      
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-    }
-
-    .feeling-image-container {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 0.5rem;
-    }
-    
-    .feeling-image {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
-    }
-
-    @media screen and (max-width: 576px) {
-      .idea-wall-card .p-card-body {
-        padding: 1rem;
-      }
-      
-      .idea-card .p-card-body {
-        padding: 1rem;
-      }
-      
-      .ideas-container {
-        gap: 1rem;
-      }
-
-      .feeling-image-container {
-        width: 28px;
-        height: 28px;
-      }
-      
-      .feeling-image {
-        width: 24px;
-        height: 24px;
-      }
-    }
-  `]
+  templateUrl: './idea-wall.component.html',
+  styleUrls: ['./idea-wall.component.scss']
 })
 export class IdeaWallComponent implements OnInit {
   ideas: Idea[] = [];
@@ -372,6 +55,10 @@ export class IdeaWallComponent implements OnInit {
   searchQuery = '';
   sortBy = 'created_at';
   sortOrder: 'asc' | 'desc' = 'desc';
+  
+  // Tag filter
+  availableTags: TagOption[] = [];
+  selectedTags: number[] = [];
 
   // Pagination
   currentPage = 1;
@@ -391,14 +78,42 @@ export class IdeaWallComponent implements OnInit {
   constructor(
     private ideaService: IdeaService,
     private router: Router,
-    public authService: AuthService
+    public authService: AuthService,
+    private route: ActivatedRoute,
+    private toastService: ToastService,
+    private tagService: TagService,
+    private tagUtilService: TagUtilService
   ) {}
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
       this.currentUserId = this.authService.getId();
     }
+    
+    this.loadTags();
     this.loadIdeas();
+    
+    // 从路由参数中获取 idea ID 并打开 idea details drawer
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.openDetails(params['id']);
+      }
+    });
+    
+    // 检查当前 URL 是否包含 idea ID
+    const currentPath = window.location.pathname;
+    const ideaIdMatch = currentPath.match(/\/idea\/([^\/]+)/);
+    if (ideaIdMatch && ideaIdMatch[1]) {
+      this.openDetails(ideaIdMatch[1]);
+    }
+  }
+  
+  loadTags(): void {
+    this.tagService.getTags().subscribe(response => {
+      if (response.success && response.data) {
+        this.availableTags = this.tagUtilService.formatTagsForDisplay(response.data, true);
+      }
+    });
   }
 
   loadIdeas(): void {
@@ -415,6 +130,11 @@ export class IdeaWallComponent implements OnInit {
 
     if (this.showMyIdeas) {
       params.creator_id = this.currentUserId;
+    }
+    
+    // Add tags filter if selected
+    if (this.selectedTags && this.selectedTags.length > 0) {
+      params.tags = this.selectedTags;
     }
     
     this.ideaService
@@ -455,6 +175,11 @@ export class IdeaWallComponent implements OnInit {
   onSortChange(): void {
     this.loadIdeas();
   }
+  
+  onTagFilterChange(): void {
+    this.currentPage = 1;
+    this.loadIdeas();
+  }
 
   onPageChange(event: any): void {
     this.currentPage = event.page + 1;
@@ -468,15 +193,15 @@ export class IdeaWallComponent implements OnInit {
    */
   onVote(idea: Idea): void {
     // Toggle vote status: if already voted then unvote (0), otherwise vote (1)
-    const voteStatus = idea.hasVoted ? 0 : 1;
+    const voteStatus = idea.has_voted ? 0 : 1;
     
     this.ideaService.voteIdea(idea.id, voteStatus).subscribe({
       next: () => {
         // Update vote status
-        idea.hasVoted = !idea.hasVoted;
+        idea.has_voted = !idea.has_voted;
         
         // Update vote count
-        if (idea.hasVoted) {
+        if (idea.has_voted) {
           idea.total_votes += 1;
         } else {
           idea.total_votes -= 1;
@@ -519,6 +244,9 @@ export class IdeaWallComponent implements OnInit {
     this.selectedIdeaId = ideaId;
     this.ideaDetailsVisible = false;
     
+    // 使用 history API 更新 URL，避免页面重新加载导致的闪动
+    window.history.replaceState({}, '', `/idea/${ideaId}`);
+    
     // 直接获取评论数据
     this.ideaService.getComments(ideaId).subscribe({
       next: (commentsResponse) => {
@@ -554,41 +282,25 @@ export class IdeaWallComponent implements OnInit {
    * @param event {ideaId: string, count: number} 
    */
   onCommentCountChange(event: {ideaId: string, count: number}): void {
-    console.log('Comment count change event received:', event);
-    
-    // 更新本地评论数缓存
-    this.commentCounts[event.ideaId] = event.count;
-    
-    // 更新当前显示列表中的评论数
-    if (this.ideas && this.ideas.length) {
-      const idea = this.ideas.find(i => i.id === event.ideaId);
-      if (idea) {
-        // 仅当评论数不同时才更新
-        if (idea.total_comments !== event.count) {
-          console.log(`Updating idea ${idea.id} comment count from ${idea.total_comments} to ${event.count}`);
-          idea.total_comments = event.count;
-          
-          // 可选：如果需要确保与后端同步，可以直接更新数据库中的评论计数
-          // 通常不需要这样做，因为后端在添加或删除评论时会自动更新total_comments字段
-          // 但如果发现数据不一致，可以考虑调用API更新
-          this.ideaService.getIdeaById(event.ideaId).subscribe({
-            next: (response) => {
-              if (response.success && response.data) {
-                // 再次验证评论数是否同步
-                if (idea.total_comments !== response.data.total_comments) {
-                  console.log(`Syncing comment count with server: ${response.data.total_comments}`);
-                  idea.total_comments = response.data.total_comments;
-                }
-              }
-            },
-            error: (error) => {
-              console.error('Failed to sync comment count with server', error);
-            }
-          });
-        }
-      } else {
-        console.log(`Idea ${event.ideaId} not found in current list`);
-      }
+    // 更新指定idea的评论数
+    const idea = this.ideas.find(i => i.id === event.ideaId);
+    if (idea && idea.total_comments !== event.count) {
+      console.log(`Updating comment count for idea ${event.ideaId}: ${event.count}`);
+      idea.total_comments = event.count;
+    }
+  }
+
+  /**
+   * 处理来自idea-details组件的点赞状态变化事件
+   * @param event 包含ideaId、has_voted和totalVotes的事件对象
+   */
+  onVoteStatusChange(event: {ideaId: string, has_voted: boolean, totalVotes: number}): void {
+    // 更新指定idea的点赞状态和点赞数
+    const idea = this.ideas.find(i => i.id === event.ideaId);
+    if (idea) {
+      console.log(`Updating vote status for idea ${event.ideaId}: has_voted=${event.has_voted}, totalVotes=${event.totalVotes}`);
+      idea.has_voted = event.has_voted;
+      idea.total_votes = event.totalVotes;
     }
   }
   
@@ -616,5 +328,23 @@ export class IdeaWallComponent implements OnInit {
     this.loadIdeas();
   }
 
-  protected readonly Math = Math;
+  /**
+   * 分享idea链接
+   * @param ideaId 
+   */
+  shareIdea(ideaId: string): void {
+    // 构建idea的完整URL
+    const baseUrl = window.location.origin;
+    const ideaUrl = `${baseUrl}/idea/${ideaId}`;
+    
+    // 使用Clipboard API复制链接
+    navigator.clipboard.writeText(ideaUrl)
+      .then(() => {
+        this.toastService.showSuccess('Link copied to clipboard');
+      })
+      .catch(err => {
+        console.error('Failed to copy link: ', err);
+        this.toastService.showError('Failed to copy link');
+      });
+  }
 } 
