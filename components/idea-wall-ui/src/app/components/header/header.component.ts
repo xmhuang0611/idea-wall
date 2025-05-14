@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/auth.service';
 import { ButtonModule } from 'primeng/button';
@@ -26,7 +26,15 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
           </div>
           
           <!-- Right Side -->
-          <div>
+          <div class="flex">
+            <p-avatar 
+              *ngIf="isAdmin"
+              icon="pi pi-cog"
+              shape="circle"
+              [style]="{'color': 'var(--primary-color)'}"
+              class="cursor-pointer mr-2"
+              (click)="goToSettings()">
+            </p-avatar>
             <ng-container *ngIf="!isLoggedIn; else userIcon">
               <button pButton
                       label="Login"
@@ -115,6 +123,29 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
       }
     }
 
+    .settings-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #f3f4f6;
+      color: #4b5563;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      
+      &:hover {
+        background-color: #e5e7eb;
+        color: #1f2937;
+      }
+
+      i {
+        font-size: 1.2rem;
+      }
+    }
+
     .user-menu {
       min-width: 180px;
     }
@@ -192,13 +223,18 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
 })
 export class HeaderComponent implements OnInit {
   isLoggedIn = false;
+  isAdmin = false;
+  
+  constructor(private authService: AuthService, private router: Router) {}
   username = '';
 
-  constructor(private authService: AuthService) {}
   
   ngOnInit() {
     this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
+      this.authService.getUserRoles().subscribe(roles => {
+        this.isAdmin = roles.includes('ADMIN');
+      });
       this.username = this.authService.getUserName() || 'User';
     }
   }
@@ -209,9 +245,22 @@ export class HeaderComponent implements OnInit {
     this.username = this.authService.getUserName() || 'User';
   }
 
-  logout() {
-    this.authService.logout();
+  logout(): void {
+    // First navigate to home if not already there
+    if (this.router.url !== '/') {
+      this.router.navigate(['/']).then(() => {
+        // After navigation is complete, perform logout
+        this.authService.logout();
+      });
+    } else {
+      // If already on home page, just logout
+      this.authService.logout();
+    }
     this.isLoggedIn = false;
     this.username = '';
   }
+
+  goToSettings(): void {
+    this.router.navigate(['/settings']);
 } 
+}

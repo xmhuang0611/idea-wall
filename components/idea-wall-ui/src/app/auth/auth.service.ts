@@ -6,6 +6,9 @@ import { authConfig } from './auth.config';
 import { Observable, of, Subject } from 'rxjs';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
+import { RoleDisplayService } from '../utils/role-display.service';
+import { UserService } from '../services/user.service';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +23,9 @@ export class AuthService {
 
   constructor(
     private oauthService: OAuthService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private roleDisplayService: RoleDisplayService,
+    private userService: UserService
   ) {
     if (this.useOauth) {
       this.configureOAuth();
@@ -106,6 +111,32 @@ export class AuthService {
 
   public getUserName(): string {
     return this.decodedAccessToken && (this.decodedAccessToken.user_name || '') || '';
+  }
+
+  public getUserRoles(): Observable<string[]> {
+    const userId = this.getId();
+    if (!userId) {
+      return of([]);
+    }
+
+    return this.userService.getUser(userId).pipe(
+      map(response => {
+        if (response.success && response.data) {
+          return response.data.roles.map(role => role.toString());
+        }
+        return [];
+      }),
+      catchError(() => {
+        // Fallback to token roles if API call fails
+        return of(this.decodedAccessToken?.roles || []);
+      })
+    );
+  }
+
+  public getUserDisplayRoles(): Observable<string[]> {
+    return this.getUserRoles().pipe(
+      map(roles => this.roleDisplayService.getDisplayNames(roles))
+    );
   }
 
   public isLoggedIn(): boolean {

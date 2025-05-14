@@ -80,6 +80,29 @@ code = 200 | 201 | 204 | 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500
 GET /api/users/{user_id}
 ```
 
+Response Body:
+```json
+{
+    "success": true,
+    "data": {
+        "user_id": "u123456",
+        "nickname": "Alice",
+        "avatar_url": "https://example.com/avatar.jpg",
+        "email": "alice@example.com",
+        "bio": "Product manager, Innovator",
+        "role": "USER",
+        "point_rank": 8,
+        "notification_prefs": {
+            "email": true,
+            "in_app": true
+        },
+        "privacy_settings": {
+            "show_email": false
+        }
+    }
+}
+```
+
 #### Get All Users with Roles
 
 ```http

@@ -158,6 +158,34 @@ Store notifications for all users.
 - IDEA_INCUBATOR_REVIEWER
 - ADMIN
 
+## User Info
+
+### UserInfo Collection 
+
+| Field               | Type        | Description                                         | Example                          |
+|---------------------|-------------|-----------------------------------------------------|-----------------------------------|
+| user_id             | String      | Unique user identifier                              | "u123456"                        |
+| nickname            | String      | User's display name                                 | "Alice"                          |
+| avatar_url          | String      | URL of user's avatar                                | "https://..."                    |
+| email               | String      | User's email address                                | "alice@example.com"              |
+| bio                 | String      | User's personal introduction or bio                 | "Product manager, Innovator"     |
+| role                | String      | User role (e.g., USER, IDEA_SESSION_PANNEL_REVIEWER, IDEA_INCUBATOR_REVIEWER, ADMIN) | "USER" |
+| point_rank          | Number      | User's rank in the points leaderboard               | 8                                |
+| notification_prefs  | Object      | Notification preferences (channels, frequency, etc) | { "email": true, "in_app": true } |
+| privacy_settings    | Object      | Privacy settings for profile and notifications      | { "show_email": false }           |
+
+#### Notes
+
+- To get the total number of ideas or pain points for a user, aggregate queries can be performed on the Ideas Collection using `user_id`.
+- The `role` field indicates the user's role in the system, such as USER, IDEA_SESSION_PANNEL_REVIEWER, IDEA_INCUBATOR_REVIEWER, or ADMIN.
+
+
+
+#### Indexes
+
+- `user_id`: Unique index
+
+
 ### Idea Categories
 
 - Idea
