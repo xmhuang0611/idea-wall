@@ -14,27 +14,27 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-  isLoggedIn = false;
   isAdmin = false;
-  
-  constructor(private authService: AuthService, private router: Router) {}
   username = '';
 
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  constructor(private authService: AuthService, private router: Router) {}
   
   ngOnInit() {
-    this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
       this.authService.getUserRoles().subscribe(roles => {
         this.isAdmin = roles.includes('ADMIN');
       });
-      this.username = this.authService.getUserName() || 'User';
+      this.username = this.authService.getUserName();
     }
   }
 
   login() {
     this.authService.login();
-    this.isLoggedIn = true;
-    this.username = this.authService.getUserName() || 'User';
+    this.username = this.authService.getUserName();
   }
 
   logout(): void {
@@ -46,7 +46,6 @@ export class HeaderComponent implements OnInit {
     // Then logout
     setTimeout(() => {
       this.authService.logout();
-      this.isLoggedIn = false;
     }, 100);
   }
 

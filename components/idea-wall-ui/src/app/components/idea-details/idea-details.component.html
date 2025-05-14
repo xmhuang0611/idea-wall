@@ -57,7 +57,8 @@
           <p-tag *ngFor="let tag of idea.tag_details" 
                 [value]="tag.tag_name"
                 [severity]="getTagSeverity(tag.tag_name)"
-                styleClass="p-tag-rounded mr-2 mb-1">
+                styleClass="mr-2 mb-1"
+                [rounded]="true">
           </p-tag>
         </div>
         
