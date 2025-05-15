@@ -9,11 +9,13 @@ class IdeaService:
     def __init__(self):
         self.collection_name = "ideas"
 
-    def _build_filter_query(
+    async def _build_filter_query(
         self,
         search: Optional[str] = None,
         tags: Optional[List[int]] = None,
-        creator_id: Optional[str] = None
+        creator_id: Optional[str] = None,
+        voted_by: Optional[str] = None,
+        bookmarked_by: Optional[str] = None
     ) -> Dict[str, Any]:
         filter_query = {}
             
@@ -31,17 +33,76 @@ class IdeaService:
         # Filter by creator
         if creator_id:
             filter_query["creator_id"] = creator_id
+
+        # Collect all idea IDs that need to be filtered
+        idea_ids_to_filter = []
+        
+        # Get voted ideas if needed
+        if voted_by:
+            voted_idea_ids = await self._get_voted_idea_ids(voted_by)
+            if voted_idea_ids:
+                idea_ids_to_filter.append(voted_idea_ids)
+            else:
+                # If user hasn't voted for any ideas, return empty result
+                filter_query["_id"] = {"$in": []}
+                return filter_query
+
+        # Get bookmarked ideas if needed
+        if bookmarked_by:
+            bookmarked_idea_ids = await self._get_bookmarked_idea_ids(bookmarked_by)
+            if bookmarked_idea_ids:
+                idea_ids_to_filter.append(bookmarked_idea_ids)
+            else:
+                # If user hasn't bookmarked any ideas, return empty result
+                filter_query["_id"] = {"$in": []}
+                return filter_query
+
+        # If we have any idea IDs to filter by, find their intersection
+        if idea_ids_to_filter:
+            # If we have multiple sets of IDs, find their intersection
+            if len(idea_ids_to_filter) > 1:
+                # Convert all sets to sets of strings for intersection
+                idea_id_sets = [set(str(id) for id in ids) for ids in idea_ids_to_filter]
+                # Find intersection
+                intersection = set.intersection(*idea_id_sets)
+                # Convert back to ObjectId
+                filter_query["_id"] = {"$in": [ObjectId(id) for id in intersection]}
+            else:
+                # If only one set of IDs, use it directly
+                filter_query["_id"] = {"$in": idea_ids_to_filter[0]}
             
         return filter_query
+
+    async def _get_voted_idea_ids(self, user_id: str) -> List[ObjectId]:
+        """Get all idea IDs that a user has voted for"""
+        db = await get_database()
+        votes = await db["votes"].find({
+            "creator_id": user_id,
+            "target_type": "Idea",
+            "vote_status": 1
+        }).to_list(None)
+        return [ObjectId(vote["target_id"]) for vote in votes]
+
+    async def _get_bookmarked_idea_ids(self, user_id: str) -> List[ObjectId]:
+        """Get all idea IDs that a user has bookmarked"""
+        db = await get_database()
+        bookmarks = await db["bookmarks"].find({
+            "creator_id": user_id,
+            "target_type": "Idea",
+            "bookmark_status": 1
+        }).to_list(None)
+        return [ObjectId(bookmark["target_id"]) for bookmark in bookmarks]
 
     async def get_total_ideas(
         self,
         search: Optional[str] = None,
         tags: Optional[List[int]] = None,
-        creator_id: Optional[str] = None
+        creator_id: Optional[str] = None,
+        voted_by: Optional[str] = None,
+        bookmarked_by: Optional[str] = None
     ) -> int:
         db = await get_database()
-        filter_query = self._build_filter_query(search, tags, creator_id)
+        filter_query = await self._build_filter_query(search, tags, creator_id, voted_by, bookmarked_by)
         return await db[self.collection_name].count_documents(filter_query)
 
     async def get_ideas(
@@ -52,12 +113,14 @@ class IdeaService:
         sort_order: Optional[str] = None,
         search: Optional[str] = None,
         tags: Optional[List[int]] = None,
-        creator_id: Optional[str] = None
+        creator_id: Optional[str] = None,
+        voted_by: Optional[str] = None,
+        bookmarked_by: Optional[str] = None
     ) -> List[Idea]:
         db = await get_database()
         
         # Build filter conditions
-        filter_query = self._build_filter_query(search, tags, creator_id)
+        filter_query = await self._build_filter_query(search, tags, creator_id, voted_by, bookmarked_by)
             
         # Build sort conditions
         sort_options = {}
