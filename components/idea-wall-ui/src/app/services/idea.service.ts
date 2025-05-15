@@ -30,6 +30,8 @@ export class IdeaService {
     sort_order?: 'asc' | 'desc';
     tags?: number[];
     creator_id?: string;
+    voted_by?: string;
+    bookmarked_by?: string;
   } = {}): Observable<ApiResponse<Idea[]>> {
     let httpParams = new HttpParams();
     
@@ -55,6 +57,12 @@ export class IdeaService {
     }
     if (params.creator_id) {
       httpParams = httpParams.set('creator_id', params.creator_id);
+    }
+    if (params.voted_by) {
+      httpParams = httpParams.set('voted_by', params.voted_by);
+    }
+    if (params.bookmarked_by) {
+      httpParams = httpParams.set('bookmarked_by', params.bookmarked_by);
     }
 
     return this.http.get<ApiResponse<Idea[]>>(this.apiUrl, { params: httpParams })

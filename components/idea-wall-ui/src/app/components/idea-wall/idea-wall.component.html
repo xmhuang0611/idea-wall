@@ -1,13 +1,31 @@
 <p-card class="mb-5">
   <!-- Submit Button -->
   <div class="flex justify-content-between gap-2 mb-4 align-items-center">
-    <div class="flex align-items-center">
-      <span class="text-base font-medium text-primary">My Ideas</span>
-      <p-inputSwitch [(ngModel)]="showMyIdeas"
-                    [disabled]="!authService.isLoggedIn()"
-                    (ngModelChange)="onMyIdeasChange($event)"
-                    class="ml-2">
-      </p-inputSwitch>
+    <div class="flex align-items-center gap-4">
+      <div class="flex align-items-center">
+        <span class="text-base font-medium text-primary">My Ideas</span>
+        <p-inputSwitch [(ngModel)]="showMyIdeas"
+                      [disabled]="!authService.isLoggedIn()"
+                      (ngModelChange)="onMyIdeasChange($event)"
+                      class="ml-2">
+        </p-inputSwitch>
+      </div>
+      <div class="flex align-items-center">
+        <span class="text-base font-medium text-primary">My Voted</span>
+        <p-inputSwitch [(ngModel)]="showMyVoted"
+                      [disabled]="!authService.isLoggedIn()"
+                      (ngModelChange)="onMyVotedChange($event)"
+                      class="ml-2">
+        </p-inputSwitch>
+      </div>
+      <div class="flex align-items-center">
+        <span class="text-base font-medium text-primary">My Bookmarked</span>
+        <p-inputSwitch [(ngModel)]="showMyBookmarked"
+                      [disabled]="!authService.isLoggedIn()"
+                      (ngModelChange)="onMyBookmarkedChange($event)"
+                      class="ml-2">
+        </p-inputSwitch>
+      </div>
     </div>
     <button pButton
             pRipple

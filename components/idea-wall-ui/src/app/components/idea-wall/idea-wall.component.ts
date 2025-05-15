@@ -50,6 +50,8 @@ export class IdeaWallComponent implements OnInit {
   ideas: Idea[] = [];
   currentUserId: string = '';
   showMyIdeas: boolean = false;
+  showMyVoted: boolean = false;
+  showMyBookmarked: boolean = false;
   
   // Search and filter conditions
   searchQuery = '';
@@ -130,6 +132,14 @@ export class IdeaWallComponent implements OnInit {
 
     if (this.showMyIdeas) {
       params.creator_id = this.currentUserId;
+    }
+
+    if (this.showMyVoted) {
+      params.voted_by = this.currentUserId;
+    }
+
+    if (this.showMyBookmarked) {
+      params.bookmarked_by = this.currentUserId;
     }
     
     // Add tags filter if selected
@@ -327,6 +337,16 @@ export class IdeaWallComponent implements OnInit {
   }
 
   onMyIdeasChange(checked: boolean): void {
+    this.currentPage = 1;
+    this.loadIdeas();
+  }
+
+  onMyVotedChange(checked: boolean): void {
+    this.currentPage = 1;
+    this.loadIdeas();
+  }
+
+  onMyBookmarkedChange(checked: boolean): void {
     this.currentPage = 1;
     this.loadIdeas();
   }
