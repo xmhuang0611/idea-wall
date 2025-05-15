@@ -4,6 +4,8 @@ from core.database import get_database
 from models.idea import IdeaCreate, IdeaUpdate, IdeaInDB, Idea, IdeaTag
 from bson import ObjectId
 from services.tag_service import tag_service
+from models.log import ObjectType, OperationType
+from utils.logging_utils import record_operation_log
 
 class IdeaService:
     def __init__(self):
@@ -168,7 +170,7 @@ class IdeaService:
         )
         
         result = await db[self.collection_name].insert_one(idea_in_db.model_dump())
-        return Idea(
+        result_idea = Idea(
             id=str(result.inserted_id),
             **idea_dict,
             created_at=idea_in_db.created_at,
@@ -180,6 +182,18 @@ class IdeaService:
             total_votes=0,
             total_comments=0
         )
+        
+        # Add log record
+        await record_operation_log(
+            object_type=ObjectType.IDEA,
+            object_id=str(result.inserted_id),
+            object_data=result_idea,
+            operation_type=OperationType.CREATE,
+            user_id=creator_id,
+            user_name=creator_name
+        )
+        
+        return result_idea
 
     async def update_idea(self, idea_id: str, idea: IdeaUpdate, updater_id: str, updater_name: str) -> Optional[Idea]:
         db = await get_database()
@@ -205,7 +219,20 @@ class IdeaService:
         
         if result.modified_count > 0:
             # Get updated idea
-            return await self.get_idea(idea_id)
+            updated_idea = await self.get_idea(idea_id)
+            
+            # Add log record
+            if updated_idea:
+                await record_operation_log(
+                    object_type=ObjectType.IDEA,
+                    object_id=idea_id,
+                    object_data=updated_idea,
+                    operation_type=OperationType.UPDATE,
+                    user_id=updater_id,
+                    user_name=updater_name
+                )
+            
+            return updated_idea
         return None
 
     async def update_votes(self, idea_id: str, vote_change: int) -> bool:

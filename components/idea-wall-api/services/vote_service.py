@@ -6,6 +6,8 @@ from models.vote import VoteCreate, VoteInDB, Vote
 from .idea_service import idea_service
 from .comment_service import comment_service
 from bson import ObjectId
+from models.log import ObjectType, OperationType
+from utils.logging_utils import record_operation_log
 
 class VoteService:
     def __init__(self):
@@ -86,7 +88,8 @@ class VoteService:
             if vote_change != 0:
                 await target_service.update_votes(vote.target_id, vote_change)
             
-            return Vote(
+            # Create updated Vote object
+            updated_vote = Vote(
                 id=existing_vote.id,
                 vote_status=vote.vote_status,
                 target_id=vote.target_id,
@@ -98,6 +101,18 @@ class VoteService:
                 updater_id=creator_id,
                 updater_name=creator_name
             )
+            
+            # Add log record for update operation
+            await record_operation_log(
+                object_type=ObjectType.VOTE,
+                object_id=existing_vote.id,
+                object_data=updated_vote,
+                operation_type=OperationType.UPDATE,
+                user_id=creator_id,
+                user_name=creator_name
+            )
+            
+            return updated_vote
         
         # Create new vote
         vote_in_db = VoteInDB(
@@ -114,9 +129,11 @@ class VoteService:
         if vote.vote_status != 0:
             await target_service.update_votes(vote.target_id, vote.vote_status)
         
-        return Vote(
+        result_vote = Vote(
             id=str(result.inserted_id),
-            **vote.model_dump(),
+            vote_status=vote.vote_status,
+            target_id=vote.target_id,
+            target_type=vote.target_type,
             created_at=vote_in_db.created_at,
             creator_id=creator_id,
             creator_name=creator_name,
@@ -124,5 +141,17 @@ class VoteService:
             updater_id=creator_id,
             updater_name=creator_name
         )
+        
+        # Add log record for create operation
+        await record_operation_log(
+            object_type=ObjectType.VOTE,
+            object_id=str(result.inserted_id),
+            object_data=result_vote,
+            operation_type=OperationType.CREATE,
+            user_id=creator_id,
+            user_name=creator_name
+        )
+        
+        return result_vote
 
 vote_service = VoteService() 

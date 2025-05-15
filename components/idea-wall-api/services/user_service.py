@@ -1,6 +1,8 @@
 from typing import Optional
 from core.database import get_database
 from models.user import User, UserRole
+from models.log import ObjectType, OperationType
+from utils.logging_utils import record_operation_log
 
 class UserService:
     def __init__(self):
@@ -61,7 +63,21 @@ class UserService:
         
         if result.modified_count > 0:
             # Get updated user
-            return await self.get_user(user_id)
+              # Get updated user
+            updated_user = await self.get_user(user_id)
+            
+            # Add log
+            if updated_user:
+                await record_operation_log(
+                    object_type=ObjectType.USER,
+                    object_id=user_id,
+                    object_data=updated_user,
+                    operation_type=OperationType.UPDATE,
+                    # user_id=creator_id,
+                    # user_name=creator_name
+                )
+            
+            return updated_user
         return None
 
 # Create a singleton instance

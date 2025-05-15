@@ -2,6 +2,8 @@ from typing import List, Optional
 from core.database import get_database
 from models.comment import CommentCreate, CommentInDB, Comment
 from bson import ObjectId
+from models.log import ObjectType, OperationType
+from utils.logging_utils import record_operation_log
 
 class CommentService:
     def __init__(self):
@@ -46,16 +48,16 @@ class CommentService:
             votes=0
         )
         
-        # 创建评论
+        # Create comment
         result = await db[self.collection_name].insert_one(comment_in_db.model_dump())
         
-        # 更新idea的评论数量
+        # Update idea comment count
         await db["ideas"].update_one(
             {"_id": ObjectId(comment.idea_id)},
             {"$inc": {"total_comments": 1}}
         )
         
-        return Comment(
+        result_comment = Comment(
             id=str(result.inserted_id),
             **comment_dict,
             created_at=comment_in_db.created_at,
@@ -66,6 +68,18 @@ class CommentService:
             updater_name=creator_name,
             votes=0
         )
+        
+        # Add log record for create operation
+        await record_operation_log(
+            object_type=ObjectType.COMMENT,
+            object_id=str(result.inserted_id),
+            object_data=result_comment,
+            operation_type=OperationType.CREATE,
+            user_id=creator_id,
+            user_name=creator_name
+        )
+        
+        return result_comment
 
     async def update_votes(self, comment_id: str, vote_change: int) -> bool:
         db = await get_database()
