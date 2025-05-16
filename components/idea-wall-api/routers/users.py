@@ -34,7 +34,7 @@ async def update_user_roles(
         )
     
     # 更新用户角色
-    updated_user = await user_service.update_user_roles(user_id, request.roles)
+    updated_user = await user_service.update_user_roles(user_id, request.roles, current_user)
     if not updated_user:
         return StandardResponse(
             success=False,
