@@ -28,8 +28,8 @@
       }
       
       .p-timeline-event-opposite {
-        flex: 0.2;
-        padding-right: 1.5rem;
+        flex: 0.15;
+        padding-right: 1rem;
         
         .timeline-user-info {
           display: flex;
@@ -170,7 +170,7 @@
     .history-timeline {
       .custom-timeline {
         .p-timeline-event-opposite {
-          flex: 0.25;
+          flex: 0.2;
           padding-right: 1rem;
           
           .timeline-user-info {
@@ -185,7 +185,7 @@
         }
         
         .p-timeline-event-content {
-          flex: 0.75;
+          flex: 0.8;
           padding-left: 1rem;
           
           .history-card {
