@@ -21,6 +21,8 @@ import { AuthService } from '../../auth/auth.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { TagService } from '../../services/tag.service';
 import { TagUtilService, TagOption } from '../../shared/services/tag-util.service';
+import { UserService } from '../../services/user.service';
+import { UserRole } from '../../models/user.model';
 
 @Component({
   selector: 'app-idea-wall',
@@ -49,6 +51,7 @@ import { TagUtilService, TagOption } from '../../shared/services/tag-util.servic
 export class IdeaWallComponent implements OnInit {
   ideas: Idea[] = [];
   currentUserId: string = '';
+  isAdmin: boolean = false;
   showMyIdeas: boolean = false;
   showMyVoted: boolean = false;
   showMyBookmarked: boolean = false;
@@ -84,12 +87,14 @@ export class IdeaWallComponent implements OnInit {
     private route: ActivatedRoute,
     private toastService: ToastService,
     private tagService: TagService,
-    private tagUtilService: TagUtilService
+    private tagUtilService: TagUtilService,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
       this.currentUserId = this.authService.getId();
+      this.checkAdminRole();
     }
     
     this.loadTags();
@@ -395,5 +400,33 @@ export class IdeaWallComponent implements OnInit {
         console.error('Bookmark failed', error);
       }
     });
+  }
+
+  /**
+   * 检查当前用户是否为管理员
+   */
+  private checkAdminRole(): void {
+    const userId = this.authService.getId();
+    if (userId) {
+      this.userService.getUser(userId).subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            // 检查用户角色是否包含 ADMIN
+            this.isAdmin = response.data.roles.some(role => role === 'ADMIN');
+          }
+        },
+        error: (error) => {
+          console.error('Error checking admin role:', error);
+          this.isAdmin = false;
+        }
+      });
+    }
+  }
+
+  /**
+   * 检查用户是否有权限编辑想法
+   */
+  canEditIdea(idea: Idea): boolean {
+    return this.isAdmin || idea.creator_id === this.currentUserId;
   }
 } 
