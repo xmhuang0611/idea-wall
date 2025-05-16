@@ -111,10 +111,10 @@
         <!-- Feeling Column -->
         <div class="flex flex-column align-items-center mr-3" style="width: 64px">
           <div class="feeling-image-container">
-            <img [src]="getFeelingImage(idea.feeling)"
-                 [alt]="getFeelingLabel(idea.feeling)"
+            <img [src]="feelingUtil.getFeelingImage(idea.feeling)"
+                 [alt]="feelingUtil.getFeelingLabel(idea.feeling)"
                  class="feeling-image"
-                 [title]="getFeelingLabel(idea.feeling)">
+                 [title]="feelingUtil.getFeelingLabel(idea.feeling)">
           </div>
         </div>
 
@@ -124,6 +124,13 @@
           <div class="flex justify-content-between align-items-center mb-2">
             <h3 class="text-primary m-0">{{idea.title}}</h3>
             <div class="flex gap-2">
+              <button pButton
+                      icon="pi pi-history"
+                      class="p-button-rounded p-button-text p-button-sm"
+                      (click)="viewIdeaHistory(idea.id)"
+                      pTooltip="View History"
+                      tooltipPosition="top">
+              </button>
               <button *ngIf="canEditIdea(idea)"
                       pButton
                       icon="pi pi-pencil"
@@ -150,7 +157,7 @@
           <div class="flex flex-wrap mb-3">
             <p-tag *ngFor="let tag of idea.tag_details || []" 
                   [value]="tag?.tag_name || ''"
-                  [severity]="getTagSeverity(tag?.tag_name || '')"
+                  severity="info"
                   styleClass="mr-1 mb-1"
                   [rounded]="true">
             </p-tag>
@@ -241,4 +248,11 @@
   (commentCountChange)="onCommentCountChange($event)"
   (voteStatusChange)="onVoteStatusChange($event)"
   (ideaDeleted)="onIdeaDeleted($event)">
-</app-idea-details-drawer> 
+</app-idea-details-drawer>
+
+<!-- Idea History Dialog -->
+<app-idea-history
+  [ideaId]="historyIdeaId"
+  [visible]="historyDialogVisible"
+  (visibleChange)="historyDialogVisible = $event">
+</app-idea-history> 

@@ -7,6 +7,7 @@ import { ApiResponse } from '../shared/models/api-response.model';
 import { ToastService } from '../shared/services/toast.service';
 import { Comment } from '../models/comment.model';
 import { ApiErrorHandlerService } from '../shared/services/api-error-handler.service';
+import { IdeaHistory } from '../models/idea.model';
 
 @Injectable({
   providedIn: 'root'
@@ -194,6 +195,28 @@ export class IdeaService {
             this.toastService.showSuccess(message);
           }
         }),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  /**
+   * Get history for an idea
+   * @param ideaId Idea ID
+   * @param skip Number of records to skip for pagination
+   * @param limit Number of records to return
+   * @returns Observable with history records
+   */
+  getIdeaHistory(ideaId: string, skip: number = 0, limit: number = 20): Observable<ApiResponse<IdeaHistory[]>> {
+    if (!ideaId) {
+      return throwError(() => new Error('Invalid idea ID'));
+    }
+    
+    let params = new HttpParams()
+      .set('skip', skip.toString())
+      .set('limit', limit.toString());
+    
+    return this.http.get<ApiResponse<IdeaHistory[]>>(`${this.apiUrl}/${ideaId}/history`, { params })
+      .pipe(
         catchError(this.errorHandler.handleError)
       );
   }

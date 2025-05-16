@@ -1,0 +1,83 @@
+<p-dialog 
+  [visible]="visible"
+  (visibleChange)="updateVisibleState($event)"
+  [style]="{width: '90vw', maxWidth: '1000px'}"
+  [modal]="true"
+  [resizable]="false"
+  [draggable]="false"
+  [closable]="true"
+  styleClass="idea-history-dialog"
+  header="Idea History"
+  (onShow)="onDialogShow()">
+  
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-5">
+    <p-progressSpinner 
+      [style]="{width: '50px', height: '50px'}" 
+      strokeWidth="4"
+      fill="var(--surface-ground)" 
+      animationDuration=".5s">
+    </p-progressSpinner>
+  </div>
+  
+  <!-- No Records State -->
+  <div *ngIf="!isLoading && historyRecords.length === 0" class="flex flex-column align-items-center py-5">
+    <i class="pi pi-history text-6xl text-500 mb-3"></i>
+    <span class="text-xl text-500">No history found</span>
+  </div>
+  
+  <!-- History Timeline -->
+  <div *ngIf="!isLoading && historyRecords.length > 0" class="history-timeline">
+    <p-timeline [value]="historyRecords" styleClass="custom-timeline">
+      <ng-template pTemplate="opposite" let-record>
+        <div class="timeline-user-info">
+          <span class="font-bold">
+            {{record.creator_name}}
+          </span>
+          <p class="text-500 m-0">
+            {{record.created_at | date:'MMM d, y h:mm a'}}
+          </p>
+        </div>
+      </ng-template>
+      
+      <ng-template pTemplate="marker" let-record>
+        <div class="custom-marker-container">
+          <span class="custom-marker flex align-items-center justify-content-center text-white"
+                [ngClass]="{'marker-create': record.action === 'create', 'marker-update': record.action === 'update'}">
+            <i class="pi" [ngClass]="{'pi-plus': record.action === 'create', 'pi-pencil': record.action === 'update'}"></i>
+          </span>
+        </div>
+      </ng-template>
+      
+      <ng-template pTemplate="content" let-record>
+        <div class="history-card">
+          <div class="history-card-header">
+            <span class="action-label">
+              {{record.action === 'create' ? 'Created' : 'Updated'}}
+            </span>
+            
+            <div class="feeling-container">
+              <img [src]="feelingUtil.getFeelingImage(record.feeling)"
+                   [alt]="feelingUtil.getFeelingLabel(record.feeling)"
+                   [pTooltip]="feelingUtil.getFeelingLabel(record.feeling)">
+            </div>
+          </div>
+          
+          <div class="history-card-content">
+            <h3 class="history-title">{{record.title}}</h3>
+            <p class="history-description">{{record.description}}</p>
+          </div>
+          
+          <div class="history-card-footer" *ngIf="record.tag_details && record.tag_details.length > 0">
+            <p-tag *ngFor="let tag of record.tag_details" 
+                  [value]="tag?.tag_name || ''"
+                  severity="info"
+                  styleClass="history-tag"
+                  [rounded]="true">
+            </p-tag>
+          </div>
+        </div>
+      </ng-template>
+    </p-timeline>
+  </div>
+</p-dialog>

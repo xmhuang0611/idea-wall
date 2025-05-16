@@ -46,7 +46,7 @@ class UserService:
             users.append(User(**user_dict))
         return users
 
-    async def update_user_roles(self, user_id: str, roles: list[UserRole]) -> Optional[User]:
+    async def update_user_roles(self, user_id: str, roles: list[UserRole], current_user: User) -> Optional[User]:
         """
         Update user roles
         """
@@ -73,8 +73,8 @@ class UserService:
                     object_id=user_id,
                     object_data=updated_user,
                     operation_type=OperationType.UPDATE,
-                    # user_id=creator_id,
-                    # user_name=creator_name
+                    user_id=current_user.user_id,
+                    user_name=current_user.user_name
                 )
             
             return updated_user
