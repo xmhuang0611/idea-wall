@@ -1,4 +1,4 @@
-/* 使用PrimeNG主题变量和类 */
+/* Use PrimeNG theme variables and classes */
 :host {
   .login-form {
     .p-inputtext {
@@ -29,14 +29,14 @@
   }
 }
 
-/* 对话框样式 */
+/* Dialog styles */
 .p-dialog {
   .p-dialog-content {
     border-radius: 0 0 6px 6px;
   }
 }
 
-/* 输入框占位符样式 */
+/* Input placeholder styles */
 input::placeholder {
   color: var(--text-color-secondary);
   opacity: 0.6;

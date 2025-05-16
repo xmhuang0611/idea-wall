@@ -93,10 +93,10 @@ export class SubmitIdeaComponent implements OnInit {
           this.availableTags = response.data;
           this.formattedTags = this.tagUtilService.formatTagsForDisplay(response.data, true);
         }
-        resolve();
+        resolve(); // Continue even if there's an error
       }, error => {
         console.error('Error loading tags:', error);
-        resolve(); // 即使出错也继续
+        resolve(); // Continue even if there's an error
       });
     });
   }
@@ -110,7 +110,7 @@ export class SubmitIdeaComponent implements OnInit {
           const idea = response.data;
           console.log('Loaded idea data:', idea);
           
-          // 正确提取标签ID
+          // Extract tag IDs correctly
           let tagIds: number[] = [];
           tagIds = this.extractTagIds(idea.tags);
           
@@ -179,7 +179,7 @@ export class SubmitIdeaComponent implements OnInit {
   }
 
   private extractTagIds(tags: any[]): number[] {
-    // Correctly extract tag IDs
+    // Extract tag IDs correctly
     return tags.map(tag => typeof tag === 'object' ? tag.tag_id : tag);
   }
 } 

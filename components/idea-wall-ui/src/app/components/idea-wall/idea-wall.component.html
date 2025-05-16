@@ -123,14 +123,24 @@
           <!-- Title and Edit Button -->
           <div class="flex justify-content-between align-items-center mb-2">
             <h3 class="text-primary m-0">{{idea.title}}</h3>
-            <button *ngIf="canEditIdea(idea)"
-                    pButton
-                    icon="pi pi-pencil"
-                    class="p-button-rounded p-button-text p-button-sm"
-                    (click)="$event.stopPropagation(); editIdea(idea.id)"
-                    pTooltip="Edit Idea"
-                    tooltipPosition="top">
-            </button>
+            <div class="flex gap-2">
+              <button *ngIf="canEditIdea(idea)"
+                      pButton
+                      icon="pi pi-pencil"
+                      class="p-button-rounded p-button-text p-button-sm"
+                      (click)="$event.stopPropagation(); editIdea(idea.id)"
+                      pTooltip="Edit Idea"
+                      tooltipPosition="top">
+              </button>
+              <button *ngIf="canEditIdea(idea)"
+                      pButton
+                      icon="pi pi-trash"
+                      class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                      (click)="$event.stopPropagation(); confirmDelete(idea)"
+                      pTooltip="Delete Idea"
+                      tooltipPosition="top">
+              </button>
+            </div>
           </div>
 
           <!-- Description -->
@@ -220,11 +230,15 @@
   </div>
 </p-card>
 
+<!-- Add confirmation dialog -->
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
 <!-- Idea Details Drawer -->
 <app-idea-details-drawer
   [ideaId]="selectedIdeaId"
   [visible]="ideaDetailsVisible"
   (visibleChange)="ideaDetailsVisible = $event"
   (commentCountChange)="onCommentCountChange($event)"
-  (voteStatusChange)="onVoteStatusChange($event)">
+  (voteStatusChange)="onVoteStatusChange($event)"
+  (ideaDeleted)="onIdeaDeleted($event)">
 </app-idea-details-drawer> 

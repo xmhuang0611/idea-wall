@@ -51,7 +51,7 @@ import { UserService } from './services/user.service';
       padding: 0 0.5rem;
     }
 
-    /* 全局滚动条样式 */
+    /* Global scrollbar styles */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -71,7 +71,7 @@ import { UserService } from './services/user.service';
       background: #a8a8a8;
     }
 
-    /* 全局文字渲染优化 */
+    /* Global text rendering optimization */
     * {
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;

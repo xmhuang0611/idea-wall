@@ -78,22 +78,22 @@ base_tags = [
     (2, "Technology", 0),
     (3, "Process Improvement", 0),
     (4, "User Experience", 0),
-    (5, "Security", 2),             # 子标签 (父标签: Technology)
-    (6, "Cost Reduction", 3),       # 修改为子标签 (父标签: Process Improvement)
+    (5, "Security", 2),             # Child tag (Parent: Technology)
+    (6, "Cost Reduction", 3),       # Changed to child tag (Parent: Process Improvement)
     (7, "Employee Satisfaction", 0),
     (8, "Sustainability", 0),
-    (9, "Automation", 2),           # 子标签 (父标签: Technology)
+    (9, "Automation", 2),           # Child tag (Parent: Technology)
     (10, "Customer Service", 0),
-    (11, "Mobile Development", 2),  # 新增子标签 (父标签: Technology)
-    (12, "Cloud Computing", 2),     # 新增子标签 (父标签: Technology)
-    (13, "Blockchain", 2),          # 新增子标签 (父标签: Technology)
-    (14, "AI & ML", 2),             # 新增子标签 (父标签: Technology)
-    (15, "Agile Methods", 3),       # 新增子标签 (父标签: Process Improvement)
-    (16, "Lean Management", 3),     # 新增子标签 (父标签: Process Improvement)
-    (17, "Six Sigma", 3),           # 新增子标签 (父标签: Process Improvement)
-    (18, "Design Thinking", 1),     # 新增子标签 (父标签: Innovation)
-    (19, "Product Innovation", 1),  # 新增子标签 (父标签: Innovation)
-    (20, "Service Innovation", 1)   # 新增子标签 (父标签: Innovation)
+    (11, "Mobile Development", 2),  # New child tag (Parent: Technology)
+    (12, "Cloud Computing", 2),     # New child tag (Parent: Technology)
+    (13, "Blockchain", 2),          # New child tag (Parent: Technology)
+    (14, "AI & ML", 2),             # New child tag (Parent: Technology)
+    (15, "Agile Methods", 3),       # New child tag (Parent: Process Improvement)
+    (16, "Lean Management", 3),     # New child tag (Parent: Process Improvement)
+    (17, "Six Sigma", 3),           # New child tag (Parent: Process Improvement)
+    (18, "Design Thinking", 1),     # New child tag (Parent: Innovation)
+    (19, "Product Innovation", 1),  # New child tag (Parent: Innovation)
+    (20, "Service Innovation", 1)   # New child tag (Parent: Innovation)
 ]
 test_tags = [
     {
@@ -189,9 +189,9 @@ for i in range(20):
     desc = idea_descs[i % len(idea_descs)]
     feeling = random.randint(1, 5)
     
-    # 只选择子标签 (parent_id > 0)
+    # Only select child tags (parent_id > 0)
     child_tags = [t[0] for t in base_tags if t[2] > 0]
-    # 如果没有足够的子标签，确保至少随机选择1个
+    # If there are not enough child tags, ensure at least 1 is selected
     num_tags = min(random.randint(1, 3), len(child_tags))
     tags = random.sample(child_tags, num_tags)
     
