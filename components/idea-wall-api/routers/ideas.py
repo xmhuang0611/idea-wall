@@ -9,6 +9,15 @@ from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaTag
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
 from models.user import UserRole
+from services.log_service import log_service
+from services.tag_service import tag_service
+from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaTag
+from models.response import StandardResponse, Pagination, ErrorDetail
+from models.user import User
+from models.log import ObjectType, OperationType
+import json
+from datetime import datetime
+from bson import ObjectId
 
 router = APIRouter()
 
@@ -186,14 +195,19 @@ async def update_idea(
         data=updated_idea
     )
 
-@router.delete("/{idea_id}", response_model=StandardResponse)
-async def delete_idea(
+@router.get("/{idea_id}/history", response_model=StandardResponse[List[dict]])
+async def get_idea_history(
     idea_id: str,
-    current_user: User = Depends(get_current_user)
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
-    # Check if idea exists
-    existing_idea = await idea_service.get_idea(idea_id)
-    if not existing_idea:
+    """
+    Get the history of an idea
+    """
+    # First check if the idea exists
+    idea = await idea_service.get_idea(idea_id)
+    if not idea:
         return StandardResponse(
             success=False,
             error=ErrorDetail(
@@ -202,39 +216,67 @@ async def delete_idea(
             )
         )
     
-    # Get user from database to check roles
-    db_user = await user_service.get_user(current_user.user_id)
-    if not db_user:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=403,
-                message="User not found"
-            )
-        )
+    # Calculate page number from skip and limit
+    page = (skip // limit) + 1
     
-    # Check if user is the creator or has ADMIN role
-    if existing_idea.creator_id != current_user.user_id and UserRole.ADMIN not in db_user.roles:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=403,
-                message="Only the creator or admin can delete this idea"
-            )
-        )
+    # Get logs for this idea
+    logs = await log_service.list_logs(
+        page=page,
+        page_size=limit,
+        object_type=ObjectType.IDEA,
+        object_id=idea_id,
+        operation_type=None,  # Get all operation types (create, update)
+        start_date=None,
+        end_date=None
+    )
     
-    # Delete idea
-    success = await idea_service.delete_idea(idea_id)
-    if not success:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=500,
-                message="Failed to delete idea"
-            )
-        )
+    # Count total logs for pagination
+    total_logs = await log_service.count_logs(
+        object_type=ObjectType.IDEA,
+        object_id=idea_id
+    )
+    
+    # Convert logs to history records
+    history_records = []
+    for log in logs:
+        try:
+            # Parse the object_data JSON
+            data = json.loads(log.object_data)
+            
+            # Add tag details - they might be missing in the log data
+            if "tags" in data and ("tag_details" not in data or not data["tag_details"]):
+                all_tags = await tag_service.get_all_tags()
+                data["tag_details"] = [{"tag_id": tag.tag_id, "tag_name": tag.tag_name} 
+                                     for tag in all_tags if tag.tag_id in data["tags"]]
+            
+            # Create history record
+            history_record = {
+                "id": log.id,
+                "idea_id": idea_id,
+                "title": data.get("title", ""),
+                "description": data.get("description", ""),
+                "feeling": data.get("feeling", 1),
+                "tags": data.get("tags", []),
+                "tag_details": data.get("tag_details", []),
+                "created_at": log.created_at,
+                "creator_id": log.creator_id,
+                "creator_name": log.creator_name,
+                "action": log.operation_type
+            }
+            
+            history_records.append(history_record)
+        
+        except Exception as e:
+            # Skip malformed log entries
+            print(f"Error parsing log data: {e}")
+            continue
     
     return StandardResponse(
         success=True,
-        message="Idea deleted successfully"
+        data=history_records,
+        pagination=Pagination(
+            skip=skip,
+            limit=limit,
+            total=total_logs
+        )
     )

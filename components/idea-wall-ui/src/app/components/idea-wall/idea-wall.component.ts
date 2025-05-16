@@ -25,6 +25,8 @@ import { UserService } from '../../services/user.service';
 import { UserRole } from '../../models/user.model';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+import { IdeaHistoryComponent } from '../idea-history/idea-history.component';
+import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 
 @Component({
   selector: 'app-idea-wall',
@@ -46,7 +48,8 @@ import { ConfirmationService } from 'primeng/api';
     TooltipModule,
     MultiSelectModule,
     IdeaDetailsComponent,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    IdeaHistoryComponent
   ],
   providers: [ConfirmationService],
   templateUrl: './idea-wall.component.html',
@@ -84,6 +87,10 @@ export class IdeaWallComponent implements OnInit {
 
   isLoading: boolean = false;
 
+  // Idea History dialog
+  historyDialogVisible = false;
+  historyIdeaId = '';
+
   constructor(
     private ideaService: IdeaService,
     private router: Router,
@@ -93,7 +100,8 @@ export class IdeaWallComponent implements OnInit {
     private tagService: TagService,
     private tagUtilService: TagUtilService,
     private userService: UserService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    public feelingUtil: FeelingUtilService
   ) {}
 
   ngOnInit(): void {
@@ -233,29 +241,6 @@ export class IdeaWallComponent implements OnInit {
     });
   }
 
-  getTagSeverity(tag: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {
-    // Return different severities based on tag content to achieve different colors
-    const tagMap: {[key: string]: 'success' | 'info' | 'warning' | 'danger' | 'secondary'} = {
-      'urgent': 'danger',
-      'important': 'warning',
-      'feature': 'info',
-      'enhancement': 'success',
-      'bug': 'danger',
-      'documentation': 'info',
-      'discussion': 'secondary'
-    };
-    
-    const lowerTag = tag.toLowerCase();
-    for (const key in tagMap) {
-      if (lowerTag.includes(key)) {
-        return tagMap[key];
-      }
-    }
-    
-    // Default color
-    return 'info';
-  }
-
   /**
    * Open idea details drawer
    * @param ideaId 
@@ -330,20 +315,6 @@ export class IdeaWallComponent implements OnInit {
    */
   editIdea(ideaId: string): void {
     this.router.navigate(['/submit-idea', ideaId]);
-  }
-
-  getFeelingImage(feeling: number): string {
-    return `assets/images/${feeling}-${this.getFeelingEmoji(feeling)}.png`;
-  }
-
-  getFeelingLabel(feeling: number): string {
-    const labels = ['Terrible', 'Unhappy', 'Thoughtable', 'Happy', 'Unbelievable'];
-    return labels[feeling - 1] || '';
-  }
-
-  getFeelingEmoji(feeling: number): string {
-    const emojis = ['1f92c', '1f621', '1f615', '1f604', '1f929'];
-    return emojis[feeling - 1] || '';
   }
 
   onMyIdeasChange(checked: boolean): void {
@@ -476,5 +447,17 @@ export class IdeaWallComponent implements OnInit {
         console.error('Failed to delete idea:', error);
       }
     });
+
+  }
+
+  /**
+   * View idea history
+   * @param ideaId 
+   */
+  viewIdeaHistory(ideaId: string): void {
+    this.historyIdeaId = ideaId;
+    this.historyDialogVisible = true;
+    // Stop event propagation to prevent opening details
+    event?.stopPropagation();
   }
 } 

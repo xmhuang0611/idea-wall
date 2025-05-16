@@ -23,6 +23,7 @@ import { ConfirmationService } from 'primeng/api';
 import { ToastService } from '../../shared/services/toast.service';
 import { AuthService } from '../../auth/auth.service';
 import { UserService } from '../../services/user.service';
+import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 
 @Component({
   selector: 'app-idea-details-drawer',
@@ -75,7 +76,8 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
     private confirmationService: ConfirmationService,
     private toastService: ToastService,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    public feelingUtil: FeelingUtilService,
   ) {
     this.commentForm = this.fb.group({
       comment: ['', Validators.required]
@@ -329,43 +331,6 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
   
-  getTagSeverity(tag: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {
-    // Return different severities based on tag content to achieve different colors
-    const tagMap: {[key: string]: 'success' | 'info' | 'warning' | 'danger' | 'secondary'} = {
-      'urgent': 'danger',
-      'important': 'warning',
-      'feature': 'info',
-      'enhancement': 'success',
-      'bug': 'danger',
-      'documentation': 'info',
-      'discussion': 'secondary'
-    };
-    
-    const lowerTag = tag.toLowerCase();
-    for (const key in tagMap) {
-      if (lowerTag.includes(key)) {
-        return tagMap[key];
-      }
-    }
-    
-    // Default color
-    return 'info';
-  }
-  
-  getFeelingImage(feeling: number): string {
-    return `assets/images/${feeling}-${this.getFeelingEmoji(feeling)}.png`;
-  }
-
-  getFeelingLabel(feeling: number): string {
-    const labels = ['Terrible', 'Unhappy', 'Thoughtable', 'Happy', 'Unbelievable'];
-    return labels[feeling - 1] || '';
-  }
-
-  getFeelingEmoji(feeling: number): string {
-    const emojis = ['1f92c', '1f621', '1f615', '1f604', '1f929'];
-    return emojis[feeling - 1] || '';
-  }
-
   /**
    * Check if current user is admin
    */

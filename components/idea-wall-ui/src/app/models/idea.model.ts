@@ -20,7 +20,16 @@ export interface Idea {
   updater_name: string;
 }
 
-export interface IdeaTag {
-  tag_id: number;
-  tag_name: string;
+export interface IdeaHistory {
+  id: string;
+  idea_id: string;
+  title: string;
+  description: string;
+  feeling: number;
+  tags?: number[];
+  tag_details?: Tag[];
+  created_at: Date;
+  creator_id: string;
+  creator_name: string;
+  action: string;
 } 

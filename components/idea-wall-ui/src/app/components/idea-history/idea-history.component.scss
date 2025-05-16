@@ -1,0 +1,258 @@
+:host ::ng-deep {
+  .idea-history-dialog {
+    .p-dialog-content {
+      max-height: 70vh;
+      overflow-y: auto;
+      padding: 0 1rem;
+    }
+    
+    .p-dialog-header {
+      padding: 1rem 1.5rem;
+      background-color: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+    }
+  }
+  
+  .history-timeline {
+    padding: 1.5rem 0;
+    
+    .custom-timeline {
+      .p-timeline-event {        
+        &:last-child {
+          margin-bottom: 0;
+          
+          .p-timeline-event-separator:before {
+            height: 50%;
+          }
+        }
+      }
+      
+      .p-timeline-event-opposite {
+        flex: 0.2;
+        padding-right: 1.5rem;
+        
+        .timeline-user-info {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          text-align: right;
+          
+          span {
+            font-size: 0.875rem;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+          }
+          
+          p {
+            font-size: 0.75rem;
+            color: var(--text-color-secondary);
+          }
+        }
+      }
+      
+      .p-timeline-event-separator {
+        .custom-marker-container {
+          display: flex;
+          justify-content: center;
+          position: relative;
+          z-index: 2;
+          
+          .custom-marker {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px var(--surface-ground);
+            
+            &.marker-create {
+              background-color: var(--primary-color);
+            }
+            
+            &.marker-update {
+              background-color: var(--primary-color);
+            }
+            
+            i {
+              font-size: 0.875rem;
+            }
+          }
+        }
+        
+        &:before {
+          content: '';
+          height: 100%;
+          position: absolute;
+          left: 50%;
+          top: 0;
+          transform: translateX(-50%);
+          z-index: 1;
+        }
+      }
+      
+      .p-timeline-event-content {
+        flex: 0.8;
+        padding-left: 1.5rem;
+        position: relative;
+        
+        &:before {
+          display: none;
+        }
+        
+        .history-card {
+          margin-bottom: 1rem;
+          background-color: var(--surface-card);
+          border-radius: 8px;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+          transition: transform 0.2s, box-shadow 0.2s;
+          border: 1px solid var(--surface-border);
+          
+          &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+          }
+          
+          .history-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background-color: var(--surface-section);
+            border-bottom: 1px solid var(--surface-border);
+            
+            .action-label {
+              font-weight: 600;
+              font-size: 1rem;
+              color: var(--text-color);
+            }
+            
+            .feeling-container {
+              img {
+                width: 1.5rem;
+                height: 1.5rem;
+              }
+            }
+          }
+          
+          .history-card-content {
+            padding: 0.75rem 1rem;
+            
+            .history-title {
+              margin: 0 0 0.75rem 0;
+              font-size: 1.25rem;
+              color: var(--primary-color);
+              font-weight: 600;
+            }
+            
+            .history-description {
+              margin: 0;
+              white-space: pre-line;
+              color: var(--text-color);
+              line-height: 1.5;
+            }
+          }
+          
+          .history-card-footer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0 1rem 0.75rem;
+            
+            .history-tag {
+              margin: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  @media screen and (max-width: 768px) {
+    .history-timeline {
+      .custom-timeline {
+        .p-timeline-event-opposite {
+          flex: 0.25;
+          padding-right: 1rem;
+          
+          .timeline-user-info {
+            span {
+              font-size: 0.8rem;
+            }
+            
+            p {
+              font-size: 0.7rem;
+            }
+          }
+        }
+        
+        .p-timeline-event-content {
+          flex: 0.75;
+          padding-left: 1rem;
+          
+          .history-card {
+            .history-card-header {
+              padding: 0.5rem 0.75rem;
+              
+              .action-label {
+                font-size: 0.875rem;
+              }
+              
+              .feeling-container img {
+                width: 1.25rem;
+                height: 1.25rem;
+              }
+            }
+            
+            .history-card-content {
+              padding: 0.75rem;
+              
+              .history-title {
+                font-size: 1.1rem;
+                margin-bottom: 0.5rem;
+              }
+            }
+            
+            .history-card-footer {
+              padding: 0 0.75rem 0.75rem;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  @media screen and (max-width: 576px) {
+    .history-timeline {
+      .custom-timeline {
+        .p-timeline-event {
+          flex-direction: column;
+          
+          .p-timeline-event-opposite {
+            flex: none;
+            width: 100%;
+            padding-right: 0;
+            margin-bottom: 0.5rem;
+            
+            .timeline-user-info {
+              align-items: flex-start;
+              text-align: left;
+            }
+          }
+          
+          .p-timeline-event-separator {
+            margin: 0.5rem 0;
+            
+            &:before {
+              display: none;
+            }
+          }
+          
+          .p-timeline-event-content {
+            flex: none;
+            width: 100%;
+            padding-left: 0;
+          }
+        }
+      }
+    }
+  }
+} 
