@@ -4,9 +4,11 @@ from core.deps import get_current_user, get_current_user_optional
 from services.idea_service import idea_service
 from services.vote_service import vote_service
 from services.bookmark_service import bookmark_service
+from services.user_service import user_service
 from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaTag
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
+from models.user import UserRole
 
 router = APIRouter()
 
@@ -141,13 +143,24 @@ async def update_idea(
             )
         )
     
-    # Check if user is the creator
-    if existing_idea.creator_id != current_user.user_id:
+    # Get user from database to check roles
+    db_user = await user_service.get_user(current_user.user_id)
+    if not db_user:
         return StandardResponse(
             success=False,
             error=ErrorDetail(
                 code=403,
-                message="Only the creator can update this idea"
+                message="User not found"
+            )
+        )
+    
+    # Check if user is the creator or has ADMIN role
+    if existing_idea.creator_id != current_user.user_id and UserRole.ADMIN not in db_user.roles:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=403,
+                message="Only the creator or admin can update this idea"
             )
         )
     
