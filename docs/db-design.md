@@ -86,11 +86,12 @@ Stores tags for categorizing ideas.
 
 Stores operation logs for all system operations.
 
-| Field       | Type        | Description                  | Example Value                |
-|-------------|-------------|------------------------------|------------------------------|
-| object_type | String      | Operating object             | "Idea", "Comments", ...      |
-| object_id   | String      | Operating object id          | ObjectId or Number           |
-| object_data | String      | Operating object json        | { id: 1, tag: "Innovation" } |
+| Field          | Type        | Description                  | Example Value                |
+|----------------|-------------|------------------------------|------------------------------|
+| object_type    | String      | Operating object             | "Idea", "Comments", ...      |
+| operation_type | String      | Type of operation            | "Create", "Update", "Delete" |
+| object_id      | String      | Operating object id          | ObjectId or Number           |
+| object_data    | String      | Operating object json        | { id: 1, tag: "Innovation" } |
 
 ### Notifications
 
