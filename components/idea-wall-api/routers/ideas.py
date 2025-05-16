@@ -185,3 +185,56 @@ async def update_idea(
         success=True,
         data=updated_idea
     )
+
+@router.delete("/{idea_id}", response_model=StandardResponse)
+async def delete_idea(
+    idea_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    # Check if idea exists
+    existing_idea = await idea_service.get_idea(idea_id)
+    if not existing_idea:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=404,
+                message="Idea not found"
+            )
+        )
+    
+    # Get user from database to check roles
+    db_user = await user_service.get_user(current_user.user_id)
+    if not db_user:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=403,
+                message="User not found"
+            )
+        )
+    
+    # Check if user is the creator or has ADMIN role
+    if existing_idea.creator_id != current_user.user_id and UserRole.ADMIN not in db_user.roles:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=403,
+                message="Only the creator or admin can delete this idea"
+            )
+        )
+    
+    # Delete idea
+    success = await idea_service.delete_idea(idea_id)
+    if not success:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=500,
+                message="Failed to delete idea"
+            )
+        )
+    
+    return StandardResponse(
+        success=True,
+        message="Idea deleted successfully"
+    )

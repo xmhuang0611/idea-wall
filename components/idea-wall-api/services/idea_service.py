@@ -251,4 +251,55 @@ class IdeaService:
         )
         return result.modified_count > 0
 
+    async def delete_idea(self, idea_id: str) -> bool:
+        """Delete the specified Idea
+        
+        Args:
+            idea_id: ID of the Idea to be deleted
+            
+        Returns:
+            bool: Whether the deletion was successful
+        """
+        db = await get_database()
+        
+        # Get the Idea to be deleted for logging
+        idea_to_delete = await self.get_idea(idea_id)
+        if not idea_to_delete:
+            return False
+            
+        # Delete the Idea
+        result = await db[self.collection_name].delete_one({"_id": ObjectId(idea_id)})
+        
+        if result.deleted_count > 0:
+            # Log the deletion operation
+            await record_operation_log(
+                object_type=ObjectType.IDEA,
+                object_id=idea_id,
+                object_data=idea_to_delete,
+                operation_type=OperationType.DELETE,
+                user_id=idea_to_delete.updater_id,
+                user_name=idea_to_delete.updater_name
+            )
+            
+            # Delete related vote records
+            await db["votes"].delete_many({
+                "target_id": idea_id,
+                "target_type": "Idea"
+            })
+            
+            # Delete related bookmark records
+            await db["bookmarks"].delete_many({
+                "target_id": idea_id,
+                "target_type": "Idea"
+            })
+            
+            # Delete related comments
+            await db["comments"].delete_many({
+                "idea_id": idea_id
+            })
+            
+            return True
+            
+        return False
+
 idea_service = IdeaService() 

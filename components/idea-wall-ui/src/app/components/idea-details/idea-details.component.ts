@@ -18,6 +18,11 @@ import { Comment } from '../../models/comment.model';
 import { Idea } from '../../models/idea.model';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
+import { ToastService } from '../../shared/services/toast.service';
+import { AuthService } from '../../auth/auth.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-idea-details-drawer',
@@ -37,8 +42,10 @@ import { Router } from '@angular/router';
     PaginatorModule,
     ChipModule,
     RippleModule,
-    TooltipModule
+    TooltipModule,
+    ConfirmDialogModule
   ],
+  providers: [ConfirmationService],
   templateUrl: './idea-details.component.html',
   styleUrls: ['./idea-details.component.scss']
 })
@@ -48,6 +55,7 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() commentCountChange = new EventEmitter<{ideaId: string, count: number}>();
   @Output() voteStatusChange = new EventEmitter<{ideaId: string, has_voted: boolean, totalVotes: number}>();
+  @Output() ideaDeleted = new EventEmitter<string>();
   
   idea: Idea | null = null;
   comments: Comment[] = [];
@@ -58,11 +66,16 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   commentPageSize: number = 5;
   displayedComments: Comment[] = [];
   sidebarWidth: string = '50vw';
+  isAdmin: boolean = false;
   
   constructor(
     private ideaService: IdeaService,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private confirmationService: ConfirmationService,
+    private toastService: ToastService,
+    private authService: AuthService,
+    private userService: UserService
   ) {
     this.commentForm = this.fb.group({
       comment: ['', Validators.required]
@@ -74,6 +87,10 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.loadIdeaDetails();
     // Listen for window size changes
     window.addEventListener('resize', this.onResize.bind(this));
+    // Check admin role if user is logged in
+    if (this.authService.isLoggedIn()) {
+      this.checkAdminRole();
+    }
   }
   
   ngOnDestroy(): void {
@@ -347,5 +364,64 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   getFeelingEmoji(feeling: number): string {
     const emojis = ['1f92c', '1f621', '1f615', '1f604', '1f929'];
     return emojis[feeling - 1] || '';
+  }
+
+  /**
+   * Check if current user is admin
+   */
+  private checkAdminRole(): void {
+    const userId = this.authService.getId();
+    if (userId) {
+      this.userService.getUser(userId).subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            // Check if user has ADMIN role
+            this.isAdmin = response.data.roles.some(role => role === 'ADMIN');
+          }
+        },
+        error: (error) => {
+          console.error('Error checking admin role:', error);
+          this.isAdmin = false;
+        }
+      });
+    }
+  }
+
+  canDeleteIdea(): boolean {
+    if (!this.idea || !this.authService.isLoggedIn()) {
+      return false;
+    }
+    const currentUserId = this.authService.getId();
+    return this.isAdmin || this.idea.creator_id === currentUserId;
+  }
+
+  confirmDelete(): void {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to delete this idea? This action cannot be undone.',
+      header: 'Delete Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.deleteIdea();
+      }
+    });
+  }
+
+  deleteIdea(): void {
+    if (!this.idea) return;
+
+    this.ideaService.deleteIdea(this.idea.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.showSuccess('Idea deleted successfully');
+          this.ideaDeleted.emit(this.idea?.id);
+          this.visibleChange.emit(false);
+          this.router.navigate(['/']);
+        }
+      },
+      error: (error) => {
+        console.error('Failed to delete idea', error);
+        this.toastService.showError('Failed to delete idea');
+      }
+    });
   }
 }

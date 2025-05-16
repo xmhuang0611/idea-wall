@@ -23,6 +23,8 @@ import { TagService } from '../../services/tag.service';
 import { TagUtilService, TagOption } from '../../shared/services/tag-util.service';
 import { UserService } from '../../services/user.service';
 import { UserRole } from '../../models/user.model';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-idea-wall',
@@ -43,8 +45,10 @@ import { UserRole } from '../../models/user.model';
     ProgressSpinnerModule,
     TooltipModule,
     MultiSelectModule,
-    IdeaDetailsComponent
+    IdeaDetailsComponent,
+    ConfirmDialogModule
   ],
+  providers: [ConfirmationService],
   templateUrl: './idea-wall.component.html',
   styleUrls: ['./idea-wall.component.scss']
 })
@@ -88,7 +92,8 @@ export class IdeaWallComponent implements OnInit {
     private toastService: ToastService,
     private tagService: TagService,
     private tagUtilService: TagUtilService,
-    private userService: UserService
+    private userService: UserService,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -403,7 +408,7 @@ export class IdeaWallComponent implements OnInit {
   }
 
   /**
-   * 检查当前用户是否为管理员
+   * Check if current user is admin
    */
   private checkAdminRole(): void {
     const userId = this.authService.getId();
@@ -411,7 +416,7 @@ export class IdeaWallComponent implements OnInit {
       this.userService.getUser(userId).subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            // 检查用户角色是否包含 ADMIN
+            // Check if user has ADMIN role
             this.isAdmin = response.data.roles.some(role => role === 'ADMIN');
           }
         },
@@ -424,9 +429,51 @@ export class IdeaWallComponent implements OnInit {
   }
 
   /**
-   * 检查用户是否有权限编辑想法
+   * Check if user has permission to edit the idea
    */
   canEditIdea(idea: Idea): boolean {
     return this.isAdmin || idea.creator_id === this.currentUserId;
+  }
+
+  onIdeaDeleted(ideaId: string): void {
+    // Remove the deleted idea from the list
+    this.ideas = this.ideas.filter(idea => idea.id !== ideaId);
+    // Update total count
+    this.totalItems--;
+  }
+
+  /**
+   * Show confirmation dialog before deleting an idea
+   * @param idea Idea to be deleted
+   */
+  confirmDelete(idea: Idea): void {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to delete this idea? This action cannot be undone.',
+      header: 'Delete Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.deleteIdea(idea);
+      }
+    });
+  }
+
+  /**
+   * Delete an idea
+   * @param idea Idea to be deleted
+   */
+  deleteIdea(idea: Idea): void {
+    this.ideaService.deleteIdea(idea.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Remove deleted idea from the list
+          this.ideas = this.ideas.filter(i => i.id !== idea.id);
+          // Update total count
+          this.totalItems--;
+        }
+      },
+      error: (error) => {
+        console.error('Failed to delete idea:', error);
+      }
+    });
   }
 } 

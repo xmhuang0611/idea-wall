@@ -8,8 +8,21 @@
   <ng-template pTemplate="header">
     <div class="flex align-items-center justify-content-between py-2 w-full">
       <h3 class="text-xl font-semibold m-0 text-900">Idea Details</h3>
+      <div class="flex align-items-center gap-2">
+        <button *ngIf="canDeleteIdea()"
+                pButton
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-danger p-button-text"
+                (click)="confirmDelete()"
+                pTooltip="Delete Idea"
+                tooltipPosition="left">
+        </button>
+      </div>
     </div>
   </ng-template>
+  
+  <!-- Add confirmation dialog -->
+  <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
   
   <div class="p-fluid idea-container">
     <div *ngIf="isLoading" class="flex justify-content-center align-items-center h-full">

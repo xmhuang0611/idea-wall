@@ -27,7 +27,7 @@ class CommentService:
         return None
 
     async def count_comments(self, idea_id: str) -> int:
-        """获取指定idea_id的评论总数"""
+        """Get total number of comments for a specific idea_id"""
         db = await get_database()
         return await db[self.collection_name].count_documents({"idea_id": idea_id})
 
