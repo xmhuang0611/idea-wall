@@ -422,7 +422,8 @@ export class IdeaWallComponent implements OnInit {
       message: 'Are you sure you want to delete this idea? This action cannot be undone.',
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
-      acceptButtonStyleClass: 'p-button-danger',
+      acceptButtonStyleClass: 'p-button-danger p-button-rounded',
+      rejectButtonStyleClass: 'p-button-rounded',
       accept: () => {
         this.deleteIdea(idea);
       }

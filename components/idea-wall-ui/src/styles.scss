@@ -64,6 +64,84 @@ body {
   }
 }
 
+/* Confirmation Dialog Styles */
+.p-confirm-dialog {
+  .p-dialog-content {
+    padding: 1.5rem;
+    
+    .p-confirm-dialog-message {
+      margin-left: 1rem;
+      line-height: 1.5;
+    }
+  }
+  
+  .p-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    
+    .p-button {
+      border-radius: 2rem;
+      min-width: 6rem;
+      
+      &.p-confirm-dialog-reject {
+        background-color: var(--surface-100);
+        color: var(--text-color);
+        border: 1px solid var(--surface-300);
+        
+        &:hover {
+          background-color: var(--surface-200);
+        }
+      }
+      
+      &.p-confirm-dialog-accept {
+        &.p-button-danger {
+          border-radius: 2rem;
+        }
+      }
+    }
+  }
+}
+
+/* Custom Delete Confirmation Dialog */
+.delete-confirm-dialog {
+  .p-dialog-content {
+    padding: 2rem 1.5rem 1.5rem;
+    display: flex;
+    align-items: center;
+    
+    .p-confirm-dialog-icon {
+      color: var(--red-500);
+      font-size: 1.5rem;
+    }
+    
+    .p-confirm-dialog-message {
+      font-size: 1rem;
+      margin-left: 1rem;
+    }
+  }
+  
+  .p-dialog-footer {
+    .p-button {
+      font-weight: 500;
+      transition: all 0.2s ease;
+      
+      &.p-confirm-dialog-accept {
+        box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
+        
+        &:hover {
+          box-shadow: 0 6px 12px rgba(220, 38, 38, 0.3);
+          transform: translateY(-1px);
+        }
+      }
+      
+      &.p-confirm-dialog-reject:hover {
+        background: var(--surface-200);
+      }
+    }
+  }
+}
+
 .login-dialog-container {
   .p-dialog {
     overflow: hidden;

@@ -3,7 +3,7 @@
   <div class="flex justify-content-between gap-2 mb-4 align-items-center">
     <div class="flex align-items-center gap-4">
       <div class="flex align-items-center">
-        <span class="text-base font-medium text-primary">My Ideas</span>
+        <span class="text-base font-medium">My Ideas</span>
         <p-inputSwitch [(ngModel)]="showMyIdeas"
                       [disabled]="!authService.isLoggedIn()"
                       (ngModelChange)="onMyIdeasChange($event)"
@@ -11,7 +11,7 @@
         </p-inputSwitch>
       </div>
       <div class="flex align-items-center">
-        <span class="text-base font-medium text-primary">My Voted</span>
+        <span class="text-base font-medium">My Voted</span>
         <p-inputSwitch [(ngModel)]="showMyVoted"
                       [disabled]="!authService.isLoggedIn()"
                       (ngModelChange)="onMyVotedChange($event)"
@@ -19,7 +19,7 @@
         </p-inputSwitch>
       </div>
       <div class="flex align-items-center">
-        <span class="text-base font-medium text-primary">My Bookmarked</span>
+        <span class="text-base font-medium">My Bookmarked</span>
         <p-inputSwitch [(ngModel)]="showMyBookmarked"
                       [disabled]="!authService.isLoggedIn()"
                       (ngModelChange)="onMyBookmarkedChange($event)"
@@ -39,9 +39,9 @@
   </div>
 
   <!-- Filters Row -->
-  <div class="flex gap-4 mb-5">
+  <div class="flex gap-3 mb-5">
     <!-- Search -->
-    <div class="flex-2">
+    <div style="width: 50%;">
       <label class="block mb-1">Search</label>
       <div class="p-inputgroup">
         <input type="text"
@@ -57,7 +57,7 @@
     </div>
 
     <!-- Tag Filter -->
-    <div class="flex-1">
+    <div style="width: 25%;">
       <label class="block mb-1">Tags</label>
       <p-multiSelect 
         [options]="availableTags"
@@ -67,8 +67,6 @@
         [showToggleAll]="false"
         placeholder="Filter by tags"
         [style]="{'width': '100%'}"
-        [display]="'chip'"
-        [maxSelectedLabels]="3"
         [resetFilterOnHide]="true"
         [filter]="true"
         filterBy="label"
@@ -77,7 +75,7 @@
     </div>
 
     <!-- Sort -->
-    <div class="flex-1">
+    <div style="width: 25%;">
       <label class="block mb-1">Sort By</label>
       <p-dropdown 
         [options]="[
@@ -238,7 +236,7 @@
 </p-card>
 
 <!-- Add confirmation dialog -->
-<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+<p-confirmDialog [style]="{width: '450px'}" styleClass="delete-confirm-dialog"></p-confirmDialog>
 
 <!-- Idea Details Drawer -->
 <app-idea-details-drawer

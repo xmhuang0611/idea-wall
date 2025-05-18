@@ -64,6 +64,7 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   isLoading: boolean = false;
   commentsLoading: boolean = false;
   isSubmitting: boolean = false;
+  commentText: string = '';
   commentPageSize: number = 5;
   displayedComments: Comment[] = [];
   sidebarWidth: string = '50vw';
@@ -223,25 +224,19 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
   
   submitComment(): void {
-    if (!this.commentForm.valid || !this.ideaId || this.isSubmitting) {
-      return;
-    }
-    
-    const comment = this.commentForm.get('comment')?.value;
-    
-    if (!comment || comment.trim() === '') {
+    if (!this.commentText || this.commentText.trim() === '' || !this.ideaId || this.isSubmitting) {
       return;
     }
     
     this.isSubmitting = true;
     
-    this.ideaService.addComment(this.ideaId, comment)
+    this.ideaService.addComment(this.ideaId, this.commentText)
       .subscribe({
         next: (response) => {
           this.isSubmitting = false;
           if (response.success) {
-            // Reset form
-            this.commentForm.reset();
+            // Reset comment text
+            this.commentText = '';
             
             // Reload comments
             this.loadComments();
@@ -365,7 +360,8 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
       message: 'Are you sure you want to delete this idea? This action cannot be undone.',
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
-      acceptButtonStyleClass: 'p-button-danger',
+      acceptButtonStyleClass: 'p-button-danger p-button-rounded',
+      rejectButtonStyleClass: 'p-button-rounded',
       accept: () => {
         this.deleteIdea();
       }

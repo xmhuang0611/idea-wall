@@ -22,7 +22,7 @@
   </ng-template>
   
   <!-- Add confirmation dialog -->
-  <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+  <p-confirmDialog [style]="{width: '450px'}" styleClass="delete-confirm-dialog"></p-confirmDialog>
   
   <div class="p-fluid idea-container">
     <div *ngIf="isLoading" class="flex justify-content-center align-items-center h-full">
@@ -110,27 +110,27 @@
         </div>
         
         <!-- Comment Input -->
-        <div class="comment-input-container mb-3">
-          <form [formGroup]="commentForm" class="relative">
-            <textarea 
-              pInputTextarea 
-              formControlName="comment" 
-              [rows]="2" 
-              [autoResize]="false"
-              placeholder="Share your comments here"
-              class="w-full comment-textarea">
-            </textarea>
-            <div class="comment-actions">
+        <div>
+          <textarea 
+            pInputTextarea 
+            [(ngModel)]="commentText" 
+            [rows]="3" 
+            [autoResize]="false"
+            placeholder="Share your comments here"
+            class="w-full">
+          </textarea>
+          <div class="flex justify-content-end my-2">
+            <div>
               <button pButton pRipple
-                      label="Submit" 
-                      icon="pi pi-send"
-                      [disabled]="!commentForm.valid || isSubmitting"
-                      [loading]="isSubmitting"
-                      class="p-button-rounded p-button-primary p-button-sm"
-                      (click)="submitComment()">
+                    label="Submit" 
+                    icon="pi pi-send"
+                    [disabled]="!commentText || isSubmitting"
+                    [loading]="isSubmitting"
+                    class="p-button-primary p-button-rounded p-button-sm"
+                    (click)="submitComment()">
               </button>
             </div>
-          </form>
+          </div>
         </div>
         
         <!-- Comments List -->
