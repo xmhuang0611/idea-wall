@@ -20,7 +20,7 @@
                  id="title"
                  formControlName="title"
                  placeholder="Enter a descriptive title"
-                 class="w-full submit-idea-input">
+                 class="w-full">
         </div>
         <small class="p-error block mt-1" *ngIf="ideaForm.get('title')?.invalid && ideaForm.get('title')?.touched">
           Title is required and must be at least 3 characters long
@@ -37,7 +37,7 @@
                     [rows]="5"
                     [autoResize]="true"
                     placeholder="Describe your idea in detail"
-                    class="w-full submit-idea-input"></textarea>
+                    class="w-full"></textarea>
         </div>
         <small class="p-error block mt-1" *ngIf="ideaForm.get('description')?.invalid && ideaForm.get('description')?.touched">
           Description is required and must be at least 10 characters long
@@ -82,10 +82,7 @@
                       optionValue="tag_id"
                       [showToggleAll]="false"
                       placeholder="Select relevant tags"
-                      [style]="{'width': '100%'}"
-                      styleClass="w-full submit-idea-input"
-                      [display]="'chip'"
-                      [maxSelectedLabels]="3"></p-multiSelect>
+                      styleClass="w-full"></p-multiSelect>
         <small class="text-600 block mt-1">Select tags that best describe your idea (optional)</small>
       </div>
 
