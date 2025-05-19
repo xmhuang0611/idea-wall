@@ -1,0 +1,61 @@
+<div class="settings-outer">
+  <div class="settings-container">
+    <aside class="settings-menu">
+      <ul>
+        <li [class.active]="selectedMenu === 'user-management'" (click)="selectMenu('user-management')">
+          User Management
+        </li>
+      </ul>
+    </aside>
+    <main class="settings-content">
+      <section *ngIf="selectedMenu === 'user-management'">
+        <h2>User Management</h2>
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>User Name</th>
+              <th>User Role</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td>{{ user.user_name }}</td>
+              <td>{{ formatRoles(user.roles) }}</td>
+              <td>
+                <button class="edit-btn" (click)="openEditModal(user)">Edit</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Role Edit Modal -->
+<div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3>Edit User Roles</h3>
+    <div class="modal-content">
+      <div class="form-group">
+        <label>Select Roles:</label>
+        <div class="role-options">
+          <div *ngFor="let role of availableRoles" class="role-option">
+            <input
+              type="checkbox"
+              [id]="role"
+              [checked]="isRoleSelected(role)"
+              (change)="toggleRole(role)"
+            >
+            <label [for]="role">{{ roleDisplayMap[role] }}</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeModal()">Cancel</button>
+      <button class="save-btn" (click)="saveRole()">Save</button>
+    </div>
+  </div>
+</div> 
