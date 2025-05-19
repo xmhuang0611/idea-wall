@@ -10,10 +10,11 @@ class UserService:
 
     async def get_user(self, user_id: str) -> Optional[User]:
         """
-        Get a user by ID
+        Get a user by ID (case-insensitive)
         """
         db = await get_database()
-        user_dict = await db[self.collection_name].find_one({"user_id": user_id})
+        # Use regex with case-insensitive flag for user_id comparison
+        user_dict = await db[self.collection_name].find_one({"user_id": {"$regex": f"^{user_id}$", "$options": "i"}})
         if user_dict:
             # Validate and convert roles
             roles = []

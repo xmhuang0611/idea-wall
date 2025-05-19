@@ -24,7 +24,7 @@ class VoteService:
             query = {
                 "target_id": target_id,
                 "target_type": target_type,
-                "creator_id": user_id
+                "creator_id": {"$regex": f"^{user_id}$", "$options": "i"}
             }
             
         vote_dict = await db[self.collection_name].find_one(query)
@@ -37,7 +37,7 @@ class VoteService:
         db = await get_database()
         votes = []
         cursor = db[self.collection_name].find({
-            "creator_id": user_id,
+            "creator_id": {"$regex": f"^{user_id}$", "$options": "i"},
             "target_type": target_type
         })
         
