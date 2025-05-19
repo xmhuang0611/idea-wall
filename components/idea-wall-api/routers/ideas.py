@@ -152,26 +152,18 @@ async def update_idea(
             )
         )
     
-    # Get user from database to check roles
-    db_user = await user_service.get_user(current_user.user_id)
-    if not db_user:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=403,
-                message="User not found"
+    # Check if user is the creator (case-insensitive comparison)
+    if existing_idea.creator_id.upper() != current_user.user_id.upper():
+        # If not creator, check if user is admin
+        db_user = await user_service.get_user(current_user.user_id)
+        if not db_user or UserRole.ADMIN not in db_user.roles:
+            return StandardResponse(
+                success=False,
+                error=ErrorDetail(
+                    code=403,
+                    message="Only the creator or admin can update this idea"
+                )
             )
-        )
-    
-    # Check if user is the creator or has ADMIN role
-    if existing_idea.creator_id != current_user.user_id and UserRole.ADMIN not in db_user.roles:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=403,
-                message="Only the creator or admin can update this idea"
-            )
-        )
     
     # Update idea
     updated_idea = await idea_service.update_idea(
@@ -211,26 +203,18 @@ async def delete_idea(
             )
         )
 
-    # Get user from database to check roles
-    db_user = await user_service.get_user(current_user.user_id)
-    if not db_user:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=403,
-                message="User not found"
+    # Check if user is the creator (case-insensitive comparison)
+    if existing_idea.creator_id.upper() != current_user.user_id.upper():
+        # If not creator, check if user is admin
+        db_user = await user_service.get_user(current_user.user_id)
+        if not db_user or UserRole.ADMIN not in db_user.roles:
+            return StandardResponse(
+                success=False,
+                error=ErrorDetail(
+                    code=403,
+                    message="Only the creator or admin can delete this idea"
+                )
             )
-        )
-
-    # Check if user is the creator or has ADMIN role
-    if existing_idea.creator_id != current_user.user_id and UserRole.ADMIN not in db_user.roles:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=403,
-                message="Only the creator or admin can delete this idea"
-            )
-        )
 
     # Delete idea
     success = await idea_service.delete_idea(idea_id)
