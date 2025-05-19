@@ -49,22 +49,21 @@ class UserService:
 
     async def update_user_roles(self, user_id: str, roles: list[UserRole], current_user: User) -> Optional[User]:
         """
-        Update user roles
+        Update user roles. If roles list is empty, all roles will be removed.
         """
         db = await get_database()
         
-        # Convert roles to strings for storage
+        # Convert roles to strings for storage (empty list is allowed)
         roles_str = [role.value for role in roles]
         
-        # Update user roles
+        # Update user roles with case-insensitive user_id comparison
         result = await db[self.collection_name].update_one(
-            {"user_id": user_id},
+            {"user_id": {"$regex": f"^{user_id}$", "$options": "i"}},
             {"$set": {"roles": roles_str}}
         )
         
         if result.modified_count > 0:
             # Get updated user
-              # Get updated user
             updated_user = await self.get_user(user_id)
             
             # Add log

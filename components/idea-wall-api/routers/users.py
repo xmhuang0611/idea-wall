@@ -22,7 +22,10 @@ async def update_user_roles(
     request: UpdateUserRolesRequest,
     current_user: User = Depends(user_has_role(UserRole.ADMIN))
 ):
-    # 检查用户是否存在
+    """
+    Update user roles. An empty roles list will remove all roles from the user.
+    """
+    # Check if user exists
     existing_user = await user_service.get_user(user_id)
     if not existing_user:
         return StandardResponse(
@@ -33,7 +36,7 @@ async def update_user_roles(
             )
         )
     
-    # 更新用户角色
+    # Update user roles (empty list is allowed)
     updated_user = await user_service.update_user_roles(user_id, request.roles, current_user)
     if not updated_user:
         return StandardResponse(
