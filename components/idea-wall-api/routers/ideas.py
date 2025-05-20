@@ -5,15 +5,14 @@ from services.idea_service import idea_service
 from services.vote_service import vote_service
 from services.bookmark_service import bookmark_service
 from services.user_service import user_service
-from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaTag
+from models.idea import Idea, IdeaCreate, IdeaUpdate
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
 from models.user import UserRole
 from services.log_service import log_service
 from services.tag_service import tag_service
-from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaTag
+from models.idea import Idea, IdeaCreate, IdeaUpdate
 from models.response import StandardResponse, Pagination, ErrorDetail
-from models.user import User
 from models.log import ObjectType, OperationType
 import json
 from datetime import datetime
