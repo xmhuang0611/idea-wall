@@ -1,32 +1,42 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { User, UserRole } from '../../../models/user.model';
 import { UserService } from '../../../services/user.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { ApiResponse } from '../../../shared/models/api-response.model';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ButtonModule, InputTextModule, ConfirmDialogModule],
   template: `
     <section>
-      <h2>User Management</h2>
+      <div class="flex justify-content-between align-items-center mb-3">
+        <h2 class="m-0">User Management</h2>
+        <button pButton pRipple label="Add" icon="pi pi-plus" class="p-button-rounded p-button-primary" (click)="openCreateModal()"></button>
+      </div>
       <table class="user-table">
         <thead>
           <tr>
-            <th>User Name</th>
-            <th>User Role</th>
-            <th>Action</th>
+            <th class="name-column">User Name</th>
+            <th class="id-column">User ID</th>
+            <th class="role-column">User Role</th>
+            <th class="action-column">Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let user of users">
+          <tr *ngFor="let user of filteredUsers">
             <td>{{ user.user_name }}</td>
+            <td>{{ user.user_id }}</td>
             <td>{{ formatRoles(user.roles) }}</td>
-            <td>
-              <button class="edit-btn" (click)="openEditModal(user)">Edit</button>
+            <td class="action-buttons">
+              <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-primary p-button-sm mr-2" (click)="openEditModal(user)"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-secondary p-button-sm" (click)="confirmDeleteUser(user)"></button>
             </td>
           </tr>
         </tbody>
@@ -54,31 +64,108 @@ import { ApiResponse } from '../../../shared/models/api-response.model';
           </div>
         </div>
         <div class="modal-actions">
-          <button class="cancel-btn" (click)="closeModal()">Cancel</button>
-          <button class="save-btn" (click)="saveRole()">Save</button>
+          <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-rounded p-button-outlined p-button-secondary" (click)="closeModal()"></button>
+          <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-rounded p-button-primary" (click)="saveRole()"></button>
         </div>
       </div>
     </div>
+
+    <!-- Create User Modal -->
+    <div class="modal-backdrop" *ngIf="showCreateModal" (click)="closeCreateModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h3>Create New User</h3>
+        <div class="modal-content">
+          <div class="form-group">
+            <label for="userName">User Name: <span class="required-field">*</span></label>
+            <input type="text" id="userName" class="form-control" [(ngModel)]="newUser.user_name" pInputText>
+          </div>
+          <div class="form-group">
+            <label for="userId">User ID: <span class="required-field">*</span></label>
+            <input type="text" id="userId" class="form-control" [(ngModel)]="newUser.user_id" pInputText>
+          </div>
+          <div class="form-group">
+            <label>Select Roles: <span class="required-field">*</span></label>
+            <div class="role-options">
+              <div *ngFor="let role of availableRoles" class="role-option">
+                <input
+                  type="checkbox"
+                  [id]="'new-'+role"
+                  [checked]="isNewRoleSelected(role)"
+                  (change)="toggleNewRole(role)"
+                >
+                <label [for]="'new-'+role">{{ roleDisplayMap[role] }}</label>
+              </div>
+            </div>
+            <small *ngIf="newUser.roles.length === 0" class="validation-message">At least one role must be selected</small>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-rounded p-button-outlined p-button-secondary" (click)="closeCreateModal()"></button>
+          <button pButton pRipple label="Create" icon="pi pi-check" class="p-button-rounded p-button-primary" (click)="createUser()" [disabled]="!isCreateFormValid()"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
   `,
   styles: [`
     .user-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 24px;
+      margin-top: 16px;
       background: #fff;
       border-radius: 12px;
       overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
       th, td {
-        padding: 14px 18px;
+        padding: 12px 16px;
         border-bottom: 1px solid #e5e7eb;
         text-align: left;
+        vertical-align: middle;
       }
 
       th {
         background: #f3f4f6;
         font-weight: 600;
+        font-size: 0.9rem;
       }
+
+      td {
+        font-size: 0.9rem;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      tr:hover {
+        background-color: #f9fafb;
+      }
+
+      .name-column {
+        width: 30%;
+      }
+
+      .id-column {
+        width: 25%;
+      }
+
+      .role-column {
+        width: 30%;
+      }
+
+      .action-column {
+        width: 15%;
+        text-align: center;
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
     }
 
     .edit-btn {
@@ -133,6 +220,14 @@ import { ApiResponse } from '../../../shared/models/api-response.model';
         margin-bottom: 8px;
         color: #4b5563;
         font-weight: 500;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
       }
     }
 
@@ -194,14 +289,35 @@ import { ApiResponse } from '../../../shared/models/api-response.model';
         background: #2563eb;
       }
     }
+
+    .required-field {
+      color: var(--red-500);
+      margin-left: 4px;
+    }
+
+    .validation-message {
+      color: var(--red-500);
+      font-size: 0.875rem;
+      margin-top: 4px;
+      display: block;
+    }
   `]
 })
 export class UserManagementComponent implements OnInit {
   users: User[] = [];
+  filteredUsers: User[] = [];
   showModal = false;
   selectedUser: User | null = null;
   selectedRoles: UserRole[] = [];
   availableRoles: UserRole[] = ['ADMIN', 'IDEA_SESSION_PANEL_REVIEWER', 'IDEA_INCUBATOR_REVIEWER'];
+  
+  // Create user state
+  showCreateModal = false;
+  newUser: { user_id: string; user_name: string; roles: UserRole[] } = {
+    user_id: '',
+    user_name: '',
+    roles: []
+  };
   
   roleDisplayMap: Record<UserRole, string> = {
     'ADMIN': 'Administrator',
@@ -211,7 +327,8 @@ export class UserManagementComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -223,6 +340,8 @@ export class UserManagementComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.users = response.data;
+          // Filter users with roles
+          this.filteredUsers = this.users.filter(user => user.roles && user.roles.length > 0);
         }
       },
       error: (error) => {
@@ -280,5 +399,104 @@ export class UserManagementComponent implements OnInit {
 
   formatRoles(roles: UserRole[]): string {
     return roles.map(role => this.roleDisplayMap[role]).join(', ');
+  }
+
+  // Create user methods
+  openCreateModal(): void {
+    this.newUser = {
+      user_id: '',
+      user_name: '',
+      roles: []
+    };
+    this.showCreateModal = true;
+  }
+
+  closeCreateModal(): void {
+    this.showCreateModal = false;
+    this.newUser = {
+      user_id: '',
+      user_name: '',
+      roles: []
+    };
+  }
+
+  isNewRoleSelected(role: UserRole): boolean {
+    return this.newUser.roles.includes(role);
+  }
+
+  toggleNewRole(role: UserRole): void {
+    const index = this.newUser.roles.indexOf(role);
+    if (index === -1) {
+      this.newUser.roles.push(role);
+    } else {
+      this.newUser.roles.splice(index, 1);
+    }
+  }
+
+  createUser(): void {
+    // Form is already validated through the disabled button
+    this.userService.createUser(this.newUser)
+      .subscribe({
+        next: (response: ApiResponse<User>) => {
+          if (response.success) {
+            this.toastService.showSuccess('User created successfully');
+            this.fetchUsers();
+            this.closeCreateModal();
+          } else if (response.error) {
+            // Handle specific error messages from the server
+            this.toastService.showError(response.error.message || 'Failed to create user');
+          }
+        },
+        error: (error: any) => {
+          if (error.error?.error?.message) {
+            // Extract error message from API response if available
+            this.toastService.showError(error.error.error.message);
+          } else if (error.status === 409) {
+            this.toastService.showError(`User ID '${this.newUser.user_id}' already exists`);
+          } else {
+            this.toastService.showError('Failed to create user. Please try again.');
+          }
+        }
+      });
+  }
+
+  isCreateFormValid(): boolean {
+    return !!(this.newUser.user_id && 
+             this.newUser.user_name && 
+             this.newUser.roles.length > 0);
+  }
+
+  // Delete user methods
+  confirmDeleteUser(user: User): void {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to delete user "${user.user_name}"?`,
+      header: 'Delete Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.deleteUser(user);
+      }
+    });
+  }
+
+  deleteUser(user: User): void {
+    this.userService.deleteUser(user.user_id)
+      .subscribe({
+        next: (response: ApiResponse<boolean>) => {
+          if (response.success) {
+            this.toastService.showSuccess(`User "${user.user_name}" deleted successfully`);
+            this.fetchUsers();
+          } else if (response.error) {
+            this.toastService.showError(response.error.message || 'Failed to delete user');
+          }
+        },
+        error: (error: any) => {
+          if (error.error?.error?.message) {
+            this.toastService.showError(error.error.error.message);
+          } else {
+            this.toastService.showError('Failed to delete user. Please try again.');
+          }
+        }
+      });
   }
 } 

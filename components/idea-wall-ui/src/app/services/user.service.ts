@@ -37,4 +37,18 @@ export class UserService {
         catchError(this.errorHandler.handleError)
       );
   }
+
+  createUser(user: { user_id: string; user_name: string; roles: UserRole[] }): Observable<ApiResponse<User>> {
+    return this.http.post<ApiResponse<User>>(this.apiUrl, user)
+      .pipe(
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  deleteUser(userId: string): Observable<ApiResponse<boolean>> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/${userId}`)
+      .pipe(
+        catchError(this.errorHandler.handleError)
+      );
+  }
 } 
