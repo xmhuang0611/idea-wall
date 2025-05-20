@@ -52,14 +52,8 @@ async def get_current_user(
         # sub is the standard field in JWT for user ID
         user_id: str = payload.get("sub") or payload.get("user_id") or payload.get("userid")
         user_name: str = payload.get("name") or payload.get("username") or payload.get("user_name")
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token: user ID not found",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
             
-        return User(user_id=user_id, user_name=user_name)
+        return User(user_id=user_id.lower(), user_name=user_name)
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -97,11 +91,8 @@ async def get_current_user_optional(
         # User ID may be stored in different fields depending on the OAuth provider
         user_id: str = payload.get("sub") or payload.get("user_id") or payload.get("userid")
         user_name: str = payload.get("name") or payload.get("username") or payload.get("user_name")
-        
-        if user_id is None:
-            return None
             
-        return User(user_id=user_id, user_name=user_name)
+        return User(user_id=user_id.lower(), user_name=user_name)
     except JWTError:
         return None
 

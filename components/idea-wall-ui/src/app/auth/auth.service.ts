@@ -104,7 +104,7 @@ export class AuthService {
   }
 
   public getId(): any {
-    return this.decodedAccessToken && this.decodedAccessToken.userid;
+    return this.decodedAccessToken && this.decodedAccessToken.userid.toLowerCase();
   }
 
   public getUserName(): string {
