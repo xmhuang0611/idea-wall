@@ -9,6 +9,9 @@ class TagBase(BaseModel):
 class TagCreate(TagBase):
     pass
 
+class TagUpdate(TagBase):
+    pass
+
 class TagInDB(TagBase, AuditModel):
     pass
 

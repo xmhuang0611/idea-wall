@@ -1,34 +1,16 @@
 <div class="settings-outer">
   <div class="settings-container">
-    <aside class="settings-menu">
-      <ul>
-        <li [class.active]="selectedMenu === 'user-management'" (click)="selectMenu('user-management')">
-          User Management
-        </li>
-      </ul>
-    </aside>
+    <app-settings-menu
+      [selectedMenu]="selectedMenu"
+      (menuSelect)="onMenuSelect($event)">
+    </app-settings-menu>
+    
     <main class="settings-content">
-      <section *ngIf="selectedMenu === 'user-management'">
-        <h2>User Management</h2>
-        <table class="user-table">
-          <thead>
-            <tr>
-              <th>User Name</th>
-              <th>User Role</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let user of users">
-              <td>{{ user.user_name }}</td>
-              <td>{{ formatRoles(user.roles) }}</td>
-              <td>
-                <button class="edit-btn" (click)="openEditModal(user)">Edit</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
+      <app-user-management *ngIf="selectedMenu === 'user-management'">
+      </app-user-management>
+      
+      <app-tag-management *ngIf="selectedMenu === 'tags-management'">
+      </app-tag-management>
     </main>
   </div>
 </div>
