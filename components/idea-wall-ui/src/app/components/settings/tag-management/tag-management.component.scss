@@ -35,10 +35,6 @@
 
       &.child-row {
         background: var(--surface-ground);
-        
-        td {
-          padding-left: 2rem;
-        }
       }
 
       > td {
@@ -83,10 +79,6 @@
 
   .child-row {
     background-color: var(--surface-ground);
-  
-    td {
-      padding-left: 2rem;
-    }
   }
   
   :host ::ng-deep {
