@@ -352,7 +352,7 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
       return false;
     }
     const currentUserId = this.authService.getId();
-    return this.isAdmin || this.idea.creator_id.toUpperCase() === currentUserId.toUpperCase();
+    return this.isAdmin || this.idea === currentUserId;
   }
 
   confirmDelete(): void {

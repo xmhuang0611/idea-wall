@@ -22,7 +22,7 @@ class BookmarkService:
             query = {
                 "target_id": target_id,
                 "target_type": target_type,
-                "creator_id": {"$regex": f"^{user_id}$", "$options": "i"}
+                "creator_id": user_id
             }
             
         bookmark_dict = await db[self.collection_name].find_one(query)
@@ -35,7 +35,7 @@ class BookmarkService:
         db = await get_database()
         bookmarks = []
         cursor = db[self.collection_name].find({
-            "creator_id": {"$regex": f"^{user_id}$", "$options": "i"},
+            "creator_id": user_id,
             "target_type": target_type
         })
         
