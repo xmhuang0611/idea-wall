@@ -403,7 +403,7 @@ export class IdeaWallComponent implements OnInit {
    * Check if user has permission to edit the idea
    */
   canEditIdea(idea: Idea): boolean {
-    return this.isAdmin || idea.creator_id.toUpperCase() === this.currentUserId.toUpperCase();
+    return this.isAdmin || idea.creator_id === this.currentUserId;
   }
 
   onIdeaDeleted(ideaId: string): void {

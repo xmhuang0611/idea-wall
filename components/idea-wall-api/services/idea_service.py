@@ -34,7 +34,7 @@ class IdeaService:
 
         # Filter by creator
         if creator_id:
-            filter_query["creator_id"] = {"$regex": f"^{creator_id}$", "$options": "i"}
+            filter_query["creator_id"] = creator_id
 
         # Collect all idea IDs that need to be filtered
         idea_ids_to_filter = []
@@ -79,7 +79,7 @@ class IdeaService:
         """Get all idea IDs that a user has voted for"""
         db = await get_database()
         votes = await db["votes"].find({
-            "creator_id": {"$regex": f"^{user_id}$", "$options": "i"},
+            "creator_id": user_id,
             "target_type": "Idea",
             "vote_status": 1
         }).to_list(None)
@@ -89,7 +89,7 @@ class IdeaService:
         """Get all idea IDs that a user has bookmarked"""
         db = await get_database()
         bookmarks = await db["bookmarks"].find({
-            "creator_id": {"$regex": f"^{user_id}$", "$options": "i"},
+            "creator_id": user_id,
             "target_type": "Idea",
             "bookmark_status": 1
         }).to_list(None)

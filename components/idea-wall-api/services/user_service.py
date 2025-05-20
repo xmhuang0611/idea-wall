@@ -14,7 +14,7 @@ class UserService:
         """
         db = await get_database()
         # Use regex with case-insensitive flag for user_id comparison
-        user_dict = await db[self.collection_name].find_one({"user_id": {"$regex": f"^{user_id}$", "$options": "i"}})
+        user_dict = await db[self.collection_name].find_one({"user_id": user_id})
         if user_dict:
             # Validate and convert roles
             roles = []
@@ -58,7 +58,7 @@ class UserService:
         
         # Update user roles with case-insensitive user_id comparison
         result = await db[self.collection_name].update_one(
-            {"user_id": {"$regex": f"^{user_id}$", "$options": "i"}},
+            {"user_id": user_id},
             {"$set": {"roles": roles_str}}
         )
         

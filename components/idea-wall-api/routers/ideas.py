@@ -153,7 +153,7 @@ async def update_idea(
         )
     
     # Check if user is the creator (case-insensitive comparison)
-    if existing_idea.creator_id.upper() != current_user.user_id.upper():
+    if existing_idea.creator_id != current_user.user_id:
         # If not creator, check if user is admin
         db_user = await user_service.get_user(current_user.user_id)
         if not db_user or UserRole.ADMIN not in db_user.roles:
