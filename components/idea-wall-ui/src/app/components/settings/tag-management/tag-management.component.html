@@ -63,12 +63,7 @@
     <ng-template pTemplate="rowexpansion" let-tag>
       <tr *ngFor="let child of tag.children" class="child-row">
         <td></td>
-        <td>
-          <div class="flex align-items-center">
-            <i class="pi pi-angle-right mr-2"></i>
-            {{ child.tag_name }}
-          </div>
-        </td>
+        <td>{{ child.tag_name }}</td>
         <td>{{ tag.tag_name }}</td>
         <td>{{ child.created_at | date:'medium' }}</td>
         <td>{{ child.updated_at | date:'medium' }}</td>

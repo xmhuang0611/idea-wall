@@ -18,7 +18,7 @@ import { ConfirmationService } from 'primeng/api';
     <section>
       <div class="flex justify-content-between align-items-center mb-3">
         <h2 class="m-0">User Management</h2>
-        <button pButton pRipple label="Add" icon="pi pi-plus" class="p-button-rounded p-button-primary" (click)="openCreateModal()"></button>
+        <button pButton pRipple label="Add User" icon="pi pi-plus" class="p-button-rounded p-button-primary" (click)="openCreateModal()"></button>
       </div>
       <table class="user-table">
         <thead>
@@ -34,9 +34,11 @@ import { ConfirmationService } from 'primeng/api';
             <td>{{ user.user_name }}</td>
             <td>{{ user.user_id }}</td>
             <td>{{ formatRoles(user.roles) }}</td>
-            <td class="action-buttons">
-              <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-primary p-button-sm mr-2" (click)="openEditModal(user)"></button>
-              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-secondary p-button-sm" (click)="confirmDeleteUser(user)"></button>
+            <td>
+              <div class="flex gap-2 justify-content-center">
+                <button pButton pRipple icon="pi pi-pencil" class="p-button-text p-button-rounded" (click)="openEditModal(user)"></button>
+                <button pButton pRipple icon="pi pi-trash" class="p-button-text p-button-rounded p-button-danger" (click)="confirmDeleteUser(user)"></button>
+              </div>
             </td>
           </tr>
         </tbody>
