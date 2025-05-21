@@ -14,6 +14,8 @@ alwaysApply: true
 - 优先使用PrimeNG组件库
 - 按钮使用rounded风格(p-button-rounded)
 - 标签使用rounded风格([rounded]="true")
+- 表格使用p-table组件
+- 对话框使用p-dialog组件, 带确认功能的使用p-confirmDialog
 - 使用PrimeNG提供的图标(pi pi-*)
 - 使用PrimeFlex网格系统和工具类进行布局
 - 利用PrimeFlex提供的工具类:
@@ -23,7 +25,6 @@ alwaysApply: true
   - 响应式: hidden, block, sm:*, md:*, lg:*
 - 颜色使用PrimeNG的变量系统(var(--primary-color)等)
 - 避免直接使用硬编码颜色值,应使用CSS变量
-
 
 ### 组件主题定制
 - 优先使用PrimeNG现有样式
@@ -54,6 +55,7 @@ alwaysApply: true
 ### 代码规范
 - 方法不超过50行
 - 参数不超过4个
+- 避免使用any类型
 - 使用类型注解提高代码可读性
 - 使用接口定义复杂数据结构
 - 组件方法添加适当的JSDoc注释
@@ -62,7 +64,7 @@ alwaysApply: true
 ### 性能优化
 - 使用OnPush变更检测策略减少不必要的渲染
 - 对频繁触发的事件使用防抖/节流
-- 大型列表使用虚拟滚动
+- 大列表使用虚拟滚动 (p-virtualScroller)
+- 表格数据使用分页 (p-paginator)
 - 延迟加载非关键组件
-
-- 避免在模板中使用复杂计算
+- 避免在模板中使用复杂计算, 使用getter或caching rxjs管道
