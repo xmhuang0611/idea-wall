@@ -25,7 +25,7 @@ import { TagManagementComponent } from './tag-management/tag-management.componen
           <app-user-management *ngIf="selectedMenu === 'user-management'">
           </app-user-management>
           
-          <app-tag-management *ngIf="selectedMenu === 'tags-management'">
+          <app-tag-management *ngIf="selectedMenu === 'tag-management'">
           </app-tag-management>
         </main>
       </div>

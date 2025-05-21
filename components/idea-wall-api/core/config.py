@@ -7,7 +7,8 @@ load_dotenv()
 
 class Settings(BaseSettings):
     app_name: str = "Idea Wall API"
-    mongodb_url: str = os.getenv("MONGODB_URL", "mongodb+srv://idea-wall:Ur9idQTkrRl8yLac@idea-wall.1wvgtc4.mongodb.net/?retryWrites=true&w=majority&appName=idea-wall")
+    # mongodb_url: str = os.getenv("MONGODB_URL", "mongodb+srv://idea-wall:Ur9idQTkrRl8yLac@idea-wall.1wvgtc4.mongodb.net/?retryWrites=true&w=majority&appName=idea-wall")
+    mongodb_url: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
     database_name: str = os.getenv("DATABASE_NAME", "idea-wall")
 
 @lru_cache()

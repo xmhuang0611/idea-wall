@@ -28,6 +28,11 @@ import { ConfirmationService } from 'primeng/api';
 import { IdeaHistoryComponent } from '../idea-history/idea-history.component';
 import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 
+interface Topic {
+  name: string;
+  count: number;
+}
+
 @Component({
   selector: 'app-idea-wall',
   standalone: true,
@@ -74,7 +79,7 @@ export class IdeaWallComponent implements OnInit {
 
   // Pagination
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 5;
   totalItems = 0;
   pageSizeOptions = [5, 10, 20, 50, 100];
 
@@ -90,6 +95,9 @@ export class IdeaWallComponent implements OnInit {
   // Idea History dialog
   historyDialogVisible = false;
   historyIdeaId = '';
+
+  hotTopics: Topic[] = [];
+  newestIdeas: Idea[] = [];
 
   constructor(
     private ideaService: IdeaService,
@@ -126,6 +134,9 @@ export class IdeaWallComponent implements OnInit {
     if (ideaIdMatch && ideaIdMatch[1]) {
       this.openDetails(ideaIdMatch[1]);
     }
+
+    this.loadHotTopics();
+    this.loadNewestIdeas();
   }
   
   loadTags(): void {
@@ -460,5 +471,48 @@ export class IdeaWallComponent implements OnInit {
     this.historyDialogVisible = true;
     // Stop event propagation to prevent opening details
     event?.stopPropagation();
+  }
+
+  private loadHotTopics() {
+    // TODO: Implement hot topics fetching logic
+    // Using mock data temporarily
+    this.hotTopics = [
+      { name: 'Product Improvement', count: 15 },
+      { name: 'User Experience', count: 12 },
+      { name: 'New Features', count: 10 },
+      { name: 'Bug Fixes', count: 8 },
+      { name: 'Performance Optimization', count: 6 }
+    ];
+  }
+
+  private loadNewestIdeas() {
+    // Use existing ideaService to fetch latest ideas
+    this.ideaService.getIdeas({
+      limit: 5,
+      sort_by: 'created_at',
+      sort_order: 'desc'
+    }).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.newestIdeas = response.data;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading newest ideas:', error);
+      }
+    });
+  }
+
+  onTopicClick(topic: Topic) {
+    // When clicking a topic, filter the ideas list by matching tags
+    const matchingTags = this.availableTags.filter(tag => 
+      tag.label.toLowerCase().includes(topic.name.toLowerCase())
+    );
+    this.selectedTags = matchingTags.map(tag => tag.tag_id);
+    this.onTagFilterChange();
+  }
+
+  onIdeaClick(ideaId: string) {
+    this.openDetails(ideaId);
   }
 } 

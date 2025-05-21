@@ -196,6 +196,8 @@ export class TagManagementComponent implements OnInit {
       message: `Are you sure you want to delete the tag "${tag.tag_name}"?`,
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger p-button-rounded',
+      rejectButtonStyleClass: 'p-button-rounded',
       accept: () => {
         this.tagService.deleteTag(tag.tag_id).subscribe({
           next: (response: ApiResponse<boolean>) => {

@@ -6,13 +6,6 @@
   flex: 2;
 }
 
-.ideas-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  min-height: 200px;
-}
-
 .idea-card {
   transition: all 0.2s ease;
   cursor: pointer;
