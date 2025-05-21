@@ -314,7 +314,7 @@ export class IdeaWallComponent implements OnInit {
    * @param ideaId 
    */
   editIdea(ideaId: string): void {
-    this.router.navigate(['/submit-idea', ideaId]);
+    this.router.navigate(['/idea-form', ideaId]);
   }
 
   onMyIdeasChange(checked: boolean): void {

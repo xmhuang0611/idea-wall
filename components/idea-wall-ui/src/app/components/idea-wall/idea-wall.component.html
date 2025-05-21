@@ -31,7 +31,7 @@
             pRipple
             icon="pi pi-plus"
             label="Submit Your Idea"
-            routerLink="/submit-idea"
+            routerLink="/idea-form"
             [disabled]="!authService.isLoggedIn()"
             class="p-button-rounded ml-4"
             (click)="!authService.isLoggedIn() && $event.preventDefault()">
