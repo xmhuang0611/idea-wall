@@ -109,7 +109,7 @@ import { ConfirmationService } from 'primeng/api';
     </div>
 
     <!-- Confirmation Dialog -->
-    <p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+<p-confirmDialog [style]="{width: '450px'}" styleClass="delete-confirm-dialog"></p-confirmDialog>
   `,
   styles: [`
     .user-table {
@@ -474,7 +474,8 @@ export class UserManagementComponent implements OnInit {
       message: `Are you sure you want to delete user "${user.user_name}"?`,
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
-      acceptButtonStyleClass: 'p-button-danger',
+      acceptButtonStyleClass: 'p-button-danger p-button-rounded',
+      rejectButtonStyleClass: 'p-button-rounded',
       accept: () => {
         this.deleteUser(user);
       }

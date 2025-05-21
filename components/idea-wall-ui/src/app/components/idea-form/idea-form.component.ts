@@ -21,7 +21,7 @@ interface FeelingOption {
 }
 
 @Component({
-  selector: 'app-submit-idea',
+  selector: 'app-idea-form',
   standalone: true,
   imports: [
     CommonModule,
@@ -34,10 +34,10 @@ interface FeelingOption {
     MultiSelectModule,
     CardModule
   ],
-  templateUrl: './submit-idea.component.html',
-  styleUrls: ['./submit-idea.component.scss']
+  templateUrl: './idea-form.component.html',
+  styleUrls: ['./idea-form.component.scss']
 })
-export class SubmitIdeaComponent implements OnInit {
+export class IdeaFormComponent implements OnInit {
   ideaForm: FormGroup;
   isSubmitting = false;
   availableTags: Tag[] = [];

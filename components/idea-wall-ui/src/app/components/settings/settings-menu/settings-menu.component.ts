@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type SettingsMenu = 'user-management' | 'tags-management';
+export type SettingsMenu = 'user-management' | 'tag-management';
 
 @Component({
   selector: 'app-settings-menu',
@@ -63,7 +63,7 @@ export class SettingsMenuComponent {
 
   menuItems = [
     { id: 'user-management' as SettingsMenu, label: 'User Management' },
-    { id: 'tags-management' as SettingsMenu, label: 'Tags Management' }
+    { id: 'tag-management' as SettingsMenu, label: 'Tag Management' }
   ];
 
   onMenuSelect(menu: SettingsMenu): void {
