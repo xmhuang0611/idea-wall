@@ -47,48 +47,7 @@ import { Idea } from '../../../models/idea.model';
     CheckboxModule,
     RadioButtonModule
   ],
-  template: `
-    <div class="container">
-      <div *ngIf="loading" class="flex justify-content-center py-6">
-        <i class="pi pi-spin pi-spinner text-2xl"></i>
-      </div>
-      
-      <div *ngIf="!loading && session" class="surface-card p-4 shadow-2 border-round mt-4">
-        <!-- Session Header -->
-        <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
-          <div>
-            <h1 class="text-2xl font-semibold m-0">{{session.title}}</h1>
-            <div class="flex align-items-center mt-2">
-              <p-tag 
-                [value]="getStatusLabel(session.status)"
-                [severity]="getStatusSeverity(session.status)"
-                [rounded]="true"
-                class="mr-2"
-              ></p-tag>
-              <span class="text-500">Version {{session.session_version}}</span>
-            </div>
-          </div>
-          
-          <div class="mt-3 md:mt-0">
-            <button 
-              *ngIf="canReview() && !hasReviewed && session.status === 'IN_REVIEW'"
-              pButton 
-              label="Submit Review" 
-              icon="pi pi-check-circle"
-              class="p-button-success p-button-rounded mr-2"
-              (click)="showReviewDialog = true"
-            ></button>
-            
-            <button 
-              *ngIf="canMakeFinalDecision()"
-              pButton 
-              label="Make Final Decision" 
-              icon="pi pi-check-square"
-              class="p-button-primary p-button-rounded"
-              (click)="showDecisionDialog = true"
-            ></button>
-          </div>
-        </div>
+  template: `    <div class="container">      <div *ngIf="loading" class="flex justify-content-center py-6">        <i class="pi pi-spin pi-spinner text-2xl"></i>      </div>            <div *ngIf="!loading && session" class="surface-card p-4 shadow-2 border-round mt-4">        <!-- Session Header -->        <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">          <div>            <h1 class="text-2xl font-semibold m-0">{{session.title}}</h1>            <div class="flex align-items-center mt-2">              <p-tag                 [value]="getStatusLabel(session.status)"                [severity]="getStatusSeverity(session.status)"                [rounded]="true"                class="mr-2"              ></p-tag>              <span class="text-500">Version {{session.session_version}}</span>            </div>          </div>                    <div class="mt-3 md:mt-0">            <button               *ngIf="isReviewer && !hasReviewed"              pButton               label="Submit Review"               icon="pi pi-check-circle"              class="p-button-success p-button-rounded mr-2"              (click)="showReviewDialog = true"            ></button>                        <button               *ngIf="canMakeFinalDecision()"              pButton               label="Make Final Decision"               icon="pi pi-check-square"              class="p-button-primary p-button-rounded"              (click)="showDecisionDialog = true"            ></button>          </div>        </div>
         
         <!-- Session Info -->
         <p-tabView>
@@ -177,19 +136,7 @@ import { Idea } from '../../../models/idea.model';
             </div>
           </p-tabPanel>
           
-          <!-- Reviews Tab -->
-          <p-tabPanel header="Reviews ({{reviews.length}})">
-            <div *ngIf="reviewsLoading" class="flex justify-content-center py-4">
-              <i class="pi pi-spin pi-spinner text-xl"></i>
-            </div>
-            
-            <div *ngIf="!reviewsLoading && reviews.length === 0" class="text-center p-4">
-              <i class="pi pi-comment text-4xl text-500 mb-3"></i>
-              <p class="text-700">No reviews submitted yet.</p>
-            </div>
-            
-            <p-accordion *ngIf="!reviewsLoading && reviews.length > 0">
-              <p-accordionTab *ngFor="let review of reviews" [header]="review.reviewer_name + ' - ' + (review.created_at | date:'short')">
+                              <!-- Reviews Tab -->          <p-tabPanel header="Reviews ({{reviews.length}})">            <div *ngIf="reviewsLoading" class="flex justify-content-center py-4">              <i class="pi pi-spin pi-spinner text-xl"></i>            </div>                        <div *ngIf="!reviewsLoading && reviews.length === 0" class="text-center p-4">              <i class="pi pi-comment text-4xl text-500 mb-3"></i>              <p class="text-700">No reviews yet</p>                            <button                 *ngIf="isReviewer && !hasReviewed && session.status === 'IN_REVIEW'"                pButton                 label="Add Review"                 icon="pi pi-plus-circle"                class="p-button-outlined p-button-rounded mt-3"                (click)="showReviewDialog = true"              ></button>            </div>                        <div *ngIf="!reviewsLoading && reviews.length > 0" class="mb-4 text-center">              <button                 *ngIf="isReviewer && !hasReviewed && session.status === 'IN_REVIEW'"                pButton                 label="Add Review"                 icon="pi pi-plus-circle"                class="p-button-outlined p-button-rounded mb-3"                (click)="showReviewDialog = true"              ></button>            </div>                        <p-accordion *ngIf="!reviewsLoading && reviews.length > 0">              <p-accordionTab *ngFor="let review of reviews" [header]="review.reviewer_name + ' - ' + (review.created_at | date:'short')">
                 <div class="grid">
                   <div class="col-12 md:col-6 mb-3">
                     <div class="flex align-items-center mb-2">
@@ -286,166 +233,11 @@ import { Idea } from '../../../models/idea.model';
         </p-tabView>
       </div>
       
-      <!-- Review Dialog -->
-      <p-dialog 
-        [(visible)]="showReviewDialog" 
-        [style]="{width: '90%', maxWidth: '800px'}" 
-        [modal]="true"
-        [closeOnEscape]="false"
-        [closable]="!submitting"
-        header="Submit Review">
-        <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
-          <div class="grid">
-            <!-- Innovation -->
-            <div class="col-12 mb-3">
-              <label class="block text-900 font-medium mb-2">Innovation</label>
-              <div class="flex align-items-center mb-2">
-                <p-rating formControlName="innovation_score" [cancel]="false"></p-rating>
-                <span class="ml-2">{{reviewForm.get('innovation_score')?.value || 0}}/5</span>
-              </div>
-              <textarea 
-                pInputTextarea 
-                formControlName="innovation_comments"
-                [rows]="2" 
-                [autoResize]="true"
-                placeholder="Add comments (optional)"
-                class="w-full"
-              ></textarea>
-            </div>
-            
-            <!-- Value -->
-            <div class="col-12 mb-3">
-              <label class="block text-900 font-medium mb-2">Value</label>
-              <div class="flex align-items-center mb-2">
-                <p-rating formControlName="value_score" [cancel]="false"></p-rating>
-                <span class="ml-2">{{reviewForm.get('value_score')?.value || 0}}/5</span>
-              </div>
-              <textarea 
-                pInputTextarea 
-                formControlName="value_comments"
-                [rows]="2" 
-                [autoResize]="true"
-                placeholder="Add comments (optional)"
-                class="w-full"
-              ></textarea>
-            </div>
-            
-            <!-- Feasibility -->
-            <div class="col-12 mb-3">
-              <label class="block text-900 font-medium mb-2">Feasibility</label>
-              <div class="flex align-items-center mb-2">
-                <p-rating formControlName="feasibility_score" [cancel]="false"></p-rating>
-                <span class="ml-2">{{reviewForm.get('feasibility_score')?.value || 0}}/5</span>
-              </div>
-              <textarea 
-                pInputTextarea 
-                formControlName="feasibility_comments"
-                [rows]="2" 
-                [autoResize]="true"
-                placeholder="Add comments (optional)"
-                class="w-full"
-              ></textarea>
-            </div>
-            
-            <!-- Impact -->
-            <div class="col-12 mb-3">
-              <label class="block text-900 font-medium mb-2">Impact</label>
-              <div class="flex align-items-center mb-2">
-                <p-rating formControlName="impact_score" [cancel]="false"></p-rating>
-                <span class="ml-2">{{reviewForm.get('impact_score')?.value || 0}}/5</span>
-              </div>
-              <textarea 
-                pInputTextarea 
-                formControlName="impact_comments"
-                [rows]="2" 
-                [autoResize]="true"
-                placeholder="Add comments (optional)"
-                class="w-full"
-              ></textarea>
-            </div>
-            
-            <!-- ROI -->
-            <div class="col-12 mb-3">
-              <label class="block text-900 font-medium mb-2">ROI (Return on Investment)</label>
-              <div class="flex align-items-center mb-2">
-                <p-rating formControlName="roi_score" [cancel]="false"></p-rating>
-                <span class="ml-2">{{reviewForm.get('roi_score')?.value || 0}}/5</span>
-              </div>
-              <textarea 
-                pInputTextarea 
-                formControlName="roi_comments"
-                [rows]="2" 
-                [autoResize]="true"
-                placeholder="Add comments (optional)"
-                class="w-full"
-              ></textarea>
-            </div>
-          </div>
-          
-          <div class="flex justify-content-end gap-2 mt-4">
-            <button 
-              type="button" 
-              pButton 
-              label="Cancel" 
-              class="p-button-outlined p-button-rounded"
-              [disabled]="submitting"
-              (click)="showReviewDialog = false"
-            ></button>
-            <button 
-              type="submit" 
-              pButton 
-              label="Submit Review" 
-              class="p-button-success p-button-rounded"
-              [disabled]="reviewForm.invalid || submitting"
-              [loading]="submitting"
-            ></button>
-          </div>
+                        <!-- Review Dialog -->      <p-dialog         [(visible)]="showReviewDialog"         [style]="{width: '90%', maxWidth: '800px'}"         [modal]="true"        [closeOnEscape]="false"        [closable]="!submitting"        header="Submit Review">        <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">          <div class="grid">                        <!-- Innovation -->            <div class="col-12 mb-3">              <label class="block text-900 font-medium mb-2">Innovation</label>              <div class="flex align-items-center mb-2">                <p-rating formControlName="innovation_score" [cancel]="false"></p-rating>                <span class="ml-2">{{reviewForm.get('innovation_score')?.value || 0}}/5</span>              </div>              <textarea                 pInputTextarea                 formControlName="innovation_comments"                [rows]="2"                 [autoResize]="true"                placeholder="Add comments (optional)"                class="w-full"              ></textarea>            </div>                        <!-- Value -->            <div class="col-12 mb-3">              <label class="block text-900 font-medium mb-2">Value</label>              <div class="flex align-items-center mb-2">                <p-rating formControlName="value_score" [cancel]="false"></p-rating>                <span class="ml-2">{{reviewForm.get('value_score')?.value || 0}}/5</span>              </div>              <textarea                 pInputTextarea                 formControlName="value_comments"                [rows]="2"                 [autoResize]="true"                placeholder="Add comments (optional)"                class="w-full"              ></textarea>            </div>                        <!-- Feasibility -->            <div class="col-12 mb-3">              <label class="block text-900 font-medium mb-2">Feasibility</label>              <div class="flex align-items-center mb-2">                <p-rating formControlName="feasibility_score" [cancel]="false"></p-rating>                <span class="ml-2">{{reviewForm.get('feasibility_score')?.value || 0}}/5</span>              </div>              <textarea                 pInputTextarea                 formControlName="feasibility_comments"                [rows]="2"                 [autoResize]="true"                placeholder="Add comments (optional)"                class="w-full"              ></textarea>            </div>                        <!-- Impact -->            <div class="col-12 mb-3">              <label class="block text-900 font-medium mb-2">Impact</label>              <div class="flex align-items-center mb-2">                <p-rating formControlName="impact_score" [cancel]="false"></p-rating>                <span class="ml-2">{{reviewForm.get('impact_score')?.value || 0}}/5</span>              </div>              <textarea                 pInputTextarea                 formControlName="impact_comments"                [rows]="2"                 [autoResize]="true"                placeholder="Add comments (optional)"                class="w-full"              ></textarea>            </div>                        <!-- ROI -->            <div class="col-12 mb-3">              <label class="block text-900 font-medium mb-2">Return on Investment</label>              <div class="flex align-items-center mb-2">                <p-rating formControlName="roi_score" [cancel]="false"></p-rating>                <span class="ml-2">{{reviewForm.get('roi_score')?.value || 0}}/5</span>              </div>              <textarea                 pInputTextarea                 formControlName="roi_comments"                [rows]="2"                 [autoResize]="true"                placeholder="Add comments (optional)"                class="w-full"              ></textarea>            </div>          </div>                              <div class="flex justify-content-end gap-2 mt-4">            <button               type="button"               pButton               label="Cancel"               class="p-button-outlined p-button-rounded"              [disabled]="submitting"              (click)="showReviewDialog = false"            ></button>            <button               type="submit"               pButton               label="Submit Review"               class="p-button-success p-button-rounded"              [disabled]="reviewForm.invalid || submitting"              [loading]="submitting"            ></button>          </div>
         </form>
       </p-dialog>
       
-      <!-- Final Decision Dialog -->
-      <p-dialog 
-        [(visible)]="showDecisionDialog" 
-        [style]="{width: '90%', maxWidth: '600px'}" 
-        [modal]="true"
-        [closeOnEscape]="false"
-        [closable]="!submitting"
-        header="Make Final Decision">
-        <form [formGroup]="decisionForm" (ngSubmit)="submitFinalDecision()">
-          <div class="field mb-4">
-            <label class="block text-900 font-medium mb-2">Decision</label>
-            <div class="p-field-radiobutton">
-              <p-radioButton formControlName="decision" value="APPROVED" inputId="approved"></p-radioButton>
-              <label for="approved" class="ml-2">Approve</label>
-            </div>
-            <div class="p-field-radiobutton mt-2">
-              <p-radioButton formControlName="decision" value="REJECTED" inputId="rejected"></p-radioButton>
-              <label for="rejected" class="ml-2">Reject</label>
-            </div>
-            <div class="p-field-radiobutton mt-2">
-              <p-radioButton formControlName="decision" value="NEED_IMPROVEMENT" inputId="need_improvement"></p-radioButton>
-              <label for="need_improvement" class="ml-2">Needs Improvement</label>
-            </div>
-          </div>
-          
-          <div class="field mb-4" *ngIf="decisionForm.get('decision')?.value !== 'APPROVED'">
-            <label class="block text-900 font-medium mb-2">Allow Resubmission?</label>
-            <div class="p-field-checkbox">
-              <p-checkbox formControlName="allow_resubmit" [binary]="true" inputId="allow_resubmit"></p-checkbox>
-              <label for="allow_resubmit" class="ml-2">Yes, allow creator to resubmit</label>
-            </div>
-          </div>
-          
-          <div class="field mb-4">
-            <label class="block text-900 font-medium mb-2">Comments</label>
-            <textarea 
-              pInputTextarea 
-              formControlName="comments"
-              [rows]="5" 
-              [autoResize]="true"
-              placeholder="Provide feedback on this session"
-              class="w-full"
-            ></textarea>
+                  <!-- Final Decision Dialog -->      <p-dialog         [(visible)]="showDecisionDialog"         [style]="{width: '90%', maxWidth: '600px'}"         [modal]="true"        [closeOnEscape]="false"        [closable]="!submitting"        header="Make Final Decision">        <form [formGroup]="decisionForm" (ngSubmit)="submitFinalDecision()">                    <div class="field mb-4">            <label class="block text-900 font-medium mb-2">Decision</label>            <div class="p-field-radiobutton">              <p-radioButton formControlName="decision" value="APPROVED" inputId="approved"></p-radioButton>              <label for="approved" class="ml-2">Approve</label>            </div>            <div class="p-field-radiobutton mt-2">              <p-radioButton formControlName="decision" value="REJECTED" inputId="rejected"></p-radioButton>              <label for="rejected" class="ml-2">Reject</label>            </div>            <div class="p-field-radiobutton mt-2">              <p-radioButton formControlName="decision" value="NEED_IMPROVEMENT" inputId="need_improvement"></p-radioButton>              <label for="need_improvement" class="ml-2">Needs Improvement</label>            </div>          </div>                    <div class="field mb-4" *ngIf="decisionForm.get('decision')?.value !== 'APPROVED'">            <label class="block text-900 font-medium mb-2">Allow Resubmission?</label>            <div class="p-field-checkbox">              <p-checkbox formControlName="allow_resubmit" [binary]="true" inputId="allow_resubmit"></p-checkbox>              <label for="allow_resubmit" class="ml-2">Yes, allow creator to resubmit</label>            </div>          </div>                    <div class="field mb-4">            <label class="block text-900 font-medium mb-2">Comments</label>            <textarea               pInputTextarea               formControlName="comments"              [rows]="5"               [autoResize]="true"              placeholder="Provide feedback for this session"              class="w-full"            ></textarea>
             <small 
               *ngIf="decisionForm.get('comments')?.invalid && decisionForm.get('comments')?.touched"
               class="p-error"
@@ -540,18 +332,7 @@ export class SessionDetailComponent implements OnInit {
     private authService: AuthService,
     private toastService: ToastService
   ) {
-    this.reviewForm = this.fb.group({
-      innovation_score: [0, [Validators.required, Validators.min(1), Validators.max(5)]],
-      innovation_comments: [''],
-      value_score: [0, [Validators.required, Validators.min(1), Validators.max(5)]],
-      value_comments: [''],
-      feasibility_score: [0, [Validators.required, Validators.min(1), Validators.max(5)]],
-      feasibility_comments: [''],
-      impact_score: [0, [Validators.required, Validators.min(1), Validators.max(5)]],
-      impact_comments: [''],
-      roi_score: [0, [Validators.required, Validators.min(1), Validators.max(5)]],
-      roi_comments: ['']
-    });
+        this.reviewForm = this.fb.group({      innovation_score: [null, [Validators.required, Validators.min(1), Validators.max(5)]],      innovation_comments: [''],      value_score: [null, [Validators.required, Validators.min(1), Validators.max(5)]],      value_comments: [''],      feasibility_score: [null, [Validators.required, Validators.min(1), Validators.max(5)]],      feasibility_comments: [''],      impact_score: [null, [Validators.required, Validators.min(1), Validators.max(5)]],      impact_comments: [''],      roi_score: [null, [Validators.required, Validators.min(1), Validators.max(5)]],      roi_comments: ['']    });
     
     this.decisionForm = this.fb.group({
       decision: ['APPROVED', Validators.required],
@@ -571,7 +352,7 @@ export class SessionDetailComponent implements OnInit {
       }
     });
     
-    // 检查用户是否有reviewer角色
+    // Check if user has reviewer role
     this.checkReviewerRole();
   }
   
@@ -608,7 +389,7 @@ export class SessionDetailComponent implements OnInit {
         if (response.success && response.data) {
           this.reviews = response.data;
           
-          // 检查当前用户是否已经提交了评审
+          // Check if current user has already submitted a review
           this.checkIfUserHasReviewed();
         }
       },
@@ -637,8 +418,8 @@ export class SessionDetailComponent implements OnInit {
   }
   
   checkReviewerRole(): void {
-    // 这里需要根据具体的权限系统来实现
-    // 暂时假设所有登录用户都有reviewer权限
+    // This should be implemented based on the specific permission system
+    // For now, assume all logged-in users have reviewer permissions
     this.isReviewer = this.authService.isLoggedIn();
   }
   
@@ -657,12 +438,12 @@ export class SessionDetailComponent implements OnInit {
       return false;
     }
     
-    // 已经提交过评审的不能再评审
+    // Users who have already submitted a review cannot review again
     if (this.hasReviewed) {
       return false;
     }
     
-    // 只有IN_REVIEW状态的session才能评审
+    // Only sessions with IN_REVIEW status can be reviewed
     return this.session.status === SessionStatus.IN_REVIEW;
   }
   
@@ -671,17 +452,17 @@ export class SessionDetailComponent implements OnInit {
       return false;
     }
     
-    // 已经做出最终决定的不能再决定
+    // Cannot make a decision if a final decision has already been made
     if (this.session.has_final_decision) {
       return false;
     }
     
-    // 只有IN_REVIEW状态的session才能做决定
+    // Only sessions with IN_REVIEW status can have decisions made
     if (this.session.status !== SessionStatus.IN_REVIEW) {
       return false;
     }
     
-    // 评审数量必须达到最低要求
+    // The number of reviews must meet the minimum requirement
     return this.session.review_count >= this.session.min_required_reviews;
   }
   
@@ -700,7 +481,24 @@ export class SessionDetailComponent implements OnInit {
     }
     
     this.submitting = true;
-    const reviewData = this.reviewForm.value;
+    const formValue = this.reviewForm.value;
+    
+    // Build review data according to backend model
+    const reviewData = {
+      session_id: this.session.id,
+      reviewer_id: this.authService.getId(),
+      reviewer_name: this.authService.getUserName(),
+      innovation_score: formValue.innovation_score,
+      innovation_comments: formValue.innovation_comments,
+      value_score: formValue.value_score,
+      value_comments: formValue.value_comments,
+      feasibility_score: formValue.feasibility_score,
+      feasibility_comments: formValue.feasibility_comments,
+      impact_score: formValue.impact_score,
+      impact_comments: formValue.impact_comments,
+      roi_score: formValue.roi_score,
+      roi_comments: formValue.roi_comments,
+    };
     
     this.sessionService.submitReview(this.session.id, reviewData).subscribe({
       next: (response) => {
@@ -710,7 +508,7 @@ export class SessionDetailComponent implements OnInit {
           this.showReviewDialog = false;
           this.hasReviewed = true;
           
-          // 重新加载session和reviews
+          // Reload session and reviews
           this.loadSessionDetails(this.session!.id);
         } else {
           this.toastService.showError('Failed to submit review');
@@ -739,12 +537,21 @@ export class SessionDetailComponent implements OnInit {
     }
     
     this.submitting = true;
-    const decisionData = this.decisionForm.value;
+    const formValue = this.decisionForm.value;
     
-    // 如果决定是APPROVED，总是设置allow_resubmit为false
-    if (decisionData.decision === 'APPROVED') {
-      decisionData.allow_resubmit = false;
+    // If decision is APPROVED, always set allow_resubmit to false
+    if (formValue.decision === 'APPROVED') {
+      formValue.allow_resubmit = false;
     }
+    
+    // Build decision data according to backend model
+    const decisionData = {
+      session_id: this.session.id,
+      reviewer_id: this.authService.getId(),
+      decision: formValue.decision,
+      comments: formValue.comments,
+      allow_resubmit: formValue.allow_resubmit
+    };
     
     this.sessionService.submitFinalDecision(this.session.id, decisionData).subscribe({
       next: (response) => {
@@ -753,7 +560,7 @@ export class SessionDetailComponent implements OnInit {
           this.toastService.showSuccess('Final decision submitted successfully');
           this.showDecisionDialog = false;
           
-          // 重新加载session
+          // Reload session
           this.loadSessionDetails(this.session!.id);
         } else {
           this.toastService.showError('Failed to submit final decision');

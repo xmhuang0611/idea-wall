@@ -30,16 +30,93 @@ Stores user information and their roles.
 
 ### Ideas Collection
 
-Stores all ideas submitted to the platform.
+Stores all ideas submitted to the platform. This is the base entity that has one-to-one relationships with Idea Session and Idea Incubator.
 
-| Field          | Type     | Description                          | Example Value                          |
-|----------------|----------|--------------------------------------|----------------------------------------|
-| title          | String   | Idea title                           | "Improve User Experience"              |
-| description    | String   | Detailed description                 | "We should optimize the login flow..." |
-| feeling        | Number   | Feeling score                        | 8                                      |
-| tags           | Array    | Array of tag IDs                     | [1,2]                                  |
-| total_votes    | Number   | Total number of votes                | 42                                     |
-| total_comments | Number   | Total number of comments             | 10                                     |
+| Field           | Type     | Description                          | Example Value                          |
+|-----------------|----------|--------------------------------------|----------------------------------------|
+| title           | String   | Idea title                           | "Improve User Experience"              |
+| description     | String   | Detailed description                 | "We should optimize the login flow..." |
+| feeling         | Number   | Feeling score(1-5)                   | 3                                      |
+| tags            | Array    | Array of tag IDs                     | [1,2]                                  |
+| total_votes     | Number   | Total number of votes                | 42                                     |
+| total_comments  | Number   | Total number of comments             | 10                                     |
+| total_bookmarks | Number   | Total number of bookmarks            | 10                                     |
+| current_status  | String   | Current overall status of the idea   | "IN_SESSION_REVIEW"                    |
+| current_session_id | String | Reference to current session        | "507f1f77bcf86cd799439013"             |
+| current_incubator_id | String | Reference to current incubator    | "507f1f77bcf86cd799439014"             |
+
+### Idea Sessions Collection
+
+Stores idea session data. Each idea has exactly one session, but the session has its own version history.
+
+| Field              | Type     | Description                    | Example Value                  |
+|--------------------|----------|--------------------------------|--------------------------------|
+| idea_id            | String   | Reference to the idea          | "507f1f77bcf86cd799439013"     |
+| session_version    | Number   | Version of this session        | 2                              |
+| basic_info         | Object   | basic info                     | Basic Info                     |
+| problem_statements | String   | problem description            | "..."                          |
+| solutions          | String   | solution description           | "..."                          |
+| values             | String   | value description              | "..."                          |
+| score              | Number   | score                          | 1                              |
+| status             | String   | status                         | Idea Review Status             |
+| review_count       | Number   | Number of reviews received     | 3                              |
+| previous_session_id | String  | ID of the previous session version | "507f1f77bcf86cd799439012" |
+| has_final_decision | Boolean  | Whether final decision is made | false                      |
+| final_reviewer_id  | String   | ID of reviewer who made final decision | "user456"              |
+| final_reviewer_name| String   | Name of reviewer who made final decision | "Jane Smith"          |
+| final_decision     | String   | Final decision (APPROVED/REJECTED/NEED_IMPROVEMENT) | "APPROVED" |
+| final_comments     | String   | Final decision comments        | "This idea needs clarification on..." |
+| is_current         | Boolean  | Whether this is the current version | true                      |
+
+### Idea Incubators Collection
+
+Stores idea incubator data. Each idea has exactly one incubator if it passed the session review, and the incubator has its own version history.
+
+| Field         | Type     | Description                    | Example Value                  |
+|---------------|----------|--------------------------------|--------------------------------|
+| idea_id       | String   | Reference to the idea          | "507f1f77bcf86cd799439013"     |
+| incubator_version | Number | Version of this incubator    | 1                              |
+| basic_info    | Object   | basic info                     | Basic Info                     |
+| lean_canvas   | Object   | Lean canvas data               | Lean Canvas                    |
+| score         | Number   | score                          | 1                              |
+| status        | String   | status                         | Idea Review Status             |
+| review_count  | Number   | Number of reviews received     | 2                              |
+| previous_incubator_id | String | ID of the previous incubator version | "507f1f77bcf86cd799439015" |
+| has_final_decision | Boolean  | Whether final decision is made | false                      |
+| final_reviewer_id  | String   | ID of reviewer who made final decision | "user456"              |
+| final_reviewer_name| String   | Name of reviewer who made final decision | "Jane Smith"          |
+| final_decision     | String   | Final decision (APPROVED/REJECTED/NEED_IMPROVEMENT) | "APPROVED" |
+| final_comments     | String   | Final decision comments        | "This idea needs clarification on..." |
+| is_current    | Boolean  | Whether this is the current version | true                      |
+
+### Idea Review Collection
+
+Stores individual review results for both sessions and incubators. Multiple reviewers can submit their reviews independently.
+
+| Field                     | Type     | Description                        | Example Value                  |
+|---------------------------|----------|------------------------------------|--------------------------------|
+| idea_id                   | String   | Reference to the idea              | "507f1f77bcf86cd799439013"     |
+| target_id                 | String   | Reference to the session/incubator | "507f1f77bcf86cd799439013"     |
+| target_type               | String   | "Session" or "Incubator"           | "Incubator"                    |
+| target_version            | Number   | Version of the target              | 2                              |
+| reviewer_id               | String   | reviewer id                        | "user123"                      |
+| reviewer_name             | String   | reviewer name                      | "John Doe"                     |
+| review_result             | Object   | Individual review result           | Review Result                  |
+
+### Final Decision Collection
+
+Stores final decisions made by reviewers after the minimum required reviews are received.
+
+| Field                     | Type     | Description                        | Example Value                  |
+|---------------------------|----------|------------------------------------|--------------------------------|
+| idea_id                   | String   | Reference to the idea              | "507f1f77bcf86cd799439013"     |
+| target_id                 | String   | Reference to the session/incubator | "507f1f77bcf86cd799439013"     |
+| target_type               | String   | "Session" or "Incubator"           | "Incubator"                    |
+| target_version            | Number   | Version of the target              | 2                              |
+| decision_maker_id         | String   | ID of user who made final decision | "user456"                      |
+| decision_maker_name       | String   | Name of user who made decision     | "Jane Smith"                   |
+| decision                  | String   | APPROVED/REJECTED/NEED_IMPROVEMENT | "APPROVED"                     |
+| comments                  | String   | Decision comments                  | "This idea is ready to proceed" |
 
 ### Comments Collection
 
@@ -99,7 +176,6 @@ Store notifications for all users.
 
 | Field           | Type        | Description                  | Example Value                             |
 |-----------------|-------------|------------------------------|-------------------------------------------|
-| notification_id | ObjectId    | Id of notification           | "234d234g234g34524g234233"                |
 | user_id         | ObjectId    | Id of receiver               | "user123"                                 |
 | is_readed       | Boolean     | If notification is readed    | True                                      |
 | context         | String      | Context of notification      | "New comments you have"                   |
@@ -118,6 +194,43 @@ Store notifications for all users.
 - `tags`: Index for tag-based queries
 - `creator_id`: Index for user's ideas
 - `total_votes`: Index for sorting
+- `current_status`: Index for status-based queries
+- `current_session_id`: Index for session relationship
+- `current_incubator_id`: Index for incubator relationship
+
+### Idea Sessions Collection
+
+- `idea_id`: Unique index for one-to-one relationship with Idea
+- `status`: Index for status-based queries
+- `session_version`: Index for version-based queries
+- `previous_session_id`: Index for tracking version lineage
+- `is_current`: Index for finding current version
+- `review_count`: Index for filtering based on review count
+- `has_final_decision`: Index for finding sessions pending final decision
+
+### Idea Incubators Collection
+
+- `idea_id`: Unique index for one-to-one relationship with Idea
+- `status`: Index for status-based queries
+- `incubator_version`: Index for version-based queries
+- `previous_incubator_id`: Index for tracking version lineage
+- `is_current`: Index for finding current version
+- `review_count`: Index for filtering based on review count
+- `has_final_decision`: Index for finding incubators pending final decision
+
+### Idea Review Collection
+
+- `target_id`: Index for review target lookup
+- Compound index: `[target_id, target_type, target_version]` for specific version reviews
+- `reviewer_id`: Index for reviewer-based queries
+- `created_at`: Index for time-based queries
+
+### Final Decision Collection
+
+- `target_id`: Index for decision target lookup
+- Compound index: `[target_id, target_type, target_version]` for specific version decisions
+- `decision_maker_id`: Index for decision maker queries
+- `created_at`: Index for time-based queries
 
 ### Comments Collection
 
@@ -148,6 +261,12 @@ Store notifications for all users.
 - Comments -> Comments: One-to-Many (comments can have multiple replies)
 - Users -> Votes: One-to-Many (users can cast multiple votes)
 - Votes -> Ideas/Comments: Many-to-One (multiple votes can reference one idea or comment)
+- Ideas -> Idea Sessions: One-to-One (an idea has exactly one session)
+- Ideas -> Idea Incubators: One-to-One (an idea has exactly one incubator if it passed session review)
+- Idea Sessions -> Idea Sessions: One-to-One (version lineage through previous_session_id)
+- Idea Incubators -> Idea Incubators: One-to-One (version lineage through previous_incubator_id)
+- Sessions/Incubators -> Reviews: One-to-Many (a session/incubator can have multiple reviews)
+- Sessions/Incubators -> Final Decision: One-to-One (a session/incubator has exactly one final decision after review)
 
 ## Enums and Constants
 
@@ -156,32 +275,6 @@ Store notifications for all users.
 - IDEA_SESSION_PANEL_REVIEWER
 - IDEA_INCUBATOR_REVIEWER
 - ADMIN
-
-## User Info
-
-### UserInfo Collection 
-
-| Field               | Type        | Description                                         | Example                          |
-|---------------------|-------------|-----------------------------------------------------|-----------------------------------|
-| user_id             | String      | Unique user identifier                              | "u123456"                        |
-| nickname            | String      | User's display name                                 | "Alice"                          |
-| avatar_url          | String      | URL of user's avatar                                | "https://..."                    |
-| email               | String      | User's email address                                | "alice@example.com"              |
-| bio                 | String      | User's personal introduction or bio                 | "Product manager, Innovator"     |
-| role                | String      | User role (e.g., USER, IDEA_SESSION_PANNEL_REVIEWER, IDEA_INCUBATOR_REVIEWER, ADMIN) | "USER" |
-| point_rank          | Number      | User's rank in the points leaderboard               | 8                                |
-| notification_prefs  | Object      | Notification preferences (channels, frequency, etc) | { "email": true, "in_app": true } |
-| privacy_settings    | Object      | Privacy settings for profile and notifications      | { "show_email": false }           |
-
-#### Notes
-
-- To get the total number of ideas or pain points for a user, aggregate queries can be performed on the Ideas Collection using `user_id`.
-- The `role` field indicates the user's role in the system, such as USER, IDEA_SESSION_PANNEL_REVIEWER, IDEA_INCUBATOR_REVIEWER, or ADMIN.
-
-
-#### Indexes
-
-- `user_id`: Unique index
 
 ### Vote Target Types
 
@@ -196,3 +289,88 @@ Store notifications for all users.
 - Bookmark
 - Tag
 - User
+- IdeaSession
+- IdeaIncubator
+- Review
+- FinalDecision
+
+### Idea Statuses (for Ideas Collection)
+
+- PUBLISHED
+- IN_SESSION_REVIEW
+- SESSION_APPROVED
+- SESSION_REJECTED
+- IN_INCUBATION_REVIEW
+- INCUBATION_APPROVED
+- INCUBATION_REJECTED
+- ROLL_OUT
+
+### Session & Incubator Review Status
+
+- PENDING
+- IN_REVIEW
+- APPROVED
+- REJECTED
+- NEED_IMPROVEMENT
+- RESUBMITTED
+
+### Final Decision Types
+
+- APPROVED
+- REJECTED
+- NEED_IMPROVEMENT
+
+### Basic Info
+
+{
+    "idea_title": "...",
+    "submitter_id": "...",
+    "submitter_name": "...",
+    "submitter_job": "...",
+    "manager": "...",
+    "stream": "...",
+    "clients": "..."
+}
+
+### Lean Canvas
+
+{
+    "problem": "...",
+    "existing_alternatives": "...",
+    "solution": "...",
+    "key_metrics": "...",
+    "unique_value": "...",
+    "high_level_concept": "...",
+    "unfair_advantage": "...",
+    "channels": "...",
+    "customer_segments": "...",
+    "early_adopters": "...",
+    "cost_structure": "...",
+    "revenue_stream": "..."
+}
+
+### Review Result
+
+{
+    innovation:{
+        score: 1,
+        comment: "..."
+    },
+    value:{
+        score: 1,
+        comment: "..."
+    },
+    feasibility:{
+        score: 1,
+        comment: "..."
+    },
+    impact:{
+        score: 1,
+        comment: "..."
+    },
+    return_on_investment:{
+        score: 1,
+        comment: "..."
+    },
+    average_score: 1
+}
