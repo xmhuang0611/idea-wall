@@ -94,6 +94,10 @@
                 <button pButton icon="pi pi-history" class="p-button-rounded p-button-text p-button-sm"
                   (click)="viewIdeaHistory(idea.id)" pTooltip="View History" tooltipPosition="top">
                 </button>
+                <button *ngIf="canCreateSession(idea)" pButton icon="pi pi-sitemap"
+                  class="p-button-rounded p-button-text p-button-sm"
+                  (click)="$event.stopPropagation(); createSession(idea.id)" pTooltip="Create Session" tooltipPosition="top">
+                </button>
                 <button *ngIf="canEditIdea(idea)" pButton icon="pi pi-pencil"
                   class="p-button-rounded p-button-text p-button-sm"
                   (click)="$event.stopPropagation(); editIdea(idea.id)" pTooltip="Edit Idea" tooltipPosition="top">
