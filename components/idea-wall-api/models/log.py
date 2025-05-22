@@ -11,8 +11,6 @@ class ObjectType(str, Enum):
     BOOKMARK = "Bookmark"
     TAG = "Tag"
     USER = "User"
-    IDEA_SESSION = "Idea Session"
-    IDEA_INCUBATOR = "Idea Incubator"
     REVIEW = "Review"
     FINAL_DECISION = "Final Decision"
 

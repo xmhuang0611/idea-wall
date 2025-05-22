@@ -6,12 +6,10 @@ from .audit import AuditModel
 
 
 class ReviewStatus(str, Enum):
-    PENDING = "PENDING"
     IN_REVIEW = "IN_REVIEW"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
     NEED_IMPROVEMENT = "NEED_IMPROVEMENT"
-    RESUBMITTED = "RESUBMITTED"
 
 class FinalDecisionType(str, Enum):
     APPROVED = "APPROVED"
@@ -32,9 +30,7 @@ class ReviewResult(BaseModel):
 
 class ReviewBase(BaseModel):
     idea_id: str
-    target_id: str
-    target_type: str = "Session"  # "Session" or "Incubator"
-    target_version: int
+    target_type: str  # "Session" or "Incubator"
     reviewer_id: str
     reviewer_name: str
     review_result: ReviewResult
@@ -50,11 +46,7 @@ class Review(ReviewInDB):
 
 class FinalDecisionBase(BaseModel):
     idea_id: str
-    target_id: str
-    target_type: str = "Session"  # "Session" or "Incubator"
-    target_version: int
-    decision_maker_id: str
-    decision_maker_name: str
+    target_type: str  # "Session" or "Incubator"
     decision: FinalDecisionType
     comments: str
 
