@@ -166,7 +166,9 @@ class IdeaService:
             updater_id=creator_id,
             updater_name=creator_name,
             total_votes=0,
-            total_comments=0
+            total_comments=0,
+            total_bookmarks=0,
+            current_status="PUBLISHED"
         )
         
         result = await db[self.collection_name].insert_one(idea_in_db.model_dump())
@@ -180,7 +182,9 @@ class IdeaService:
             updater_id=creator_id,
             updater_name=creator_name,
             total_votes=0,
-            total_comments=0
+            total_comments=0,
+            total_bookmarks=0,
+            current_status="PUBLISHED"
         )
         
         # Add log record
