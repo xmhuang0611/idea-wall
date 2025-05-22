@@ -28,7 +28,6 @@ import { ConfirmationService } from 'primeng/api';
 import { IdeaHistoryComponent } from '../idea-history/idea-history.component';
 import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 import { ApiResponse } from '../../shared/models/api-response.model';
-import { IdeaStatus } from '../../models/idea.model';
 
 interface Topic {
   name: string;
@@ -514,35 +513,5 @@ export class IdeaWallComponent implements OnInit {
 
   onIdeaClick(ideaId: string) {
     this.openDetails(ideaId);
-  }
-
-  /**
-   * Check if the current user can create a session for an idea
-   * @param idea The idea to check
-   * @returns True if the user can create a session, false otherwise
-   */
-  canCreateSession(idea: Idea): boolean {
-    // 只有创建者或管理员才能创建session
-    // 且idea不能已经在评审流程中
-    if (!this.authService.isLoggedIn()) {
-      return false;
-    }
-    
-    const isCreator = idea.creator_id === this.currentUserId;
-    const isInReviewProcess = idea.current_status === IdeaStatus.IN_SESSION_REVIEW || 
-      idea.current_status === IdeaStatus.SESSION_APPROVED || 
-      idea.current_status === IdeaStatus.SESSION_REJECTED;
-    
-    return (isCreator || this.isAdmin) && !isInReviewProcess;
-  }
-
-  /**
-   * Navigate to session creation page for the specified idea
-   * @param ideaId The ID of the idea to create a session for
-   */
-  createSession(ideaId: string): void {
-    this.router.navigate(['/sessions/create'], {
-      queryParams: { idea_id: ideaId }
-    });
   }
 } 
