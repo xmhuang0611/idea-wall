@@ -182,11 +182,20 @@ import { AuthService } from '../../auth/auth.service';
               </div>
               <div class="flex gap-2">
                 <button 
+                  *ngIf="authService.isLoggedIn()"
                   pButton 
                   label="Add Review" 
                   icon="pi pi-plus" 
                   class="p-button-rounded" 
                   (click)="openReviewDialog()">
+                </button>
+                <button 
+                  *ngIf="!authService.isLoggedIn()"
+                  pButton 
+                  label="Login to Add Review" 
+                  icon="pi pi-sign-in" 
+                  class="p-button-rounded p-button-outlined" 
+                  (click)="login()">
                 </button>
               </div>
             </div>
@@ -264,7 +273,7 @@ export class SessionIdeaDetailsComponent implements OnInit {
     private ideaService: IdeaService,
     private reviewService: ReviewService,
     public feelingUtil: FeelingUtilService,
-    private authService: AuthService
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -281,9 +290,14 @@ export class SessionIdeaDetailsComponent implements OnInit {
   }
 
   checkUserPermissions(): void {
-    this.authService.getUserRoles().subscribe(roles => {
-      this.canUserMakeFinalDecision = roles.includes('IDEA_SESSION_PANEL_REVIEWER');
-    });
+    if (this.authService.isLoggedIn()) {
+      this.authService.getUserRoles().subscribe(roles => {
+        this.canUserMakeFinalDecision = roles.includes('IDEA_SESSION_PANEL_REVIEWER');
+      });
+    } else {
+      // 未登录用户不能进行任何操作
+      this.canUserMakeFinalDecision = false;
+    }
   }
 
   loadIdeaDetails(): void {
@@ -391,7 +405,7 @@ export class SessionIdeaDetailsComponent implements OnInit {
   }
 
   canMakeFinalDecision(): boolean {
-    if (!this.idea || !this.idea.session_review || !this.canUserMakeFinalDecision) {
+    if (!this.authService.isLoggedIn() || !this.idea || !this.idea.session_review || !this.canUserMakeFinalDecision) {
       return false;
     }
     
@@ -399,5 +413,9 @@ export class SessionIdeaDetailsComponent implements OnInit {
     // and with at least 2 reviews
     return this.idea.session_review.status === ReviewStatus.IN_REVIEW &&
            this.idea.session_review.review_count >= 2;
+  }
+
+  login(): void {
+    this.authService.login();
   }
 } 
