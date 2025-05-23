@@ -361,7 +361,7 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
       acceptButtonStyleClass: 'p-button-danger p-button-rounded',
-      rejectButtonStyleClass: 'p-button-rounded',
+      rejectButtonStyleClass: 'p-button-secondary p-button-rounded',
       accept: () => {
         this.deleteIdea();
       }

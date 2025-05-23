@@ -434,7 +434,7 @@ export class IdeaWallComponent implements OnInit {
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
       acceptButtonStyleClass: 'p-button-danger p-button-rounded',
-      rejectButtonStyleClass: 'p-button-rounded',
+      rejectButtonStyleClass: 'p-button-secondary p-button-rounded',
       accept: () => {
         this.deleteIdea(idea);
       }

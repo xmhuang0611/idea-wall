@@ -3,29 +3,8 @@
 }
 
 .submit-idea-card {
-  width: 1600px !important;
-
-  .p-card-body {
-    padding: 2rem;
-    width: 100%;
-  }
-
-  .p-card-content {
-    padding: 0;
-    width: 100%;
-  }
-}
-
-.submit-idea-dropdown-panel {
-  .p-dropdown-items,
-  .p-multiselect-items {
-    padding: 0.5rem 0;
-  }
-  
-  .p-dropdown-item,
-  .p-multiselect-item {
-    padding: 0.75rem 1.25rem;
-  }
+  width: 100%;
+  max-width: 1600px;
 }
 
 .feeling-selector {

@@ -16,7 +16,6 @@ import { ApiResponse } from '../../../shared/models/api-response.model';
 @Component({
   selector: 'app-tag-management',
   templateUrl: './tag-management.component.html',
-  styleUrls: ['./tag-management.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -109,7 +108,7 @@ export class TagManagementComponent implements OnInit {
       const formValue = this.tagForm.value;
       const tagId = formValue.tag_id || 0;
       
-      // 创建新标签
+      // Craete Tag
       if (!this.isEditing) {
         const tag: Partial<Tag> = {
           tag_id: tagId,
@@ -120,32 +119,16 @@ export class TagManagementComponent implements OnInit {
         this.tagService.createTag(tag).subscribe({
           next: (response: ApiResponse<Tag>) => {
             if (response.success) {
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Tag created successfully'
-              });
               this.displayModal = false;
               this.fetchTags();
-            } else {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: response.error?.message || 'Failed to create tag'
-              });
             }
           },
           error: (error) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'Failed to create tag'
-            });
             console.error('Error creating tag:', error);
           }
         });
       } 
-      // 更新标签
+      // Updagte Tag
       else {
         const tag: Partial<Tag> = {
           tag_id: tagId,
@@ -156,27 +139,11 @@ export class TagManagementComponent implements OnInit {
         this.tagService.updateTag(tagId, tag).subscribe({
           next: (response: ApiResponse<Tag>) => {
             if (response.success) {
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Tag updated successfully'
-              });
               this.displayModal = false;
               this.fetchTags();
-            } else {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: response.error?.message || 'Failed to update tag'
-              });
             }
           },
           error: (error) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'Failed to update tag'
-            });
             console.error('Error updating tag:', error);
           }
         });
@@ -197,31 +164,15 @@ export class TagManagementComponent implements OnInit {
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
       acceptButtonStyleClass: 'p-button-danger p-button-rounded',
-      rejectButtonStyleClass: 'p-button-rounded',
+      rejectButtonStyleClass: 'p-button-secondary p-button-rounded',
       accept: () => {
         this.tagService.deleteTag(tag.tag_id).subscribe({
           next: (response: ApiResponse<boolean>) => {
             if (response.success) {
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Tag deleted successfully'
-              });
               this.fetchTags();
-            } else {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: response.error?.message || 'Failed to delete tag'
-              });
             }
           },
           error: (error) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'Failed to delete tag'
-            });
             console.error('Error deleting tag:', error);
           }
         });

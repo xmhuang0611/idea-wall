@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { Tag } from '../models/tag.model';
 import { ApiResponse } from '../shared/models/api-response.model';
-import { catchError } from 'rxjs/operators';
+import { ToastService } from '../shared/services/toast.service';
 import { ApiErrorHandlerService } from '../shared/services/api-error-handler.service';
 import { map } from 'rxjs/operators';
 
@@ -15,6 +16,7 @@ export class TagService {
 
   constructor(
     private http: HttpClient,
+    private toastService: ToastService,
     private errorHandler: ApiErrorHandlerService
   ) {}
 
@@ -90,14 +92,38 @@ export class TagService {
   }
 
   createTag(tag: Partial<Tag>): Observable<ApiResponse<Tag>> {
-    return this.http.post<ApiResponse<Tag>>(this.apiUrl, tag);
+    return this.http.post<ApiResponse<Tag>>(this.apiUrl, tag)
+      .pipe(
+        tap(response => {
+          if (response.success) {
+            this.toastService.showSuccess('Tag created successfully');
+          }
+        }),
+        catchError(this.errorHandler.handleError)
+      );
   }
 
   updateTag(tagId: number, tag: Partial<Tag>): Observable<ApiResponse<Tag>> {
-    return this.http.put<ApiResponse<Tag>>(`${this.apiUrl}/${tagId}`, tag);
+    return this.http.put<ApiResponse<Tag>>(`${this.apiUrl}/${tagId}`, tag)
+    .pipe(
+      tap(response => {
+        if (response.success) {
+          this.toastService.showSuccess('Tag updated successfully');
+        }
+      }),
+      catchError(this.errorHandler.handleError)
+    );
   }
 
   deleteTag(tagId: number): Observable<ApiResponse<boolean>> {
-    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/${tagId}`);
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/${tagId}`)
+    .pipe(
+      tap(response => {
+        if (response.success) {
+          this.toastService.showSuccess('Tag deleted successfully');
+        }
+      }),
+      catchError(this.errorHandler.handleError)
+    );
   }
 } 
