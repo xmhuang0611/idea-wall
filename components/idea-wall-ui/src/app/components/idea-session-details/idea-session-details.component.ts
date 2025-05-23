@@ -17,6 +17,8 @@ import { ReviewService } from '../../services/review.service';
 import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 import { ReviewFormComponent } from '../review-form/review-form.component';
 import { ReviewListComponent } from '../review-list/review-list.component';
+import { FinalDecisionComponent } from '../final-decision/final-decision.component';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-idea-session-details',
@@ -33,7 +35,8 @@ import { ReviewListComponent } from '../review-list/review-list.component';
     TooltipModule,
     DialogModule,
     ReviewFormComponent,
-    ReviewListComponent
+    ReviewListComponent,
+    FinalDecisionComponent
   ],
   templateUrl: './idea-session-details.component.html',
   styleUrls: ['./idea-session-details.component.scss']
@@ -43,13 +46,15 @@ export class IdeaSessionDetailsComponent implements OnInit {
   reviews: Review[] = [];
   isLoading = false;
   reviewCriteria = REVIEW_CRITERIA;
+  showFinalDecisionDialog = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private ideaService: IdeaService,
     private reviewService: ReviewService,
-    public feelingUtil: FeelingUtilService
+    public feelingUtil: FeelingUtilService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -201,15 +206,52 @@ export class IdeaSessionDetailsComponent implements OnInit {
   }
 
   getCurrentUserName(): string {
-    // TODO: Get current user name from authentication service
-    // For now, return a placeholder
-    return 'Current User';
+    // Get current user name from authentication service
+    return this.authService.getUserName() || 'Current User';
   }
 
   onReviewsUpdated(): void {
     // Reload reviews after any review operation
     if (this.idea) {
       this.loadReviews(this.idea.id);
+      // Also reload idea to get updated average score
+      this.ideaService.getIdeaById(this.idea.id).subscribe({
+        next: (response: any) => {
+          if (response.success && response.data) {
+            this.idea = response.data;
+          }
+        },
+        error: (error: any) => {
+          console.error('Error reloading idea details:', error);
+        }
+      });
     }
+  }
+
+  canAddReview(): boolean {
+    // Check if user is authenticated and hasn't already submitted a review
+    if (!this.authService.getId()) {
+      return false;
+    }
+    
+    const currentUserId = this.authService.getId();
+    const hasExistingReview = this.reviews.some(review => review.creator_id === currentUserId);
+    return !hasExistingReview;
+  }
+
+  canMakeFinalDecision(): boolean {
+    // Can make final decision if there are at least 2 reviews
+    return this.reviews.length >= 2;
+  }
+
+  onFinalDecisionSubmitted(updatedIdea: Idea): void {
+    // Update the idea with the final decision
+    this.idea = updatedIdea;
+    this.showFinalDecisionDialog = false;
+  }
+
+  onFinalDecisionCancelled(): void {
+    // Close the dialog
+    this.showFinalDecisionDialog = false;
   }
 } 

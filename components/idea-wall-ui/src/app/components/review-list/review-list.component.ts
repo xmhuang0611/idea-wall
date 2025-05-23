@@ -35,6 +35,8 @@ import { AuthService } from 'src/app/auth/auth.service';
           icon="pi pi-plus" 
           label="Add Review" 
           class="p-button-rounded p-button-primary" 
+          [disabled]="!canAddReview()"
+          [pTooltip]="canAddReview() ? 'Add your review for this idea' : 'You have already submitted a review'"
           (click)="openAddReviewForm()">
         </button>
       </div>
@@ -284,5 +286,18 @@ export class ReviewListComponent implements OnInit {
     this.showAddDialog = false;
     this.selectedReview = null;
     this.reviewsUpdated.emit();
+  }
+
+  /**
+   * Check if current user can add a review (hasn't already submitted one)
+   */
+  canAddReview(): boolean {
+    if (!this.authService.getId()) {
+      return false;
+    }
+    
+    const currentUserId = this.authService.getId();
+    const hasExistingReview = this.reviews.some(review => review.creator_id === currentUserId);
+    return !hasExistingReview;
   }
 } 

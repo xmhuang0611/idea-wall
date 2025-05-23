@@ -4,7 +4,6 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { ButtonModule } from 'primeng/button';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { RadioButtonModule } from 'primeng/radiobutton';
-import { CardModule } from 'primeng/card';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { IdeaService } from '../../services/idea.service';
 import { Idea } from '../../models/idea.model';
@@ -19,24 +18,21 @@ import { Idea } from '../../models/idea.model';
     ButtonModule,
     InputTextareaModule,
     RadioButtonModule,
-    CardModule,
     ProgressSpinnerModule
   ],
   template: `
-    <p-card>
-      <ng-template pTemplate="header">
-        <div class="p-3 bg-primary-50">
-          <h3 class="m-0 text-xl font-bold">Make Final Decision</h3>
-          <p class="m-0 text-sm text-500 mt-1">
-            Review the evaluations and make a final decision for this idea.
-          </p>
-        </div>
-      </ng-template>
+    <div class="final-decision-form">
+      <!-- Header -->
+      <div class="mb-4">
+        <p class="m-0 text-sm text-500 mt-1">
+          Review the evaluations and make a final decision for this idea.
+        </p>
+      </div>
       
       <form [formGroup]="decisionForm" (ngSubmit)="onSubmit()">
         <!-- Decision Options -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Decision *</label>
+          <label class="block text-sm font-medium mb-3 text-700">Decision *</label>
           <div class="flex flex-column gap-3">
             <div class="flex align-items-center">
               <p-radioButton 
@@ -86,14 +82,14 @@ import { Idea } from '../../models/idea.model';
           
           <div 
             *ngIf="decisionForm.get('decision')?.invalid && decisionForm.get('decision')?.touched"
-            class="text-red-500 text-sm mt-1">
+            class="text-red-500 text-sm mt-2">
             Please select a decision.
           </div>
         </div>
 
         <!-- Comments -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Comments *</label>
+          <label class="block text-sm font-medium mb-2 text-700">Comments *</label>
           <textarea 
             pInputTextarea 
             formControlName="comments"
@@ -110,16 +106,16 @@ import { Idea } from '../../models/idea.model';
         </div>
 
         <!-- Review Summary -->
-        <div class="mb-4 p-3 bg-gray-50 border-round">
-          <h4 class="m-0 mb-2 text-sm font-medium">Review Summary</h4>
+        <div class="mb-4 p-3 surface-100 border-round">
+          <h4 class="m-0 mb-2 text-sm font-medium text-700">Review Summary</h4>
           <div class="grid">
             <div class="col-6">
-              <span class="text-sm text-500">Total Reviews:</span>
-              <span class="ml-2 font-medium">{{ reviewCount }}</span>
+              <span class="text-sm text-600">Total Reviews:</span>
+              <span class="ml-2 font-medium text-700">{{ reviewCount }}</span>
             </div>
             <div class="col-6">
-              <span class="text-sm text-500">Average Score:</span>
-              <span class="ml-2 font-medium">{{ averageScore | number:'1.1-1' }}/5</span>
+              <span class="text-sm text-600">Average Score:</span>
+              <span class="ml-2 font-medium text-700">{{ averageScore | number:'1.1-1' }}/5</span>
             </div>
           </div>
           <div *ngIf="reviewCount < 2" class="text-orange-600 text-sm mt-2">
@@ -134,19 +130,20 @@ import { Idea } from '../../models/idea.model';
             pButton 
             type="button" 
             label="Cancel" 
-            class="p-button-outlined"
+            class="p-button-outlined p-button-rounded"
             (click)="onCancel()">
           </button>
           <button 
             pButton 
             type="submit" 
             label="Submit Decision" 
+            class="p-button-rounded"
             [loading]="isSubmitting"
             [disabled]="decisionForm.invalid || reviewCount < 2">
           </button>
         </div>
       </form>
-    </p-card>
+    </div>
   `,
   styleUrls: ['./final-decision.component.scss']
 })

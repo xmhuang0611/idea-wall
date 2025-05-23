@@ -144,6 +144,20 @@
 
       <!-- Reviews Tab -->
       <p-tabPanel [header]="'Reviews (' + reviews.length + ')'">
+        <!-- Final Decision Button - Show when reviews count >= 2 -->
+        <div class="mb-3" *ngIf="canMakeFinalDecision()">
+          <div class="flex justify-content-end">
+            <button 
+              pButton 
+              icon="pi pi-check-circle" 
+              label="Make Final Decision" 
+              class="p-button-rounded p-button-success" 
+              [pTooltip]="'Make final decision based on ' + reviews.length + ' reviews'"
+              (click)="showFinalDecisionDialog = true">
+            </button>
+          </div>
+        </div>
+
         <app-review-list
           [reviews]="reviews"
           [ideaId]="idea.id"
@@ -153,6 +167,26 @@
         </app-review-list>
       </p-tabPanel>
     </p-tabView>
+
+    <!-- Final Decision Dialog -->
+    <p-dialog 
+      header="Make Final Decision" 
+      [(visible)]="showFinalDecisionDialog"
+      [modal]="true"
+      [style]="{width: '90vw', maxWidth: '800px'}"
+      [closable]="true"
+      [draggable]="false"
+      [resizable]="false"
+      styleClass="final-decision-dialog">
+      <app-final-decision
+        *ngIf="showFinalDecisionDialog && idea"
+        [ideaId]="idea.id"
+        [reviewCount]="reviews.length"
+        [averageScore]="idea.session_review?.average_score || 0"
+        (decisionSubmitted)="onFinalDecisionSubmitted($event)"
+        (cancelled)="onFinalDecisionCancelled()">
+      </app-final-decision>
+    </p-dialog>
   </div>
 
   <!-- Error State -->

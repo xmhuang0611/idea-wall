@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from typing import List, Optional
 from models.response import ErrorDetail, StandardResponse
-from models.review import Review, ReviewCreate, ReviewResult
+from models.review import Review, ReviewCreate, ReviewResult, TargetType
 from services.review_service import review_service
+from services.idea_service import idea_service
 from core.deps import get_current_user
 from services.user_service import user_service
 from models.user import User, UserRole
@@ -106,6 +107,10 @@ async def update_review(
                     message="Failed to update review"
                 )
             )
+        
+        # Recalculate idea scores after updating a review
+        target_type_enum = TargetType.SESSION if existing_review.target_type == "Session" else TargetType.INCUBATOR
+        await idea_service.recalculate_review_scores(existing_review.idea_id, target_type_enum)
         
         return StandardResponse(
             success=True,

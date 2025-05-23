@@ -651,4 +651,71 @@ class IdeaService:
         
         return updated_idea
 
+    async def recalculate_review_scores(self, idea_id: str, target_type: TargetType) -> Optional[Idea]:
+        """
+        Recalculate average score for an idea based on all existing reviews.
+        This method should be called after a review is updated or deleted.
+        """
+        db = await self._db()
+        
+        # Get current idea
+        idea = await self.get_idea(idea_id)
+        if not idea:
+            return None
+        
+        # Get all reviews for this idea and target type
+        reviews = await review_service.get_reviews(idea_id, target_type.value)
+        
+        if not reviews:
+            # No reviews exist, set count to 0 and average to 0
+            new_count = 0
+            new_avg = 0.0
+        else:
+            # Calculate new average from all reviews
+            total_score = 0.0
+            for review in reviews:
+                review_avg = sum([
+                    review.review_result.innovation.score,
+                    review.review_result.value.score,
+                    review.review_result.feasibility.score,
+                    review.review_result.impact.score,
+                    review.review_result.return_on_investment.score
+                ]) / 5.0
+                total_score += review_avg
+            
+            new_count = len(reviews)
+            new_avg = total_score / new_count if new_count > 0 else 0.0
+        
+        # Update idea with new scores
+        if target_type == TargetType.SESSION:
+            if not idea.session_review:
+                return None
+            
+            update_dict = {
+                "session_review.review_count": new_count,
+                "session_review.average_score": new_avg,
+                "updated_at": datetime.utcnow()
+            }
+        else:  # Incubator
+            if not idea.incubator_review:
+                return None
+            
+            update_dict = {
+                "incubator_review.review_count": new_count,
+                "incubator_review.average_score": new_avg,
+                "updated_at": datetime.utcnow()
+            }
+        
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$set": update_dict}
+        )
+        
+        if result.modified_count == 0:
+            return None
+        
+        # Get updated idea
+        updated_idea = await self.get_idea(idea_id)
+        return updated_idea
+
 idea_service = IdeaService() 
