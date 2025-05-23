@@ -9,11 +9,13 @@ import { DividerModule } from 'primeng/divider';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { RatingModule } from 'primeng/rating';
 import { TooltipModule } from 'primeng/tooltip';
+import { DialogModule } from 'primeng/dialog';
 import { Idea, IdeaStatus, ReviewStatus } from '../../models/idea.model';
 import { Review, REVIEW_CRITERIA } from '../../models/review.model';
 import { IdeaService } from '../../services/idea.service';
 import { ReviewService } from '../../services/review.service';
 import { FeelingUtilService } from '../../shared/services/feeling-util.service';
+import { ReviewFormComponent } from '../review-form/review-form.component';
 
 @Component({
   selector: 'app-idea-session-details',
@@ -27,7 +29,9 @@ import { FeelingUtilService } from '../../shared/services/feeling-util.service';
     DividerModule,
     ProgressSpinnerModule,
     RatingModule,
-    TooltipModule
+    TooltipModule,
+    DialogModule,
+    ReviewFormComponent
   ],
   templateUrl: './idea-session-details.component.html',
   styleUrls: ['./idea-session-details.component.scss']
@@ -37,6 +41,7 @@ export class IdeaSessionDetailsComponent implements OnInit {
   reviews: Review[] = [];
   isLoading = false;
   reviewCriteria = REVIEW_CRITERIA;
+  showReviewForm = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -192,5 +197,21 @@ export class IdeaSessionDetailsComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  openReviewForm(): void {
+    this.showReviewForm = true;
+  }
+
+  closeReviewForm(): void {
+    this.showReviewForm = false;
+  }
+
+  onReviewSubmitted(): void {
+    this.showReviewForm = false;
+    // Reload reviews after submission
+    if (this.idea) {
+      this.loadReviews(this.idea.id);
+    }
   }
 } 

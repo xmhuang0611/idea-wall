@@ -144,6 +144,17 @@
 
       <!-- Reviews Tab -->
       <p-tabPanel [header]="'Reviews (' + reviews.length + ')'">
+        <!-- Add Review Button -->
+        <div class="reviews-header mb-3">
+          <button 
+            pButton 
+            icon="pi pi-plus" 
+            label="Add Review" 
+            class="p-button-rounded p-button-primary" 
+            (click)="openReviewForm()">
+          </button>
+        </div>
+
         <div *ngIf="reviews.length === 0" class="no-reviews">
           <div class="text-center p-4">
             <i class="pi pi-file-excel text-3xl text-500 mb-3"></i>
@@ -151,93 +162,40 @@
           </div>
         </div>
 
-        <div *ngFor="let review of reviews" class="review-card mb-3">
-          <div class="card-header">
-            <i class="pi pi-star card-icon"></i>
-            <span class="card-title">Review by {{review.reviewer_name}}</span>
-            <div class="card-header-actions">
-              <span class="review-date">{{formatDate(review.created_at)}}</span>
+        <!-- Review List -->
+        <div *ngFor="let review of reviews" class="review-list-item mb-3">
+          <div class="review-summary">
+            <div class="review-header">
+              <div class="reviewer-info">
+                <i class="pi pi-user review-icon"></i>
+                <span class="reviewer-name">{{review.reviewer_name}}</span>
+              </div>
+              <div class="review-meta">
+                <span class="review-score">{{review.review_result.average_score | number:'1.1-1'}}/5.0</span>
+                <span class="review-date">{{formatDate(review.created_at)}}</span>
+              </div>
             </div>
-          </div>
-          <div class="card-content">
-            <div class="grid">
-              <!-- Innovation -->
-              <div class="col-12 md:col-6">
-                <div class="criteria-item">
-                  <div class="criteria-header">
-                    <span class="criteria-title">{{getCriteriaTitle('innovation')}}</span>
-                    <span class="criteria-score">{{review.review_result.innovation.score}}/5</span>
-                  </div>
-                  <div class="criteria-label">{{getScoreLabel('innovation', review.review_result.innovation.score)}}</div>
-                  <div class="criteria-comment" *ngIf="review.review_result.innovation.comment">
-                    {{review.review_result.innovation.comment}}
-                  </div>
-                </div>
+            
+            <div class="review-summary-scores">
+              <div class="score-item">
+                <span class="score-label">Innovation:</span>
+                <span class="score-value">{{review.review_result.innovation.score}}/5</span>
               </div>
-
-              <!-- Value Creation -->
-              <div class="col-12 md:col-6">
-                <div class="criteria-item">
-                  <div class="criteria-header">
-                    <span class="criteria-title">{{getCriteriaTitle('value')}}</span>
-                    <span class="criteria-score">{{review.review_result.value.score}}/5</span>
-                  </div>
-                  <div class="criteria-label">{{getScoreLabel('value', review.review_result.value.score)}}</div>
-                  <div class="criteria-comment" *ngIf="review.review_result.value.comment">
-                    {{review.review_result.value.comment}}
-                  </div>
-                </div>
+              <div class="score-item">
+                <span class="score-label">Value:</span>
+                <span class="score-value">{{review.review_result.value.score}}/5</span>
               </div>
-
-              <!-- Feasibility -->
-              <div class="col-12 md:col-6">
-                <div class="criteria-item">
-                  <div class="criteria-header">
-                    <span class="criteria-title">{{getCriteriaTitle('feasibility')}}</span>
-                    <span class="criteria-score">{{review.review_result.feasibility.score}}/5</span>
-                  </div>
-                  <div class="criteria-label">{{getScoreLabel('feasibility', review.review_result.feasibility.score)}}</div>
-                  <div class="criteria-comment" *ngIf="review.review_result.feasibility.comment">
-                    {{review.review_result.feasibility.comment}}
-                  </div>
-                </div>
+              <div class="score-item">
+                <span class="score-label">Feasibility:</span>
+                <span class="score-value">{{review.review_result.feasibility.score}}/5</span>
               </div>
-
-              <!-- Impact -->
-              <div class="col-12 md:col-6">
-                <div class="criteria-item">
-                  <div class="criteria-header">
-                    <span class="criteria-title">{{getCriteriaTitle('impact')}}</span>
-                    <span class="criteria-score">{{review.review_result.impact.score}}/5</span>
-                  </div>
-                  <div class="criteria-label">{{getScoreLabel('impact', review.review_result.impact.score)}}</div>
-                  <div class="criteria-comment" *ngIf="review.review_result.impact.comment">
-                    {{review.review_result.impact.comment}}
-                  </div>
-                </div>
+              <div class="score-item">
+                <span class="score-label">Impact:</span>
+                <span class="score-value">{{review.review_result.impact.score}}/5</span>
               </div>
-
-              <!-- Return on Investment -->
-              <div class="col-12">
-                <div class="criteria-item">
-                  <div class="criteria-header">
-                    <span class="criteria-title">{{getCriteriaTitle('return_on_investment')}}</span>
-                    <span class="criteria-score">{{review.review_result.return_on_investment.score}}/5</span>
-                  </div>
-                  <div class="criteria-label">{{getScoreLabel('return_on_investment', review.review_result.return_on_investment.score)}}</div>
-                  <div class="criteria-comment" *ngIf="review.review_result.return_on_investment.comment">
-                    {{review.review_result.return_on_investment.comment}}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Average Score -->
-              <div class="col-12">
-                <p-divider></p-divider>
-                <div class="average-score">
-                  <span class="average-label">Average Score:</span>
-                  <span class="average-value">{{review.review_result.average_score | number:'1.1-1'}}/5.0</span>
-                </div>
+              <div class="score-item">
+                <span class="score-label">ROI:</span>
+                <span class="score-value">{{review.review_result.return_on_investment.score}}/5</span>
               </div>
             </div>
           </div>
@@ -259,4 +217,23 @@
       </button>
     </div>
   </div>
+
+  <!-- Review Form Dialog -->
+  <p-dialog 
+    header="Add Review" 
+    [(visible)]="showReviewForm"
+    [modal]="true"
+    [style]="{width: '90vw', maxWidth: '800px'}"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="review-dialog">
+    <app-review-form
+      *ngIf="showReviewForm && idea"
+      [ideaId]="idea.id"
+      [targetType]="'Session'"
+      (reviewSubmitted)="onReviewSubmitted()"
+      (cancel)="closeReviewForm()">
+    </app-review-form>
+  </p-dialog>
 </div> 
