@@ -38,7 +38,8 @@ export interface IdeaHistory {
 export enum ReviewStatus {
   IN_REVIEW = 'IN_REVIEW',
   APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED'
+  REJECTED = 'REJECTED',
+  NEED_IMPROVEMENT = 'NEED_IMPROVEMENT'
 }
 
 export interface SessionReview {

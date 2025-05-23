@@ -285,4 +285,34 @@ export class IdeaService {
         catchError(this.errorHandler.handleError)
       );
   }
+
+  /**
+   * Make final decision for session review
+   * @param ideaId Idea ID
+   * @param decision Final decision (APPROVED/REJECTED/NEED_IMPROVEMENT)
+   * @param comments Decision comments
+   * @returns Observable with operation result
+   */
+  makeSessionFinalDecision(
+    ideaId: string, 
+    decision: string, 
+    comments: string
+  ): Observable<ApiResponse<Idea>> {
+    const decisionData = {
+      decision: decision,
+      comments: comments
+    };
+
+    return this.http.post<ApiResponse<Idea>>(
+      `${this.apiUrl}/${ideaId}/session-review/final-decision`, 
+      decisionData
+    ).pipe(
+      tap(response => {
+        if (response.success) {
+          this.toastService.showSuccess('Final decision submitted successfully');
+        }
+      }),
+      catchError(this.errorHandler.handleError)
+    );
+  }
 } 

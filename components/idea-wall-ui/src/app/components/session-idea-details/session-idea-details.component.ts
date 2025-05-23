@@ -14,6 +14,8 @@ import { Idea, ReviewStatus } from '../../models/idea.model';
 import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 import { ReviewFormComponent } from '../review-form/review-form.component';
 import { ReviewListComponent } from '../review-list/review-list.component';
+import { FinalDecisionComponent } from '../final-decision/final-decision.component';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-session-idea-details',
@@ -28,7 +30,8 @@ import { ReviewListComponent } from '../review-list/review-list.component';
     TabViewModule,
     DialogModule,
     ReviewFormComponent,
-    ReviewListComponent
+    ReviewListComponent,
+    FinalDecisionComponent
   ],
   template: `
     <div class="container">
@@ -167,14 +170,25 @@ import { ReviewListComponent } from '../review-list/review-list.component';
           
           <!-- Reviews Tab -->
           <p-tabPanel header="Reviews ({{reviews.length}})">
-            <div class="mb-4 flex justify-content-end">
-              <button 
-                pButton 
-                label="Add Review" 
-                icon="pi pi-plus" 
-                class="p-button-rounded" 
-                (click)="openReviewDialog()">
-              </button>
+            <div class="mb-4 flex justify-content-between align-items-center">
+              <div *ngIf="canMakeFinalDecision()">
+                <button 
+                  pButton 
+                  label="Make Final Decision" 
+                  icon="pi pi-check-circle" 
+                  class="p-button-rounded p-button-success" 
+                  (click)="openFinalDecisionDialog()">
+                </button>
+              </div>
+              <div class="flex gap-2">
+                <button 
+                  pButton 
+                  label="Add Review" 
+                  icon="pi pi-plus" 
+                  class="p-button-rounded" 
+                  (click)="openReviewDialog()">
+                </button>
+              </div>
             </div>
           
             <!-- Review List Component -->
@@ -210,6 +224,25 @@ import { ReviewListComponent } from '../review-list/review-list.component';
         (reviewSubmitted)="onReviewSubmitted($event)">
       </app-review-form>
     </p-dialog>
+
+    <!-- Final Decision Dialog -->
+    <p-dialog 
+      [(visible)]="showFinalDecisionDialog" 
+      [style]="{width: '90%', maxWidth: '900px'}" 
+      [modal]="true"
+      [closeOnEscape]="true"
+      [closable]="true"
+      [draggable]="false"
+      header="Make Final Decision">
+      
+      <app-final-decision 
+        [ideaId]="ideaId"
+        [reviewCount]="idea?.session_review?.review_count || 0"
+        [averageScore]="idea?.session_review?.average_score || 0"
+        (decisionSubmitted)="onFinalDecisionSubmitted($event)"
+        (cancelled)="onFinalDecisionCancelled()">
+      </app-final-decision>
+    </p-dialog>
   `,
   styleUrls: ['./session-idea-details.component.scss']
 })
@@ -220,7 +253,9 @@ export class SessionIdeaDetailsComponent implements OnInit {
   idea: Idea | null = null;
   isLoading: boolean = true;
   showReviewDialog: boolean = false;
+  showFinalDecisionDialog: boolean = false;
   canUserAddReview: boolean = false;
+  canUserMakeFinalDecision: boolean = false;
   reviews: any[] = [];
 
   constructor(
@@ -228,7 +263,8 @@ export class SessionIdeaDetailsComponent implements OnInit {
     private router: Router,
     private ideaService: IdeaService,
     private reviewService: ReviewService,
-    public feelingUtil: FeelingUtilService
+    public feelingUtil: FeelingUtilService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -237,9 +273,16 @@ export class SessionIdeaDetailsComponent implements OnInit {
       if (params['id']) {
         this.ideaId = params['id'];
         this.loadIdeaDetails();
+        this.checkUserPermissions();
       } else {
         this.router.navigate(['/idea-session']);
       }
+    });
+  }
+
+  checkUserPermissions(): void {
+    this.authService.getUserRoles().subscribe(roles => {
+      this.canUserMakeFinalDecision = roles.includes('IDEA_SESSION_PANEL_REVIEWER');
     });
   }
 
@@ -306,6 +349,9 @@ export class SessionIdeaDetailsComponent implements OnInit {
       case ReviewStatus.REJECTED:
         return 'Rejected';
       case ReviewStatus.IN_REVIEW:
+        return 'In Review';
+      case ReviewStatus.NEED_IMPROVEMENT: 
+        return 'Need Improvement';
       default:
         return 'In Review';
     }
@@ -328,5 +374,30 @@ export class SessionIdeaDetailsComponent implements OnInit {
         this.reviewList.refresh();
       }
     }
+  }
+
+  openFinalDecisionDialog(): void {
+    this.showFinalDecisionDialog = true;
+  }
+
+  onFinalDecisionSubmitted(updatedIdea: Idea): void {
+    this.showFinalDecisionDialog = false;
+    this.idea = updatedIdea;
+    this.loadIdeaDetails(); // Reload to get fresh data
+  }
+
+  onFinalDecisionCancelled(): void {
+    this.showFinalDecisionDialog = false;
+  }
+
+  canMakeFinalDecision(): boolean {
+    if (!this.idea || !this.idea.session_review || !this.canUserMakeFinalDecision) {
+      return false;
+    }
+    
+    // Only allow final decision for ideas in IN_SESSION_REVIEW status
+    // and with at least 2 reviews
+    return this.idea.session_review.status === ReviewStatus.IN_REVIEW &&
+           this.idea.session_review.review_count >= 2;
   }
 } 

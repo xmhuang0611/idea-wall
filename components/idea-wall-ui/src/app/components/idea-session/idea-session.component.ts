@@ -116,6 +116,8 @@ export class IdeaSessionComponent implements OnInit {
         return 'Rejected';
       case ReviewStatus.IN_REVIEW:
         return 'In Review';
+      case ReviewStatus.NEED_IMPROVEMENT:
+        return 'Need Improvement';
       default:
         return 'Unknown';
     }
