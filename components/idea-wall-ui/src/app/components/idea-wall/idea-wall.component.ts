@@ -190,10 +190,7 @@ export class IdeaWallComponent implements OnInit {
             if (response.pagination) {
               this.totalItems = response.pagination.total;
             }
-            
-            console.log('Ideas loaded:', this.ideas.length);
           } else {
-            console.error('Failed to load ideas:', response.error);
             this.ideas = [];
           }
           this.isLoading = false;
@@ -274,7 +271,6 @@ export class IdeaWallComponent implements OnInit {
           // Update comment count in current list
           const idea = this.ideas.find(i => i.id === ideaId);
           if (idea && idea.total_comments !== commentCount) {
-            console.log(`Updating comment count before opening details: ${commentCount}`);
             idea.total_comments = commentCount;
           }
         }
@@ -301,7 +297,6 @@ export class IdeaWallComponent implements OnInit {
     // Update comment count for specified idea
     const idea = this.ideas.find(i => i.id === event.ideaId);
     if (idea && idea.total_comments !== event.count) {
-      console.log(`Updating comment count for idea ${event.ideaId}: ${event.count}`);
       idea.total_comments = event.count;
     }
   }
@@ -314,7 +309,6 @@ export class IdeaWallComponent implements OnInit {
     // Update vote status and count for specified idea
     const idea = this.ideas.find(i => i.id === event.ideaId);
     if (idea) {
-      console.log(`Updating vote status for idea ${event.ideaId}: has_voted=${event.has_voted}, totalVotes=${event.totalVotes}`);
       idea.has_voted = event.has_voted;
       idea.total_votes = event.totalVotes;
     }

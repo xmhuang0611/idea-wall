@@ -108,7 +108,6 @@ export class IdeaFormComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           const idea = response.data;
-          console.log('Loaded idea data:', idea);
           
           // Extract tag IDs correctly
           let tagIds: number[] = [];

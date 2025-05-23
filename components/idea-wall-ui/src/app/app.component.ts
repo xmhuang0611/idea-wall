@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
@@ -79,28 +79,9 @@ import { UserService } from './services/user.service';
     }
   `]
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   constructor(
     private authService: AuthService,
     private userService: UserService
   ) {}
-
-  ngOnInit() {
-    // Initialize the authentication service
-    if (this.authService.isLoggedIn()) {
-      const userId = this.authService.getId();
-      if (userId) {
-        this.userService.getUser(userId).subscribe({
-          next: (response) => {
-            if (response.success && response.data) {
-              console.log('Current user information:', response.data);
-            }
-          },
-          error: (error) => {
-            console.error('Error fetching user information:', error);
-          }
-        });
-      }
-    }
-  }
 } 
