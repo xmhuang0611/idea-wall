@@ -28,7 +28,7 @@ import { UserService } from './services/user.service';
         </div>
       </main>
       <app-footer></app-footer>
-      <p-toast position="bottom-right" class="global-toast"></p-toast>
+      <p-toast position="bottom-right"></p-toast>
     </div>
   `,
   styles: [`

@@ -1,0 +1,107 @@
+<div class="flex justify-content-between align-items-center mb-3">
+  <h2 class="m-0">User Management</h2>
+  <button pButton pRipple label="Add User" icon="pi pi-plus" 
+          class="p-button-rounded p-button-primary" 
+          (click)="openUserModal()">
+  </button>
+</div>
+
+<p-table [value]="filteredUsers" 
+         styleClass="p-datatable-sm" 
+         [showCurrentPageReport]="false" 
+         [paginator]="false">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>User Name</th>
+      <th>User ID</th>
+      <th>User Role</th>
+      <th style="width: 120px">Actions</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-user>
+    <tr>
+      <td>{{ user.user_name }}</td>
+      <td>{{ user.user_id }}</td>
+      <td>{{ formatRoles(user.roles) }}</td>
+      <td>
+        <div class="flex gap-2 justify-content-center">
+          <p-button icon="pi pi-pencil" 
+                    styleClass="p-button-text p-button-rounded" 
+                    (onClick)="openUserModal(user)">
+          </p-button>
+          <p-button icon="pi pi-trash" 
+                    styleClass="p-button-text p-button-rounded p-button-danger" 
+                    (onClick)="confirmDeleteUser(user)">
+          </p-button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- User Form Dialog -->
+<p-dialog [(visible)]="displayModal" 
+          [header]="isEditing ? 'Edit User Roles' : 'Create New User'" 
+          [modal]="true"
+          [style]="{width: '450px'}" 
+          [draggable]="false" 
+          [resizable]="false" 
+          (onHide)="handleCancel()">
+  <form [formGroup]="userForm" class="p-fluid">
+    <div class="flex flex-column gap-2 mb-3">
+      <label for="user_name" class="font-semibold">User Name <span class="required-field">*</span></label>
+      <input id="user_name" type="text" pInputText formControlName="user_name"
+             [ngClass]="{'ng-invalid ng-dirty': userForm.get('user_name')?.invalid && userForm.get('user_name')?.touched}"
+             [readonly]="isEditing"
+             placeholder="Enter user name">
+      <small class="p-error" *ngIf="userForm.get('user_name')?.invalid && userForm.get('user_name')?.touched">
+        User name is required
+      </small>
+    </div>
+
+    <div class="flex flex-column gap-2 mb-3" *ngIf="!isEditing">
+      <label for="user_id" class="font-semibold">User ID <span class="required-field">*</span></label>
+      <input id="user_id" type="text" pInputText formControlName="user_id"
+             [ngClass]="{'ng-invalid ng-dirty': userForm.get('user_id')?.invalid && userForm.get('user_id')?.touched}"
+             placeholder="Enter user ID">
+      <small class="p-error" *ngIf="userForm.get('user_id')?.invalid && userForm.get('user_id')?.touched">
+        User ID is required
+      </small>
+    </div>
+
+    <div class="flex flex-column gap-2">
+      <label class="font-semibold">Select Roles <span class="required-field">*</span></label>
+      <div class="role-options">
+        <div *ngFor="let role of availableRoles" class="role-option">
+          <input type="checkbox" 
+                 [id]="role" 
+                 [checked]="isRoleSelected(role)" 
+                 (change)="toggleRole(role)">
+          <label [for]="role">{{ roleDisplayMap[role] }}</label>
+        </div>
+      </div>
+      <small class="p-error" *ngIf="userForm.get('roles')?.invalid && userForm.get('roles')?.touched">
+        At least one role must be selected
+      </small>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2">
+      <button pButton pRipple label="Cancel" icon="pi pi-times" 
+              class="p-button-rounded p-button-outlined p-button-secondary" 
+              (click)="handleCancel()">
+      </button>
+      <button pButton pRipple label="Save" icon="pi pi-check" 
+              class="p-button-rounded p-button-primary" 
+              (click)="handleOk()" 
+              [disabled]="!userForm.valid">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Confirmation Dialog -->
+<p-confirmDialog [style]="{width: '450px'}" 
+                styleClass="delete-confirm-dialog">
+</p-confirmDialog> 

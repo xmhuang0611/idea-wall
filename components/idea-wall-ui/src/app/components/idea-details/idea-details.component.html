@@ -83,7 +83,7 @@
         </div>
         
         <!-- Creator info -->
-        <div class="flex align-items-center mb-2 creator-info p-2 border-round">
+        <div class="flex align-items-center mb-2 surface-ground p-2 border-round">
           <p-avatar 
             icon="pi pi-user" 
             shape="circle"
@@ -95,7 +95,7 @@
         </div>
         
         <!-- Description -->
-        <div class="description-container p-2 border-round">
+        <div class="surface-ground p-2 border-round">
           <p class="line-height-3 m-0 text-700 white-space-pre-line">{{idea.description}}</p>
         </div>
       </div>
@@ -146,7 +146,7 @@
         
         <div *ngIf="!commentsLoading && comments.length > 0" class="comments-section">
           <div class="comment-list">
-            <div *ngFor="let comment of displayedComments" class="comment-item p-2 mb-2">
+            <div *ngFor="let comment of displayedComments" class="comment-item surface-ground p-2 mb-2 border-round">
               <div class="flex align-items-center mb-1">
                 <p-avatar 
                   icon="pi pi-user" 
@@ -157,7 +157,7 @@
                 <span class="font-medium text-900 mr-2">{{comment.creator_name}}</span>
                 <span class="text-xs text-400">{{comment.created_at | date:'medium'}}</span>
               </div>
-              <p class="m-0 line-height-3 text-700 pl-4 white-space-pre-line">{{comment.description}}</p>
+              <p class="m-0 line-height-3 text-700 white-space-pre-line">{{comment.description}}</p>
             </div>
           </div>
           

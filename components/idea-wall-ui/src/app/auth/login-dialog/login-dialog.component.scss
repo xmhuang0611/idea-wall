@@ -1,47 +1,16 @@
-/* Use PrimeNG theme variables and classes */
+/* Essential layout styles */
 :host {
   .login-form {
-    .p-inputtext {
-      width: 100%;
-      transition: all 0.3s ease;
-      
-      &:hover {
-        border-color: var(--primary-200);
-      }
-      
-      &:focus {
-        box-shadow: 0 0 0 2px var(--primary-100);
-        border-color: var(--primary-color);
-      }
-    }
-    
-    .p-button {
-      transition: all 0.2s ease;
-      
-      &.p-button-outlined:hover {
-        background: var(--surface-100);
-      }
-      
-      &.p-button-primary:hover {
-        background: var(--primary-600);
-      }
-    }
+    width: 100%;
   }
 }
 
-/* Dialog styles */
-.p-dialog {
-  .p-dialog-content {
-    border-radius: 0 0 6px 6px;
-  }
+.w-full {
+  width: 100%;
 }
 
 /* Input placeholder styles */
 input::placeholder {
   color: var(--text-color-secondary);
   opacity: 0.6;
-}
-
-.w-full {
-  width: 100%;
 }

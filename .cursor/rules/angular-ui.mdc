@@ -26,6 +26,7 @@ alwaysApply: true
 
 
 ### 组件主题定制
+- 优先使用PrimeNG现有样式
 - 优先使用PrimeNG的CSS变量进行主题定制
 - 组件样式覆盖应遵循以下格式:
   ```scss

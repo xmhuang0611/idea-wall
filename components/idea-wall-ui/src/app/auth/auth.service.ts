@@ -61,7 +61,6 @@ export class AuthService {
         },
         dismissableMask: true,
         baseZIndex: 1000,
-        styleClass: 'login-dialog-container',
         showHeader: true,
         modal: true,
         breakpoints: {
