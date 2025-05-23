@@ -108,8 +108,21 @@
   </form>
   <ng-template pTemplate="footer">
     <div class="flex justify-content-end gap-2">
-      <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-rounded p-button-outlined p-button-secondary" (click)="handleCancel()"></button>
-      <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-rounded p-button-primary" (click)="handleOk()" [disabled]="!tagForm.valid"></button>
+      <button pButton pRipple 
+              label="Cancel" 
+              icon="pi pi-times" 
+              class="p-button-rounded p-button-outlined p-button-secondary" 
+              (click)="handleCancel()"
+              [disabled]="isSubmitting">
+      </button>
+      <button pButton pRipple 
+              label="Save" 
+              icon="pi pi-check" 
+              class="p-button-rounded p-button-primary" 
+              (click)="handleOk()" 
+              [loading]="isSubmitting"
+              [disabled]="!tagForm.valid || isSubmitting">
+      </button>
     </div>
   </ng-template>
 </p-dialog>

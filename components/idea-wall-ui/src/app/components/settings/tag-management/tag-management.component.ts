@@ -40,6 +40,7 @@ export class TagManagementComponent implements OnInit {
   tagForm: FormGroup;
   expandedRowKeys: { [key: number]: boolean } = {};
   loading = false;
+  isSubmitting = false;
 
   readonly defaultParentTag: Tag = {
     tag_id: 0,
@@ -112,10 +113,13 @@ export class TagManagementComponent implements OnInit {
 
   handleOk(): void {
     if (this.tagForm.valid) {
+      this.isSubmitting = true;
       const formValue = this.tagForm.value;
       const tagId = formValue.tag_id || 0;
       
-      // Craete Tag
+      this.tagForm.disable();
+      
+      // Create Tag
       if (!this.isEditing) {
         const tag: Partial<Tag> = {
           tag_id: tagId,
@@ -129,13 +133,15 @@ export class TagManagementComponent implements OnInit {
               this.displayModal = false;
               this.fetchTags();
             }
+            this.resetSubmitState();
           },
           error: (error) => {
             console.error('Error creating tag:', error);
+            this.resetSubmitState();
           }
         });
       } 
-      // Updagte Tag
+      // Update Tag
       else {
         const tag: Partial<Tag> = {
           tag_id: tagId,
@@ -149,9 +155,11 @@ export class TagManagementComponent implements OnInit {
               this.displayModal = false;
               this.fetchTags();
             }
+            this.resetSubmitState();
           },
           error: (error) => {
             console.error('Error updating tag:', error);
+            this.resetSubmitState();
           }
         });
       }
@@ -160,9 +168,15 @@ export class TagManagementComponent implements OnInit {
     }
   }
 
+  private resetSubmitState(): void {
+    this.isSubmitting = false;
+    this.tagForm.enable();
+  }
+
   handleCancel(): void {
     this.displayModal = false;
     this.tagForm.reset();
+    this.resetSubmitState();
   }
 
   deleteTag(tag: Tag): void {
@@ -173,14 +187,17 @@ export class TagManagementComponent implements OnInit {
       acceptButtonStyleClass: 'p-button-danger p-button-rounded',
       rejectButtonStyleClass: 'p-button-secondary p-button-rounded',
       accept: () => {
+        this.isSubmitting = true;
         this.tagService.deleteTag(tag.tag_id).subscribe({
           next: (response: ApiResponse<boolean>) => {
             if (response.success) {
               this.fetchTags();
             }
+            this.isSubmitting = false;
           },
           error: (error) => {
             console.error('Error deleting tag:', error);
+            this.isSubmitting = false;
           }
         });
       }

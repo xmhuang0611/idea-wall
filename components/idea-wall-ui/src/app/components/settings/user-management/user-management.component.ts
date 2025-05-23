@@ -48,6 +48,8 @@ export class UserManagementComponent implements OnInit {
     'IDEA_INCUBATOR_REVIEWER': 'Incubator Reviewer'
   };
 
+  isSubmitting = false;
+
   constructor(
     private userService: UserService,
     private confirmationService: ConfirmationService,
@@ -97,7 +99,10 @@ export class UserManagementComponent implements OnInit {
 
   handleOk(): void {
     if (this.userForm.valid) {
+      this.isSubmitting = true;
       const formValue = this.userForm.value;
+      
+      this.userForm.disable();
       
       if (!this.isEditing) {
         // Create user
@@ -107,6 +112,11 @@ export class UserManagementComponent implements OnInit {
               this.displayModal = false;
               this.fetchUsers();
             }
+            this.resetSubmitState();
+          },
+          error: (error: any) => {
+            console.error('Error creating user:', error);
+            this.resetSubmitState();
           }
         });
       } else if (this.selectedUser) {
@@ -120,6 +130,11 @@ export class UserManagementComponent implements OnInit {
               this.displayModal = false;
               this.fetchUsers();
             }
+            this.resetSubmitState();
+          },
+          error: (error: any) => {
+            console.error('Error updating user:', error);
+            this.resetSubmitState();
           }
         });
       }
@@ -128,10 +143,15 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
+  private resetSubmitState(): void {
+    this.isSubmitting = false;
+    this.userForm.enable();
+  }
+
   handleCancel(): void {
     this.displayModal = false;
     this.userForm.reset();
-    this.selectedUser = null;
+    this.resetSubmitState();
   }
 
   isRoleSelected(role: UserRole): boolean {
@@ -161,17 +181,19 @@ export class UserManagementComponent implements OnInit {
       acceptButtonStyleClass: 'p-button-danger p-button-rounded',
       rejectButtonStyleClass: 'p-button-secondary p-button-rounded',
       accept: () => {
-        this.deleteUser(user);
-      }
-    });
-  }
-
-  deleteUser(user: User): void {
-    this.userService.deleteUser(user.user_id, user.user_name).subscribe({
-      next: (response: ApiResponse<boolean>) => {
-        if (response.success) {
-          this.fetchUsers();
-        }
+        this.isSubmitting = true;
+        this.userService.deleteUser(user.user_id, user.user_name).subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.fetchUsers();
+            }
+            this.isSubmitting = false;
+          },
+          error: (error) => {
+            console.error('Error deleting user:', error);
+            this.isSubmitting = false;
+          }
+        });
       }
     });
   }
