@@ -16,6 +16,7 @@ import { InputSwitchModule } from 'primeng/inputswitch';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { DialogModule } from 'primeng/dialog';
 import { IdeaDetailsComponent } from '../idea-details/idea-details.component';
 import { AuthService } from '../../auth/auth.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -28,6 +29,7 @@ import { ConfirmationService } from 'primeng/api';
 import { IdeaHistoryComponent } from '../idea-history/idea-history.component';
 import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 import { ApiResponse } from '../../shared/models/api-response.model';
+import { SessionReviewFormComponent } from '../session-review-form/session-review-form.component';
 
 interface Topic {
   name: string;
@@ -53,9 +55,11 @@ interface Topic {
     ProgressSpinnerModule,
     TooltipModule,
     MultiSelectModule,
+    DialogModule,
     IdeaDetailsComponent,
     ConfirmDialogModule,
-    IdeaHistoryComponent
+    IdeaHistoryComponent,
+    SessionReviewFormComponent
   ],
   providers: [ConfirmationService],
   templateUrl: './idea-wall.component.html',
@@ -100,6 +104,10 @@ export class IdeaWallComponent implements OnInit {
 
   hotTopics: Topic[] = [];
   newestIdeas: Idea[] = [];
+
+  // Session Review
+  sessionReviewDialogVisible = false;
+  selectedSessionIdeaId: string | null = null;
 
   constructor(
     private ideaService: IdeaService,
@@ -513,5 +521,12 @@ export class IdeaWallComponent implements OnInit {
 
   onIdeaClick(ideaId: string) {
     this.openDetails(ideaId);
+  }
+
+  /**
+   * Navigate to session review page for an idea
+   */
+  navigateToSessionReview(ideaId: string): void {
+    this.router.navigate(['/session-review', ideaId]);
   }
 } 

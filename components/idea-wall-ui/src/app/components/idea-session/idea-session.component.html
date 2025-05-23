@@ -1,0 +1,89 @@
+<div class="container">
+  <h1 class="text-2xl font-bold my-4">Idea Session</h1>
+  
+  <!-- Search and Filters -->
+  <p-card styleClass="mb-4">
+    <div class="flex justify-content-between align-items-center">
+      <div class="p-inputgroup" style="width: 50%;">
+        <input type="text" pInputText [(ngModel)]="searchQuery" placeholder="Search ideas...">
+        <button pButton icon="pi pi-search" (click)="onSearch()"></button>
+        <button pButton icon="pi pi-times" (click)="clearSearch()" *ngIf="searchQuery"></button>
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="flex justify-content-center my-6">
+    <p-progressSpinner></p-progressSpinner>
+  </div>
+
+  <!-- Ideas Table -->
+  <p-card *ngIf="!isLoading">
+    <p-table [value]="ideas" [tableStyle]="{'min-width': '50rem'}" 
+             styleClass="p-datatable-sm" [rowHover]="true">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Title</th>
+          <th>Submitter</th>
+          <th>Stream</th>
+          <th>Status</th>
+          <th>Submitted Date</th>
+          <th>Action</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-idea>
+        <tr>
+          <td>
+            <div class="font-medium">{{idea.title}}</div>
+            <div class="text-sm text-500 truncate" style="max-width: 300px;">{{idea.description}}</div>
+          </td>
+          <td>{{idea.creator_name}}</td>
+          <td>
+            <div *ngIf="idea.session_review?.stream">{{idea.session_review?.stream}}</div>
+            <div *ngIf="!idea.session_review?.stream" class="text-500">-</div>
+          </td>
+          <td>
+            <p-tag 
+              *ngIf="idea.session_review?.status" 
+              [value]="getReviewStatusLabel(idea.session_review?.status)" 
+              [severity]="getReviewStatusSeverity(idea.session_review?.status)"
+              [rounded]="true">
+            </p-tag>
+            <span *ngIf="!idea.session_review?.status" class="text-500">Pending</span>
+          </td>
+          <td>
+            <span *ngIf="idea.session_review?.submitted_at">
+              {{idea.session_review?.submitted_at | date:'MMM d, y'}}
+            </span>
+            <span *ngIf="!idea.session_review?.submitted_at" class="text-500">-</span>
+          </td>
+          <td>
+            <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm"
+                    (click)="viewIdea(idea.id)" pTooltip="View Details" tooltipPosition="top"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center p-4">
+            <div class="flex flex-column align-items-center">
+              <i class="pi pi-info-circle text-500 text-4xl mb-3"></i>
+              <span class="text-lg font-medium">No session ideas found</span>
+              <span class="text-500">Submit ideas from the Idea Wall for review</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <!-- Pagination -->
+    <div class="flex justify-content-center mt-4">
+      <p-paginator 
+        [rows]="pageSize" 
+        [totalRecords]="totalItems" 
+        [rowsPerPageOptions]="[5, 10, 25, 50]" 
+        (onPageChange)="onPageChange($event)">
+      </p-paginator>
+    </div>
+  </p-card>
+</div>

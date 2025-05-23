@@ -91,6 +91,12 @@
             <div class="flex justify-content-between align-items-center mb-2">
               <h3 class="text-primary m-0">{{idea.title}}</h3>
               <div class="flex gap-2">
+                <button pButton icon="pi pi-send" 
+                  class="p-button-rounded p-button-text p-button-sm"
+                  (click)="$event.stopPropagation(); navigateToSessionReview(idea.id)" 
+                  pTooltip="Submit to Session" 
+                  tooltipPosition="top">
+                </button>
                 <button pButton icon="pi pi-history" class="p-button-rounded p-button-text p-button-sm"
                   (click)="viewIdeaHistory(idea.id)" pTooltip="View History" tooltipPosition="top">
                 </button>

@@ -1,0 +1,45 @@
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.feeling-image {
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+:host ::ng-deep {
+  .p-card {
+    .p-card-header {
+      padding: 0;
+    }
+    
+    .p-card-body {
+      padding: 1.5rem;
+    }
+  }
+  
+  .white-space-pre-line {
+    white-space: pre-line;
+  }
+  
+  .border-1 {
+    border: 1px solid var(--surface-200);
+  }
+  
+  .border-round {
+    border-radius: 6px;
+  }
+  
+  .surface-ground {
+    background-color: var(--surface-ground);
+  }
+} 

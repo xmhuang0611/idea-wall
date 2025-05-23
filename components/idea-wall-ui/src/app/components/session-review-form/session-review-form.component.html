@@ -1,0 +1,148 @@
+<div class="container">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="p-4">
+        <h2 class="text-2xl font-bold text-primary mb-2">Submit Idea to Session Review</h2>
+        <p class="text-lg mb-0" *ngIf="ideaTitle">{{ ideaTitle }}</p>
+      </div>
+    </ng-template>
+    
+    <form [formGroup]="sessionReviewForm" (ngSubmit)="onSubmit()" class="p-fluid">
+      <!-- Loading Overlay -->
+      <div *ngIf="isSubmitting" class="submit-overlay">
+        <p-progressSpinner></p-progressSpinner>
+      </div>
+
+      <!-- Form Fields -->
+      <div class="grid">
+        <!-- Submitter Job -->
+        <div class="col-12 md:col-6 mb-3">
+          <label for="submitter_job" class="block mb-1">Your Job Title <span class="text-red-500">*</span></label>
+          <input 
+            id="submitter_job" 
+            type="text" 
+            pInputText 
+            formControlName="submitter_job"
+            [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('submitter_job')?.invalid && sessionReviewForm.get('submitter_job')?.touched}">
+          <small 
+            class="p-error" 
+            *ngIf="sessionReviewForm.get('submitter_job')?.invalid && sessionReviewForm.get('submitter_job')?.touched">
+            Job title is required
+          </small>
+        </div>
+
+        <!-- Manager -->
+        <div class="col-12 md:col-6 mb-3">
+          <label for="manager" class="block mb-1">Manager <span class="text-red-500">*</span></label>
+          <input 
+            id="manager" 
+            type="text" 
+            pInputText 
+            formControlName="manager"
+            [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('manager')?.invalid && sessionReviewForm.get('manager')?.touched}">
+          <small 
+            class="p-error" 
+            *ngIf="sessionReviewForm.get('manager')?.invalid && sessionReviewForm.get('manager')?.touched">
+            Manager name is required
+          </small>
+        </div>
+
+        <!-- Stream -->
+        <div class="col-12 md:col-6 mb-3">
+          <label for="stream" class="block mb-1">Stream <span class="text-red-500">*</span></label>
+          <input 
+            id="stream" 
+            type="text" 
+            pInputText 
+            formControlName="stream"
+            [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('stream')?.invalid && sessionReviewForm.get('stream')?.touched}">
+          <small 
+            class="p-error" 
+            *ngIf="sessionReviewForm.get('stream')?.invalid && sessionReviewForm.get('stream')?.touched">
+            Stream is required
+          </small>
+        </div>
+
+        <!-- Clients -->
+        <div class="col-12 md:col-6 mb-3">
+          <label for="clients" class="block mb-1">Clients</label>
+          <input 
+            id="clients" 
+            type="text" 
+            pInputText 
+            formControlName="clients">
+        </div>
+
+        <!-- Problem Statements -->
+        <div class="col-12 mb-3">
+          <label for="problem_statements" class="block mb-1">Problem Statements <span class="text-red-500">*</span></label>
+          <textarea 
+            id="problem_statements" 
+            pInputTextarea 
+            formControlName="problem_statements"
+            [rows]="4"
+            [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('problem_statements')?.invalid && sessionReviewForm.get('problem_statements')?.touched}">
+          </textarea>
+          <small 
+            class="p-error" 
+            *ngIf="sessionReviewForm.get('problem_statements')?.invalid && sessionReviewForm.get('problem_statements')?.touched">
+            Problem statements are required
+          </small>
+        </div>
+
+        <!-- Solutions -->
+        <div class="col-12 mb-3">
+          <label for="solutions" class="block mb-1">Solutions <span class="text-red-500">*</span></label>
+          <textarea 
+            id="solutions" 
+            pInputTextarea 
+            formControlName="solutions"
+            [rows]="4"
+            [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('solutions')?.invalid && sessionReviewForm.get('solutions')?.touched}">
+          </textarea>
+          <small 
+            class="p-error" 
+            *ngIf="sessionReviewForm.get('solutions')?.invalid && sessionReviewForm.get('solutions')?.touched">
+            Solutions are required
+          </small>
+        </div>
+
+        <!-- Values -->
+        <div class="col-12 mb-3">
+          <label for="values" class="block mb-1">Value to Business <span class="text-red-500">*</span></label>
+          <textarea 
+            id="values" 
+            pInputTextarea 
+            formControlName="values"
+            [rows]="4"
+            [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('values')?.invalid && sessionReviewForm.get('values')?.touched}">
+          </textarea>
+          <small 
+            class="p-error" 
+            *ngIf="sessionReviewForm.get('values')?.invalid && sessionReviewForm.get('values')?.touched">
+            Value description is required
+          </small>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-content-end gap-2 mt-4">
+        <button 
+          pButton 
+          type="button" 
+          label="Cancel" 
+          class="p-button-rounded p-button-secondary" 
+          (click)="onCancel()"
+          [disabled]="isSubmitting">
+        </button>
+        <button 
+          pButton 
+          type="submit" 
+          label="Submit for Review" 
+          class="p-button-rounded" 
+          [disabled]="isSubmitting">
+        </button>
+      </div>
+    </form>
+  </p-card>
+</div> 

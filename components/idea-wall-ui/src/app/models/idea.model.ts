@@ -18,6 +18,7 @@ export interface Idea {
   updated_at: Date;
   updater_id: string;
   updater_name: string;
+  session_review?: SessionReview;
 }
 
 export interface IdeaHistory {
@@ -32,4 +33,26 @@ export interface IdeaHistory {
   creator_id: string;
   creator_name: string;
   action: string;
+}
+
+export enum ReviewStatus {
+  IN_REVIEW = 'IN_REVIEW',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED'
+}
+
+export interface SessionReview {
+  submitter_id?: string;
+  submitter_name?: string;
+  submitter_job?: string;
+  manager?: string;
+  stream?: string;
+  clients?: string;
+  problem_statements?: string;
+  solutions?: string;
+  values?: string;
+  average_score: number;
+  status: ReviewStatus;
+  review_count: number;
+  submitted_at?: Date;
 } 

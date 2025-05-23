@@ -352,7 +352,6 @@ class IdeaService:
             operation_type=OperationType.UPDATE,
             user_id=submitter_id,
             user_name=submitter_name,
-            description="Submitted idea for session review"
         )
         
         return updated_idea
@@ -428,7 +427,6 @@ class IdeaService:
             operation_type=OperationType.UPDATE,
             user_id=submitter_id,
             user_name=submitter_name,
-            description="Submitted idea for incubation review"
         )
         
         return updated_idea
@@ -515,7 +513,6 @@ class IdeaService:
             operation_type=OperationType.UPDATE,
             user_id=reviewer_id,
             user_name=reviewer_name,
-            description=f"Added {target_type.lower()} review result"
         )
         
         return updated_idea
@@ -591,7 +588,6 @@ class IdeaService:
             operation_type=OperationType.UPDATE,
             user_id=decision_maker_id,
             user_name=decision_maker_name,
-            description=f"Made final decision for {target_type.lower()} review: {decision}"
         )
         
         return updated_idea
@@ -640,8 +636,7 @@ class IdeaService:
             object_data=updated_idea,
             operation_type=OperationType.UPDATE,
             user_id=user_id,
-            user_name=user_name,
-            description="Rolled out idea"
+            user_name=user_name
         )
         
         return updated_idea

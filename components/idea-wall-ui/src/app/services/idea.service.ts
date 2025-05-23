@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { Idea } from '../models/idea.model';
+import { Idea, SessionReview } from '../models/idea.model';
 import { ApiResponse } from '../shared/models/api-response.model';
 import { ToastService } from '../shared/services/toast.service';
 import { Comment } from '../models/comment.model';
@@ -216,6 +216,69 @@ export class IdeaService {
       .set('limit', limit.toString());
     
     return this.http.get<ApiResponse<IdeaHistory[]>>(`${this.apiUrl}/${ideaId}/history`, { params })
+      .pipe(
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  /**
+   * Submit an idea for session review
+   * @param ideaId Idea ID
+   * @param sessionReviewData Session review data
+   * @returns Observable with operation result
+   */
+  submitSessionReview(ideaId: string, sessionReviewData: Partial<SessionReview>): Observable<ApiResponse<Idea>> {
+    return this.http.put<ApiResponse<Idea>>(`${this.apiUrl}/${ideaId}/session-review`, sessionReviewData)
+      .pipe(
+        tap(response => {
+          if (response.success) {
+            this.toastService.showSuccess('Idea submitted for session review successfully');
+          }
+        }),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  /**
+   * Get ideas submitted for session review
+   * @param params Query parameters
+   * @returns Observable with session ideas
+   */
+  getSessionIdeas(params: {
+    skip?: number;
+    limit?: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    tags?: number[];
+  } = {}): Observable<ApiResponse<Idea[]>> {
+    let httpParams = new HttpParams();
+    
+    if (params.skip !== undefined) {
+      httpParams = httpParams.set('skip', params.skip.toString());
+    }
+    if (params.limit !== undefined) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    if (params.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params.sort_by) {
+      httpParams = httpParams.set('sort_by', params.sort_by);
+    }
+    if (params.sort_order) {
+      httpParams = httpParams.set('sort_order', params.sort_order);
+    }
+    if (params.tags && params.tags.length > 0) {
+      params.tags.forEach(tag => {
+        httpParams = httpParams.append('tags', tag.toString());
+      });
+    }
+    
+    // Add filter for session ideas
+    httpParams = httpParams.set('status', 'IN_SESSION_REVIEW');
+
+    return this.http.get<ApiResponse<Idea[]>>(this.apiUrl, { params: httpParams })
       .pipe(
         catchError(this.errorHandler.handleError)
       );
