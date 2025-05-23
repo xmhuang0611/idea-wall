@@ -102,14 +102,20 @@
 
   <ng-template pTemplate="footer">
     <div class="flex justify-content-end gap-2">
-      <button pButton pRipple label="Cancel" icon="pi pi-times" 
+      <button pButton pRipple 
+              label="Cancel" 
+              icon="pi pi-times" 
               class="p-button-rounded p-button-outlined p-button-secondary" 
-              (click)="handleCancel()">
+              (click)="handleCancel()"
+              [disabled]="isSubmitting">
       </button>
-      <button pButton pRipple label="Save" icon="pi pi-check" 
+      <button pButton pRipple 
+              label="Save" 
+              icon="pi pi-check" 
               class="p-button-rounded p-button-primary" 
               (click)="handleOk()" 
-              [disabled]="!userForm.valid">
+              [loading]="isSubmitting"
+              [disabled]="!userForm.valid || isSubmitting">
       </button>
     </div>
   </ng-template>
