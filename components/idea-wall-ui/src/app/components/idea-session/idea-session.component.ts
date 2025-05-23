@@ -102,8 +102,9 @@ export class IdeaSessionComponent implements OnInit {
       case ReviewStatus.REJECTED:
         return 'danger';
       case ReviewStatus.IN_REVIEW:
-      default:
         return 'info';
+      default:
+        return 'secondary';
     }
   }
 
@@ -114,9 +115,33 @@ export class IdeaSessionComponent implements OnInit {
       case ReviewStatus.REJECTED:
         return 'Rejected';
       case ReviewStatus.IN_REVIEW:
-      default:
         return 'In Review';
+      default:
+        return 'Unknown';
     }
+  }
+
+  /**
+   * Get idea status severity based on overall idea status
+   */
+  getIdeaStatusSeverity(idea: Idea): 'success' | 'info' | 'warning' | 'danger' | 'secondary' {
+    // Check if the idea has session_review, if not it's probably a different status
+    if (!idea.session_review) {
+      return 'secondary';
+    }
+    
+    return this.getReviewStatusSeverity(idea.session_review.status);
+  }
+
+  /**
+   * Get idea status label based on overall idea status
+   */
+  getIdeaStatusLabel(idea: Idea): string {
+    if (!idea.session_review) {
+      return 'No Session Review';
+    }
+    
+    return this.getReviewStatusLabel(idea.session_review.status);
   }
 
   viewIdea(id: string): void {

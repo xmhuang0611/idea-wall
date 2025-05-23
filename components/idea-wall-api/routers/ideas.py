@@ -30,6 +30,7 @@ async def get_ideas(
     creator_id: Optional[str] = None,
     voted_by: Optional[str] = None,
     bookmarked_by: Optional[str] = None,
+    status: Optional[List[str]] = Query(None),
     current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     ideas = await idea_service.get_ideas(
@@ -41,14 +42,16 @@ async def get_ideas(
         tags=tags,
         creator_id=creator_id,
         voted_by=voted_by,
-        bookmarked_by=bookmarked_by
+        bookmarked_by=bookmarked_by,
+        status=status
     )
     total = await idea_service.get_total_ideas(
         search=search,
         tags=tags,
         creator_id=creator_id,
         voted_by=voted_by,
-        bookmarked_by=bookmarked_by
+        bookmarked_by=bookmarked_by,
+        status=status
     )
     
     # If user is logged in, get vote and bookmark status

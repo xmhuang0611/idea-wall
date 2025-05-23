@@ -275,8 +275,10 @@ export class IdeaService {
       });
     }
     
-    // Add filter for session ideas
-    httpParams = httpParams.set('status', 'IN_SESSION_REVIEW');
+    // Add filter for all session-related statuses
+    httpParams = httpParams.append('status', 'IN_SESSION_REVIEW');
+    httpParams = httpParams.append('status', 'SESSION_APPROVED');
+    httpParams = httpParams.append('status', 'SESSION_REJECTED');
 
     return this.http.get<ApiResponse<Idea[]>>(this.apiUrl, { params: httpParams })
       .pipe(

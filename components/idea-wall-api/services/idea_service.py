@@ -25,7 +25,7 @@ class IdeaService:
         creator_id: Optional[str] = None,
         voted_by: Optional[str] = None,
         bookmarked_by: Optional[str] = None,
-        status: Optional[str] = None
+        status: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         filter_query = {}
             
@@ -44,9 +44,12 @@ class IdeaService:
         if creator_id:
             filter_query["creator_id"] = creator_id
             
-        # Filter by status
+        # Filter by status (multiple statuses)
         if status:
-            filter_query["status"] = status
+            if len(status) == 1:
+                filter_query["status"] = status[0]
+            else:
+                filter_query["status"] = {"$in": status}
 
         # Collect all idea IDs that need to be filtered
         idea_ids_to_filter = []
@@ -114,7 +117,7 @@ class IdeaService:
         creator_id: Optional[str] = None,
         voted_by: Optional[str] = None,
         bookmarked_by: Optional[str] = None,
-        status: Optional[str] = None
+        status: Optional[List[str]] = None
     ) -> int:
         db = await self._db()
         filter_query = await self._build_filter_query(search, tags, creator_id, voted_by, bookmarked_by, status)
@@ -131,7 +134,7 @@ class IdeaService:
         creator_id: Optional[str] = None,
         voted_by: Optional[str] = None,
         bookmarked_by: Optional[str] = None,
-        status: Optional[str] = None
+        status: Optional[List[str]] = None
     ) -> List[Idea]:
         db = await self._db()
         
