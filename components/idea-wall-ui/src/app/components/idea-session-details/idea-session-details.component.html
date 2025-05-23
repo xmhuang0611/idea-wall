@@ -144,62 +144,13 @@
 
       <!-- Reviews Tab -->
       <p-tabPanel [header]="'Reviews (' + reviews.length + ')'">
-        <!-- Add Review Button -->
-        <div class="reviews-header mb-3">
-          <button 
-            pButton 
-            icon="pi pi-plus" 
-            label="Add Review" 
-            class="p-button-rounded p-button-primary" 
-            (click)="openReviewForm()">
-          </button>
-        </div>
-
-        <div *ngIf="reviews.length === 0" class="no-reviews">
-          <div class="text-center p-4">
-            <i class="pi pi-file-excel text-3xl text-500 mb-3"></i>
-            <p class="text-500 m-0">No reviews available yet.</p>
-          </div>
-        </div>
-
-        <!-- Review List -->
-        <div *ngFor="let review of reviews" class="review-list-item mb-3">
-          <div class="review-summary">
-            <div class="review-header">
-              <div class="reviewer-info">
-                <i class="pi pi-user review-icon"></i>
-                <span class="reviewer-name">{{review.reviewer_name}}</span>
-              </div>
-              <div class="review-meta">
-                <span class="review-score">{{review.review_result.average_score | number:'1.1-1'}}/5.0</span>
-                <span class="review-date">{{formatDate(review.created_at)}}</span>
-              </div>
-            </div>
-            
-            <div class="review-summary-scores">
-              <div class="score-item">
-                <span class="score-label">Innovation:</span>
-                <span class="score-value">{{review.review_result.innovation.score}}/5</span>
-              </div>
-              <div class="score-item">
-                <span class="score-label">Value:</span>
-                <span class="score-value">{{review.review_result.value.score}}/5</span>
-              </div>
-              <div class="score-item">
-                <span class="score-label">Feasibility:</span>
-                <span class="score-value">{{review.review_result.feasibility.score}}/5</span>
-              </div>
-              <div class="score-item">
-                <span class="score-label">Impact:</span>
-                <span class="score-value">{{review.review_result.impact.score}}/5</span>
-              </div>
-              <div class="score-item">
-                <span class="score-label">ROI:</span>
-                <span class="score-value">{{review.review_result.return_on_investment.score}}/5</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <app-review-list
+          [reviews]="reviews"
+          [ideaId]="idea.id"
+          [targetType]="'Session'"
+          [currentUserName]="getCurrentUserName()"
+          (reviewsUpdated)="onReviewsUpdated()">
+        </app-review-list>
       </p-tabPanel>
     </p-tabView>
   </div>
@@ -217,23 +168,4 @@
       </button>
     </div>
   </div>
-
-  <!-- Review Form Dialog -->
-  <p-dialog 
-    header="Add Review" 
-    [(visible)]="showReviewForm"
-    [modal]="true"
-    [style]="{width: '90vw', maxWidth: '800px'}"
-    [closable]="true"
-    [draggable]="false"
-    [resizable]="false"
-    styleClass="review-dialog">
-    <app-review-form
-      *ngIf="showReviewForm && idea"
-      [ideaId]="idea.id"
-      [targetType]="'Session'"
-      (reviewSubmitted)="onReviewSubmitted()"
-      (cancel)="closeReviewForm()">
-    </app-review-form>
-  </p-dialog>
 </div> 

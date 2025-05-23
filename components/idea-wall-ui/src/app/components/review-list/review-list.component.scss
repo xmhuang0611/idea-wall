@@ -1,58 +1,216 @@
+:host {
+  display: block;
+}
+
 .review-list-container {
-  width: 100%;
-  
-  .score-badge {
-    display: inline-flex;
+  .list-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    color: #ffffff;
-    font-weight: bold;
     
-    &.excellent {
-      background-color: var(--green-500);
-    }
-    
-    &.good {
-      background-color: var(--blue-500);
-    }
-    
-    &.average {
-      background-color: var(--orange-500);
-    }
-    
-    &.poor {
-      background-color: var(--red-500);
+    .list-title {
+      color: var(--text-color);
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
     }
   }
   
-  .reviewer-info {
-    display: flex;
-    align-items: center;
-    
-    .avatar {
-      margin-right: 0.5rem;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 50%;
+  .no-reviews-card {
+    text-align: center;
+  }
+  
+  .reviews-table-card {
+    .reviewer-info {
       display: flex;
       align-items: center;
+      
+      .reviewer-name {
+        font-weight: 500;
+        color: var(--text-color);
+      }
+    }
+    
+    .avg-score {
+      .score-badge {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+    }
+    
+    .criterion-detail {
+      .score-display {
+        margin-bottom: 0.5rem;
+        
+        .score-number {
+          background: var(--primary-100);
+          color: var(--primary-700);
+          padding: 0.25rem 0.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 0.85rem;
+        }
+      }
+      
+      .comment-display {
+        color: var(--text-color);
+        line-height: 1.4;
+        
+        small {
+          font-size: 0.8rem;
+          display: block;
+          word-wrap: break-word;
+          max-width: 200px;
+        }
+      }
+      
+      .no-comment {
+        .text-muted {
+          color: var(--text-color-secondary);
+          font-style: italic;
+          font-size: 0.75rem;
+        }
+      }
+    }
+    
+    .review-date {
+      color: var(--text-color-secondary);
+      font-size: 0.85rem;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 0.25rem;
       justify-content: center;
-      color: #ffffff;
-      font-weight: bold;
+    }
+  }
+}
+
+// Dialog Customizations
+:host ::ng-deep {
+  .review-edit-dialog,
+  .review-add-dialog {
+    .p-dialog-header {
+      background: var(--primary-color);
+      color: white;
+      
+      .p-dialog-title {
+        color: white;
+      }
+      
+      .p-dialog-header-icon {
+        color: white;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
+    
+    .p-dialog-content {
+      padding: 0;
     }
   }
   
-  .empty-message {
-    text-align: center;
-    padding: 2rem;
+  // Table Customizations
+  .p-datatable {
+    .p-datatable-thead > tr > th {
+      background: var(--surface-100);
+      border-bottom: 2px solid var(--primary-color);
+      color: var(--text-color);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.75rem;
+    }
     
-    i {
-      font-size: 3rem;
-      color: var(--surface-300);
-      margin-bottom: 1rem;
+    .p-datatable-tbody > tr > td {
+      padding: 1rem 0.75rem;
+      border-bottom: 1px solid var(--surface-200);
+      vertical-align: top;
+    }
+    
+    .p-datatable-tbody > tr:hover {
+      background: var(--surface-50);
+    }
+  }
+  
+  .p-tooltip .p-tooltip-text {
+    max-width: 300px;
+    line-height: 1.4;
+    white-space: pre-line;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .review-list-container {
+    .list-header {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+      
+      .list-title {
+        font-size: 1.1rem;
+      }
+    }
+  }
+  
+  :host ::ng-deep {
+    .p-datatable {
+      .p-datatable-thead > tr > th,
+      .p-datatable-tbody > tr > td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+      }
+    }
+    
+    .criterion-detail {
+      .comment-display small {
+        max-width: 150px;
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  :host ::ng-deep {
+    .p-datatable {
+      .p-datatable-thead > tr > th {
+        &:nth-child(n+4):nth-child(-n+7) {
+          display: none;
+        }
+      }
+      
+      .p-datatable-tbody > tr > td {
+        &:nth-child(n+4):nth-child(-n+7) {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  :host ::ng-deep {
+    .p-datatable {
+      .p-datatable-thead > tr > th {
+        &:nth-child(3),
+        &:nth-child(n+4):nth-child(-n+8) {
+          display: none;
+        }
+      }
+      
+      .p-datatable-tbody > tr > td {
+        &:nth-child(3),
+        &:nth-child(n+4):nth-child(-n+8) {
+          display: none;
+        }
+      }
     }
   }
 } 

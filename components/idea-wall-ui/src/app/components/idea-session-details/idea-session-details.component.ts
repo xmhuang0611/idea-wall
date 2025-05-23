@@ -16,6 +16,7 @@ import { IdeaService } from '../../services/idea.service';
 import { ReviewService } from '../../services/review.service';
 import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 import { ReviewFormComponent } from '../review-form/review-form.component';
+import { ReviewListComponent } from '../review-list/review-list.component';
 
 @Component({
   selector: 'app-idea-session-details',
@@ -31,7 +32,8 @@ import { ReviewFormComponent } from '../review-form/review-form.component';
     RatingModule,
     TooltipModule,
     DialogModule,
-    ReviewFormComponent
+    ReviewFormComponent,
+    ReviewListComponent
   ],
   templateUrl: './idea-session-details.component.html',
   styleUrls: ['./idea-session-details.component.scss']
@@ -41,7 +43,6 @@ export class IdeaSessionDetailsComponent implements OnInit {
   reviews: Review[] = [];
   isLoading = false;
   reviewCriteria = REVIEW_CRITERIA;
-  showReviewForm = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -199,17 +200,14 @@ export class IdeaSessionDetailsComponent implements OnInit {
     });
   }
 
-  openReviewForm(): void {
-    this.showReviewForm = true;
+  getCurrentUserName(): string {
+    // TODO: Get current user name from authentication service
+    // For now, return a placeholder
+    return 'Current User';
   }
 
-  closeReviewForm(): void {
-    this.showReviewForm = false;
-  }
-
-  onReviewSubmitted(): void {
-    this.showReviewForm = false;
-    // Reload reviews after submission
+  onReviewsUpdated(): void {
+    // Reload reviews after any review operation
     if (this.idea) {
       this.loadReviews(this.idea.id);
     }

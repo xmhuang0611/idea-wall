@@ -15,10 +15,10 @@ export interface ReviewResult {
 export interface Review {
   id: string;
   idea_id: string;
-  target_type: string; // "Session" or "Incubator"
-  reviewer_id: string;
-  reviewer_name: string;
+  target_type: string; // "Session" or "Incuba
   review_result: ReviewResult;
+  creator_id: string;
+  creator_name: string;
   created_at: Date;
 }
 

@@ -10,6 +10,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
 import { ReviewService } from '../../services/review.service';
 import { ReviewResult, REVIEW_CRITERIA } from '../../models/review.model';
+import { Review } from '../../models/review.model';
 
 @Component({
   selector: 'app-review-form',
@@ -480,6 +481,7 @@ import { ReviewResult, REVIEW_CRITERIA } from '../../models/review.model';
 export class ReviewFormComponent implements OnInit {
   @Input() ideaId: string = '';
   @Input() targetType: string = 'Session';
+  @Input() existingReview: Review | null = null;
   @Output() reviewSubmitted = new EventEmitter<boolean>();
   @Output() cancel = new EventEmitter<void>();
   
@@ -556,7 +558,22 @@ export class ReviewFormComponent implements OnInit {
   }
   
   ngOnInit(): void {
-    // Initialize form
+    // Initialize form with existing review data if editing
+    if (this.existingReview) {
+      const result = this.existingReview.review_result;
+      this.reviewForm.patchValue({
+        innovation_score: result.innovation.score,
+        innovation_comment: result.innovation.comment || '',
+        value_score: result.value.score,
+        value_comment: result.value.comment || '',
+        feasibility_score: result.feasibility.score,
+        feasibility_comment: result.feasibility.comment || '',
+        impact_score: result.impact.score,
+        impact_comment: result.impact.comment || '',
+        return_on_investment_score: result.return_on_investment.score,
+        return_on_investment_comment: result.return_on_investment.comment || ''
+      });
+    }
   }
   
   calculateAverageScore(): number {
@@ -618,18 +635,36 @@ export class ReviewFormComponent implements OnInit {
       average_score: this.calculateAverageScore()
     };
     
-    this.reviewService.addReview(this.ideaId, this.targetType, reviewResult).subscribe({
-      next: (response) => {
-        this.isSubmitting = false;
-        if (response.success) {
-          this.reviewSubmitted.emit(true);
-          this.reviewForm.reset();
+    // Choose between add or update based on existingReview
+    if (this.existingReview) {
+      // Update existing review
+      this.reviewService.updateReview(this.existingReview.id, reviewResult).subscribe({
+        next: (response: any) => {
+          this.isSubmitting = false;
+          if (response.success) {
+            this.reviewSubmitted.emit(true);
+          }
+        },
+        error: (error: any) => {
+          console.error('Error updating review:', error);
+          this.isSubmitting = false;
         }
-      },
-      error: (error) => {
-        console.error('Error submitting review:', error);
-        this.isSubmitting = false;
-      }
-    });
+      });
+    } else {
+      // Add new review
+      this.reviewService.addReview(this.ideaId, this.targetType, reviewResult).subscribe({
+        next: (response: any) => {
+          this.isSubmitting = false;
+          if (response.success) {
+            this.reviewSubmitted.emit(true);
+            this.reviewForm.reset();
+          }
+        },
+        error: (error: any) => {
+          console.error('Error submitting review:', error);
+          this.isSubmitting = false;
+        }
+      });
+    }
   }
 }

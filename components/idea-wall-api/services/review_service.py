@@ -64,5 +64,68 @@ class ReviewService:
         review_dict["id"] = str(result.inserted_id)
         return Review(**review_dict)
 
+    async def update_review(self, review_id: str, review_result: ReviewResult, updater_id: str, updater_name: str) -> Optional[Review]:
+        """
+        Update an existing review in the database.
+        
+        Args:
+            review_id: The ID of the review to update
+            review_result: The updated review result data
+            updater_id: ID of the user updating the review
+            updater_name: Name of the user updating the review
+            
+        Returns:
+            The updated Review object or None if not found
+        """
+        db = await get_database()
+        
+        # Check if review exists
+        existing_review = await db[self.collection_name].find_one({"_id": ObjectId(review_id)})
+        if not existing_review:
+            return None
+        
+        # Prepare update data
+        update_data = {
+            "review_result": review_result.model_dump(),
+            "updated_at": datetime.utcnow(),
+            "updater_id": updater_id,
+            "updater_name": updater_name
+        }
+        
+        # Update the review
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(review_id)},
+            {"$set": update_data}
+        )
+        
+        if result.modified_count == 0:
+            return None
+        
+        # Fetch and return the updated review
+        updated_review = await db[self.collection_name].find_one({"_id": ObjectId(review_id)})
+        updated_review["id"] = str(updated_review.pop("_id"))
+        return Review(**updated_review)
+
+    async def get_review_by_id(self, review_id: str) -> Optional[Review]:
+        """
+        Get a review by its ID.
+        
+        Args:
+            review_id: The ID of the review
+            
+        Returns:
+            The Review object or None if not found
+        """
+        db = await get_database()
+        
+        try:
+            review = await db[self.collection_name].find_one({"_id": ObjectId(review_id)})
+            if review:
+                review["id"] = str(review.pop("_id"))
+                return Review(**review)
+            return None
+        except Exception:
+            return None
+
 # Create an instance of the service
 review_service = ReviewService() 

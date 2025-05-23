@@ -62,4 +62,28 @@ export class ReviewService {
         catchError(this.errorHandler.handleError)
       );
   }
+
+  /**
+   * Update an existing review
+   * @param reviewId Review ID
+   * @param reviewResult Updated review result data
+   * @returns Observable with operation result
+   */
+  updateReview(reviewId: string, reviewResult: ReviewResult): Observable<ApiResponse<Review>> {
+    const reviewData = {
+      review_result: reviewResult
+    };
+
+    const url = `${this.apiUrl}/${reviewId}`;
+
+    return this.http.put<ApiResponse<Review>>(url, reviewData)
+      .pipe(
+        tap(response => {
+          if (response.success) {
+            this.toastService.showSuccess('Review updated successfully');
+          }
+        }),
+        catchError(this.errorHandler.handleError)
+      );
+  }
 } 
