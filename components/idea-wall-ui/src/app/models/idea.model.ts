@@ -1,5 +1,16 @@
 import { Tag } from './tag.model';
 
+export enum IdeaStatus {
+  DRAFT = 'DRAFT',
+  IN_SESSION_REVIEW = 'IN_SESSION_REVIEW',
+  SESSION_APPROVED = 'SESSION_APPROVED',
+  SESSION_REJECTED = 'SESSION_REJECTED',
+  IN_INCUBATION_REVIEW = 'IN_INCUBATION_REVIEW',
+  INCUBATION_APPROVED = 'INCUBATION_APPROVED',
+  INCUBATION_REJECTED = 'INCUBATION_REJECTED',
+  ROLL_OUT = 'ROLL_OUT'
+}
+
 export interface Idea {
   id: string;
   title: string;
@@ -18,6 +29,7 @@ export interface Idea {
   updated_at: Date;
   updater_id: string;
   updater_name: string;
+  status?: IdeaStatus;
   session_review?: SessionReview;
 }
 
