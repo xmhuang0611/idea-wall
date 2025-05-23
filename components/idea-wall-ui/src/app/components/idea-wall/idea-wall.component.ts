@@ -27,6 +27,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { IdeaHistoryComponent } from '../idea-history/idea-history.component';
 import { FeelingUtilService } from '../../shared/services/feeling-util.service';
+import { ApiResponse } from '../../shared/models/api-response.model';
 
 interface Topic {
   name: string;
@@ -90,7 +91,8 @@ export class IdeaWallComponent implements OnInit {
   // Store comment counts for each idea to update list display
   commentCounts: { [ideaId: string]: number } = {};
 
-  isLoading: boolean = false;
+  isLoading = false;
+  newestIdeasLoading = false;
 
   // Idea History dialog
   historyDialogVisible = false;
@@ -479,20 +481,23 @@ export class IdeaWallComponent implements OnInit {
     ];
   }
 
-  private loadNewestIdeas() {
-    // Use existing ideaService to fetch latest ideas
+  private loadNewestIdeas(): void {
+    this.newestIdeasLoading = true;
     this.ideaService.getIdeas({
       limit: 5,
       sort_by: 'created_at',
       sort_order: 'desc'
     }).subscribe({
-      next: (response) => {
+      next: (response: ApiResponse<Idea[]>) => {
         if (response.success && response.data) {
           this.newestIdeas = response.data;
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading newest ideas:', error);
+      },
+      complete: () => {
+        this.newestIdeasLoading = false;
       }
     });
   }
