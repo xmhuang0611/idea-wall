@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from models.idea import IdeaCreate, IdeaUpdate, IdeaInDB, Idea, IdeaTag, IdeaStatus, SessionReview, IncubatorReview, ReviewStatus, LeanCanvas, SessionReviewCreate, LeanCanvasCreate
 from models.log import ObjectType, OperationType
 from utils.logging_utils import record_operation_log
-from models.review import ReviewBase
+from models.review import ReviewBase, TargetType
 from services.review_service import review_service
 from core.database import get_database
 from services.tag_service import tag_service
@@ -441,7 +441,7 @@ class IdeaService:
     async def add_review_result(
         self, 
         idea_id: str, 
-        target_type: str, 
+        target_type: TargetType, 
         review_result: Dict[str, Any], 
         reviewer_id: str, 
         reviewer_name: str
@@ -451,10 +451,6 @@ class IdeaService:
         # Get current idea
         idea = await self.get_idea(idea_id)
         if not idea:
-            return None
-        
-        # Check if target type is valid
-        if target_type not in ["Session", "Incubator"]:
             return None
         
         # Calculate average score from review result
@@ -467,7 +463,7 @@ class IdeaService:
         ]) / 5.0
         
         # Update review count and recalculate average score
-        if target_type == "Session":
+        if target_type == TargetType.SESSION:
             if not idea.session_review:
                 return None
             
@@ -513,11 +509,9 @@ class IdeaService:
             review_data = ReviewBase(
                 idea_id=idea_id,
                 target_type=target_type,
-                reviewer_id=reviewer_id,
-                reviewer_name=reviewer_name,
                 review_result=review_result
             )
-            await review_service.create_review(review_data)
+            await review_service.create_review(review_data, reviewer_id, reviewer_name)
         except Exception as e:
             print(f"Error saving review to database: {str(e)}")
             # Continue even if saving to reviews collection fails
@@ -541,7 +535,7 @@ class IdeaService:
     async def make_final_decision(
         self, 
         idea_id: str, 
-        target_type: str, 
+        target_type: TargetType, 
         decision: str, 
         comments: str, 
         decision_maker_id: str, 
@@ -554,17 +548,13 @@ class IdeaService:
         if not idea:
             return None
         
-        # Check if target type is valid
-        if target_type not in ["Session", "Incubator"]:
-            return None
-        
         # Check if decision is valid
         if decision not in ["APPROVED", "REJECTED", "NEED_IMPROVEMENT"]:
             return None
         
         # Determine new idea status based on decision and target type
         new_status = None
-        if target_type == "Session":
+        if target_type == TargetType.SESSION:
             if decision == "APPROVED":
                 new_status = IdeaStatus.SESSION_APPROVED
             elif decision == "REJECTED":
@@ -579,7 +569,7 @@ class IdeaService:
         
         # Update idea with decision and potentially new status
         update_dict = {
-            f"{target_type.lower()}_review.status": decision,
+            f"{target_type.value.lower()}_review.status": decision,
             "updater_id": decision_maker_id,
             "updater_name": decision_maker_name,
             "updated_at": datetime.utcnow()

@@ -32,12 +32,14 @@ class ReviewService:
             
         return reviews
     
-    async def create_review(self, review_data: ReviewBase) -> Review:
+    async def create_review(self, review_data: ReviewBase, reviewer_id: str, reviewer_name: str) -> Review:
         """
         Create a new review in the database.
         
         Args:
             review_data: The review data
+            reviewer_id: ID of the reviewer for audit purposes
+            reviewer_name: Name of the reviewer for audit purposes
             
         Returns:
             The created Review object
@@ -50,10 +52,10 @@ class ReviewService:
         review_dict["updated_at"] = review_dict["created_at"]
         
         # Add audit fields required by AuditModel
-        review_dict["creator_id"] = review_data.reviewer_id
-        review_dict["creator_name"] = review_data.reviewer_name
-        review_dict["updater_id"] = review_data.reviewer_id
-        review_dict["updater_name"] = review_data.reviewer_name
+        review_dict["creator_id"] = reviewer_id
+        review_dict["creator_name"] = reviewer_name
+        review_dict["updater_id"] = reviewer_id
+        review_dict["updater_name"] = reviewer_name
         
         # Insert into database
         result = await db[self.collection_name].insert_one(review_dict)

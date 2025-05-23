@@ -1,9 +1,10 @@
 from enum import Enum
 from pydantic import BaseModel, Field
-from typing import List, Optional
-from datetime import datetime
 from .audit import AuditModel
 
+class TargetType(str, Enum):
+    SESSION = "Session"
+    INCUBATOR = "Incubator"
 
 class ReviewStatus(str, Enum):
     IN_REVIEW = "IN_REVIEW"
@@ -30,9 +31,7 @@ class ReviewResult(BaseModel):
 
 class ReviewBase(BaseModel):
     idea_id: str
-    target_type: str  # "Session" or "Incubator"
-    reviewer_id: str
-    reviewer_name: str
+    target_type: TargetType
     review_result: ReviewResult
 
 class ReviewCreate(BaseModel):
@@ -46,7 +45,7 @@ class Review(ReviewInDB):
 
 class FinalDecisionBase(BaseModel):
     idea_id: str
-    target_type: str  # "Session" or "Incubator"
+    target_type: TargetType
     decision: FinalDecisionType
     comments: str
 

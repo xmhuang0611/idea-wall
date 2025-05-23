@@ -6,7 +6,7 @@ from services.vote_service import vote_service
 from services.bookmark_service import bookmark_service
 from services.user_service import user_service
 from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaStatus, SessionReview, IncubatorReview, ReviewStatus, ReviewResult, SessionReviewCreate, LeanCanvasCreate
-from models.review import ReviewCreate, FinalDecisionCreate
+from models.review import ReviewCreate, FinalDecisionCreate, TargetType
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
 from models.user import UserRole
@@ -419,7 +419,7 @@ async def add_session_review_result(
     # Add review result
     updated_idea = await idea_service.add_review_result(
         idea_id,
-        "Session",
+        TargetType.SESSION,
         review.review_result.model_dump(),
         current_user.user_id,
         current_user.user_name
@@ -490,7 +490,7 @@ async def make_session_final_decision(
     # Make final decision
     updated_idea = await idea_service.make_final_decision(
         idea_id,
-        "Session",
+        TargetType.SESSION,
         decision.decision.value,
         decision.comments,
         current_user.user_id,
@@ -612,7 +612,7 @@ async def add_incubator_review_result(
     # Add review result
     updated_idea = await idea_service.add_review_result(
         idea_id,
-        "Incubator",
+        TargetType.INCUBATOR,
         review.review_result.model_dump(),
         current_user.user_id,
         current_user.user_name
@@ -683,7 +683,7 @@ async def make_incubator_final_decision(
     # Make final decision
     updated_idea = await idea_service.make_final_decision(
         idea_id,
-        "Incubator",
+        TargetType.INCUBATOR,
         decision.decision.value,
         decision.comments,
         current_user.user_id,
