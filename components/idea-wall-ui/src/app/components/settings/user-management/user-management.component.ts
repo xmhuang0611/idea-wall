@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { User, UserRole } from '../../../models/user.model';
 import { UserService } from '../../../services/user.service';
-import { ToastService } from '../../../shared/services/toast.service';
 import { ApiResponse } from '../../../shared/models/api-response.model';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmationService } from 'primeng/api';
 
 @Component({
@@ -23,10 +23,10 @@ import { ConfirmationService } from 'primeng/api';
     InputTextModule, 
     ConfirmDialogModule,
     DialogModule,
-    TableModule
+    TableModule,
+    ProgressSpinnerModule
   ],
-  templateUrl: './user-management.component.html',
-  styleUrls: ['./user-management.component.scss']
+  templateUrl: './user-management.component.html'
 })
 export class UserManagementComponent implements OnInit {
   users: User[] = [];
@@ -35,7 +35,7 @@ export class UserManagementComponent implements OnInit {
   isEditing = false;
   userForm: FormGroup;
   selectedUser: User | null = null;
-  selectedRoles: UserRole[] = [];
+  loading = false;
   availableRoles: UserRole[] = [
     'ADMIN', 
     'IDEA_SESSION_PANEL_REVIEWER', 
@@ -50,7 +50,6 @@ export class UserManagementComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private toastService: ToastService,
     private confirmationService: ConfirmationService,
     private fb: FormBuilder
   ) {
@@ -66,6 +65,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   fetchUsers(): void {
+    this.loading = true;
     this.userService.getUsers().subscribe({
       next: (response) => {
         if (response.success && response.data) {
@@ -75,19 +75,22 @@ export class UserManagementComponent implements OnInit {
           );
         }
       },
-      error: (error) => {
-        this.toastService.showError('Failed to fetch users');
+      error: () => {
+        this.loading = false;
+      },
+      complete: () => {
+        this.loading = false;
       }
     });
   }
 
   openUserModal(user?: User): void {
     this.isEditing = !!user;
-    this.selectedUser = user || null;
+    this.selectedUser = user ? { ...user } : null;
     this.userForm.reset({
       user_id: user?.user_id || '',
       user_name: user?.user_name || '',
-      roles: user?.roles || []
+      roles: user?.roles ? [...user.roles] : []
     });
     this.displayModal = true;
   }
@@ -101,26 +104,8 @@ export class UserManagementComponent implements OnInit {
         this.userService.createUser(formValue).subscribe({
           next: (response: ApiResponse<User>) => {
             if (response.success) {
-              this.toastService.showSuccess('User created successfully');
               this.displayModal = false;
               this.fetchUsers();
-            } else if (response.error) {
-              this.toastService.showError(
-                response.error.message || 'Failed to create user'
-              );
-            }
-          },
-          error: (error: any) => {
-            if (error.error?.error?.message) {
-              this.toastService.showError(error.error.error.message);
-            } else if (error.status === 409) {
-              this.toastService.showError(
-                `User ID '${formValue.user_id}' already exists`
-              );
-            } else {
-              this.toastService.showError(
-                'Failed to create user. Please try again.'
-              );
             }
           }
         });
@@ -132,17 +117,9 @@ export class UserManagementComponent implements OnInit {
         ).subscribe({
           next: (response: ApiResponse<User>) => {
             if (response.success) {
-              this.toastService.showSuccess(
-                formValue.roles.length > 0 
-                  ? 'User roles updated successfully' 
-                  : 'All user roles have been removed'
-              );
               this.displayModal = false;
               this.fetchUsers();
             }
-          },
-          error: (error: Error) => {
-            this.toastService.showError('Failed to update user roles');
           }
         });
       }
@@ -162,7 +139,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   toggleRole(role: UserRole): void {
-    const roles = this.userForm.get('roles')?.value || [];
+    const roles = [...(this.userForm.get('roles')?.value || [])];
     const index = roles.indexOf(role);
     if (index === -1) {
       roles.push(role);
@@ -190,26 +167,10 @@ export class UserManagementComponent implements OnInit {
   }
 
   deleteUser(user: User): void {
-    this.userService.deleteUser(user.user_id).subscribe({
+    this.userService.deleteUser(user.user_id, user.user_name).subscribe({
       next: (response: ApiResponse<boolean>) => {
         if (response.success) {
-          this.toastService.showSuccess(
-            `User "${user.user_name}" deleted successfully`
-          );
           this.fetchUsers();
-        } else if (response.error) {
-          this.toastService.showError(
-            response.error.message || 'Failed to delete user'
-          );
-        }
-      },
-      error: (error: any) => {
-        if (error.error?.error?.message) {
-          this.toastService.showError(error.error.error.message);
-        } else {
-          this.toastService.showError(
-            'Failed to delete user. Please try again.'
-          );
         }
       }
     });
