@@ -84,6 +84,8 @@
   </ng-template>
 </p-table>
 
+<p-confirmDialog [style]="{width: '450px'}" styleClass="delete-confirm-dialog"></p-confirmDialog>
+
 <!-- Tag Form Dialog -->
 <p-dialog [(visible)]="displayModal" [header]="isEditing ? 'Edit Tag' : 'Add Tag'" [modal]="true"
   [style]="{width: '450px'}" [draggable]="false" [resizable]="false" (onHide)="handleCancel()">
@@ -111,5 +113,3 @@
     </div>
   </ng-template>
 </p-dialog>
-
-<p-confirmDialog [style]="{width: '450px'}" styleClass="delete-confirm-dialog"></p-confirmDialog>
