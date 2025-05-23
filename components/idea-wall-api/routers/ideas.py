@@ -5,7 +5,7 @@ from services.idea_service import idea_service
 from services.vote_service import vote_service
 from services.bookmark_service import bookmark_service
 from services.user_service import user_service
-from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaStatus, SessionReview, IncubatorReview, ReviewStatus, ReviewResult
+from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaStatus, SessionReview, IncubatorReview, ReviewStatus, ReviewResult, SessionReviewCreate, LeanCanvasCreate
 from models.review import ReviewCreate, FinalDecisionCreate
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
@@ -215,7 +215,7 @@ async def delete_idea(
             )
 
     # Delete idea
-    success = await idea_service.delete_idea(idea_id)
+    success = await idea_service.delete_idea(idea_id, current_user.user_id, current_user.user_name)
     if not success:
         return StandardResponse(
             success=False,
@@ -319,7 +319,7 @@ async def get_idea_history(
 @router.put("/{idea_id}/session-review", response_model=StandardResponse[Idea])
 async def submit_session_review(
     idea_id: str,
-    session_review_data: Dict[str, Any],
+    session_review_data: SessionReviewCreate,
     current_user: User = Depends(get_current_user)
 ):
     # Check if idea exists
@@ -344,7 +344,7 @@ async def submit_session_review(
         )
     
     # Check if idea is in correct status
-    if existing_idea.status != IdeaStatus.DRAFT:
+    if existing_idea.status != IdeaStatus.DRAFT and existing_idea.status != None:
         return StandardResponse(
             success=False,
             error=ErrorDetail(
@@ -512,7 +512,7 @@ async def make_session_final_decision(
 @router.put("/{idea_id}/incubator-review", response_model=StandardResponse[Idea])
 async def submit_incubator_review(
     idea_id: str,
-    lean_canvas_data: Dict[str, Any],
+    lean_canvas_data: LeanCanvasCreate,
     current_user: User = Depends(get_current_user)
 ):
     # Check if idea exists

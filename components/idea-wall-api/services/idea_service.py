@@ -1,11 +1,14 @@
+from typing import List, Dict, Any, Optional
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-from core.database import get_database
-from models.idea import IdeaCreate, IdeaUpdate, IdeaInDB, Idea, IdeaTag, IdeaStatus, SessionReview, IncubatorReview, ReviewStatus, LeanCanvas
 from bson import ObjectId
-from services.tag_service import tag_service
+from fastapi import HTTPException
+from models.idea import IdeaCreate, IdeaUpdate, IdeaInDB, Idea, IdeaTag, IdeaStatus, SessionReview, IncubatorReview, ReviewStatus, LeanCanvas, SessionReviewCreate, LeanCanvasCreate
 from models.log import ObjectType, OperationType
 from utils.logging_utils import record_operation_log
+from models.review import ReviewBase
+from services.review_service import review_service
+from core.database import get_database
+from services.tag_service import tag_service
 
 class IdeaService:
     def __init__(self):
@@ -297,7 +300,7 @@ class IdeaService:
     async def submit_session_review(
         self, 
         idea_id: str, 
-        session_review_data: Dict[str, Any], 
+        session_review_data: SessionReviewCreate, 
         submitter_id: str, 
         submitter_name: str
     ) -> Optional[Idea]:
@@ -312,13 +315,13 @@ class IdeaService:
         session_review = SessionReview(
             submitter_id=submitter_id,
             submitter_name=submitter_name,
-            submitter_job=session_review_data.get("submitter_job"),
-            manager=session_review_data.get("manager"),
-            stream=session_review_data.get("stream"),
-            clients=session_review_data.get("clients"),
-            problem_statements=session_review_data.get("problem_statements"),
-            solutions=session_review_data.get("solutions"),
-            values=session_review_data.get("values"),
+            submitter_job=session_review_data.submitter_job,
+            manager=session_review_data.manager,
+            stream=session_review_data.stream,
+            clients=session_review_data.clients,
+            problem_statements=session_review_data.problem_statements,
+            solutions=session_review_data.solutions,
+            values=session_review_data.values,
             status=ReviewStatus.IN_REVIEW,
             review_count=0,
             submitted_at=datetime.utcnow()
@@ -360,7 +363,7 @@ class IdeaService:
     async def submit_incubator_review(
         self, 
         idea_id: str, 
-        lean_canvas_data: Dict[str, Any], 
+        lean_canvas_data: LeanCanvasCreate, 
         submitter_id: str, 
         submitter_name: str
     ) -> Optional[Idea]:
@@ -377,18 +380,18 @@ class IdeaService:
         
         # Prepare lean canvas
         lean_canvas = LeanCanvas(
-            problem=lean_canvas_data.get("problem"),
-            existing_alternatives=lean_canvas_data.get("existing_alternatives"),
-            solution=lean_canvas_data.get("solution"),
-            key_metrics=lean_canvas_data.get("key_metrics"),
-            unique_value=lean_canvas_data.get("unique_value"),
-            high_level_concept=lean_canvas_data.get("high_level_concept"),
-            unfair_advantage=lean_canvas_data.get("unfair_advantage"),
-            channels=lean_canvas_data.get("channels"),
-            customer_segments=lean_canvas_data.get("customer_segments"),
-            early_adopters=lean_canvas_data.get("early_adopters"),
-            cost_structure=lean_canvas_data.get("cost_structure"),
-            revenue_stream=lean_canvas_data.get("revenue_stream")
+            problem=lean_canvas_data.problem,
+            existing_alternatives=lean_canvas_data.existing_alternatives,
+            solution=lean_canvas_data.solution,
+            key_metrics=lean_canvas_data.key_metrics,
+            unique_value=lean_canvas_data.unique_value,
+            high_level_concept=lean_canvas_data.high_level_concept,
+            unfair_advantage=lean_canvas_data.unfair_advantage,
+            channels=lean_canvas_data.channels,
+            customer_segments=lean_canvas_data.customer_segments,
+            early_adopters=lean_canvas_data.early_adopters,
+            cost_structure=lean_canvas_data.cost_structure,
+            revenue_stream=lean_canvas_data.revenue_stream
         )
         
         # Prepare incubator review
@@ -501,6 +504,20 @@ class IdeaService:
         
         if result.modified_count == 0:
             return None
+        
+        # Save review to reviews collection
+        try:
+            review_data = ReviewBase(
+                idea_id=idea_id,
+                target_type=target_type,
+                reviewer_id=reviewer_id,
+                reviewer_name=reviewer_name,
+                review_result=review_result
+            )
+            await review_service.create_review(review_data)
+        except Exception as e:
+            print(f"Error saving review to database: {str(e)}")
+            # Continue even if saving to reviews collection fails
         
         # Get updated idea
         updated_idea = await self.get_idea(idea_id)

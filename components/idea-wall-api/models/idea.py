@@ -47,6 +47,15 @@ class SessionReview(BaseModel):
     review_count: int = 0
     submitted_at: Optional[datetime] = None
 
+class SessionReviewCreate(BaseModel):
+    submitter_job: str
+    manager: str
+    stream: str
+    clients: Optional[str] = None
+    problem_statements: str
+    solutions: str
+    values: str
+
 class LeanCanvas(BaseModel):
     problem: Optional[str] = None
     existing_alternatives: Optional[str] = None
@@ -60,6 +69,20 @@ class LeanCanvas(BaseModel):
     early_adopters: Optional[str] = None
     cost_structure: Optional[str] = None
     revenue_stream: Optional[str] = None
+
+class LeanCanvasCreate(BaseModel):
+    problem: str
+    existing_alternatives: Optional[str] = None
+    solution: str
+    key_metrics: str
+    unique_value: str
+    high_level_concept: str
+    unfair_advantage: Optional[str] = None
+    channels: str
+    customer_segments: str
+    early_adopters: Optional[str] = None
+    cost_structure: str
+    revenue_stream: str
 
 class IncubatorReview(BaseModel):
     lean_canvas: Optional[LeanCanvas] = None
