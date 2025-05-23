@@ -46,10 +46,14 @@ export class HeaderComponent implements OnInit {
     // Then logout
     setTimeout(() => {
       this.authService.logout();
+      this.isAdmin = false;
+      this.username = '';
     }, 100);
   }
 
   goToSettings(): void {
-    this.router.navigate(['/settings']);
+    if (this.isAdmin) {
+      this.router.navigate(['/settings']);
+    }
   }
 }

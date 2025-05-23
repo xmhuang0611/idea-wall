@@ -194,4 +194,21 @@ export class TagManagementComponent implements OnInit {
   onRowCollapse(event: { data: Tag }): void {
     delete this.expandedRowKeys[event.data.tag_id];
   }
+
+  hasExpandableRows(): boolean {
+    return this.tags.some(tag => tag.parent_id === 0 && tag.children && tag.children.length > 0);
+  }
+
+  expandAll(): void {
+    this.expandedRowKeys = {};
+    this.tags.forEach(tag => {
+      if (tag.parent_id === 0 && tag.children && tag.children.length > 0) {
+        this.expandedRowKeys[tag.tag_id] = true;
+      }
+    });
+  }
+
+  collapseAll(): void {
+    this.expandedRowKeys = {};
+  }
 } 
