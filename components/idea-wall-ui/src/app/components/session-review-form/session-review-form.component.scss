@@ -1,7 +1,108 @@
 .container {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  background-color: var(--surface-ground);
+  min-height: 100vh;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 0.75rem 0;
+}
+
+.idea-title-card {
+  background: var(--surface-0);
+  border: 1px solid var(--surface-200);
+  border-radius: var(--border-radius);
+  padding: 0.875rem 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.form-content {
+  overflow: hidden;
+  border-radius: var(--border-radius);
+}
+
+.form-section {
+  &:not(:last-child) {
+    .section-content {
+      border-bottom: 1px solid var(--surface-200);
+    }
+  }
+  
+  &:first-child {
+    .section-header {
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+  }
+  
+  &:last-of-type {
+    .section-content {
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+  }
+}
+
+.section-header {
+  background: var(--surface-50);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  border-bottom: 1px solid var(--surface-200);
+  margin: 0;
+}
+
+.section-icon {
+  color: var(--primary-color);
+  font-size: 1rem;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.section-content {
+  padding: 1.25rem;
+  background: var(--surface-0);
+}
+
+.field {
+  margin-bottom: 0.875rem;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-color);
+  min-height: 1.25rem;
+}
+
+.required {
+  color: var(--red-500);
+}
+
+.form-actions {
+  padding: 1.25rem;
+  background: var(--surface-0);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 .submit-overlay {
@@ -13,46 +114,142 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.8);
   z-index: 10;
+  border-radius: var(--border-radius);
 }
 
 :host ::ng-deep {
-  textarea {
-    resize: vertical;
-    min-height: 100px;
-  }
-  
-  .p-card {
-    position: relative;
+  .form-card {
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--surface-200);
     
-    .p-card-header {
-      background-color: var(--surface-50);
-      border-bottom: 1px solid var(--surface-200);
+    .p-card-body {
+      padding: 0;
     }
     
     .p-card-content {
-      padding: 1.5rem;
+      padding: 0;
     }
   }
   
-  .p-dropdown {
+  .p-inputtext,
+  .p-inputtextarea {
+    font-size: 0.875rem;
+    border: 1px solid var(--surface-300);
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    transition: all 0.2s ease;
     width: 100%;
+    box-sizing: border-box;
+    
+    &:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.2);
+      outline: none;
+    }
+    
+    &:hover:not(:focus) {
+      border-color: var(--surface-400);
+    }
   }
   
-  .p-divider {
-    margin: 2rem 0;
+  .p-inputtextarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.5;
   }
   
-  .bg-blue-50 {
-    background-color: #eff6ff;
+  .p-button {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
   }
   
-  .text-blue-700 {
-    color: #1d4ed8;
+  .p-error {
+    color: var(--red-500);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: block;
+    min-height: 1rem;
   }
   
-  .bg-gray-50 {
-    background-color: #f9fafb;
+  // Custom form validation styles
+  .ng-invalid.ng-dirty .p-inputtext,
+  .ng-invalid.ng-dirty .p-inputtextarea {
+    border-color: var(--red-500);
+    
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(var(--red-500-rgb), 0.2);
+    }
+  }
+  
+  // Grid adjustments for perfect alignment
+  .grid {
+    margin: 0 -0.5rem;
+    
+    > [class*="col-"] {
+      padding: 0 0.5rem;
+    }
+  }
+  
+  // Ensure consistent field heights and alignment
+  .field {
+    display: flex;
+    flex-direction: column;
+    
+    .p-inputtext,
+    .p-inputtextarea {
+      flex-grow: 1;
+    }
+  }
+  
+  // Better row structure for grid
+  .section-content .grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .container {
+      padding: 1rem 0.75rem;
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+    }
+    
+    .section-header {
+      padding: 0.875rem 1rem;
+    }
+    
+    .section-content {
+      padding: 1rem;
+    }
+    
+    .form-actions {
+      padding: 1rem;
+      flex-direction: column;
+      
+      .p-button {
+        width: 100%;
+      }
+    }
+    
+    .grid > [class*="col-"] {
+      padding: 0;
+      margin-bottom: 0.75rem;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    
+    .field {
+      min-height: auto;
+    }
   }
 } 
