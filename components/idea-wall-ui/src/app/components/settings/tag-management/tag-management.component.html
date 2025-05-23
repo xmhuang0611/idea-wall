@@ -1,6 +1,22 @@
 <div class="flex justify-content-between align-items-center mb-3">
   <h2 class="m-0">Tag Management</h2>
-  <button pButton pRipple label="Add Tag" icon="pi pi-plus" class="p-button-rounded" (click)="openTagModal()" [disabled]="loading"></button>
+  <div class="flex gap-2">
+    <button pButton pRipple icon="pi pi-arrow-up-right-and-arrow-down-left-from-center" label="Expand All" 
+            class="p-button-rounded p-button-outlined p-button-secondary" 
+            (click)="expandAll()" 
+            [disabled]="loading || !hasExpandableRows()">
+    </button>
+    <button pButton pRipple icon="pi pi-arrow-down-left-and-arrow-up-right-to-center" label="Collapse All" 
+            class="p-button-rounded p-button-outlined p-button-secondary" 
+            (click)="collapseAll()" 
+            [disabled]="loading || !hasExpandableRows()">
+    </button>
+    <button pButton pRipple label="Add Tag" icon="pi pi-plus" 
+            class="p-button-rounded" 
+            (click)="openTagModal()" 
+            [disabled]="loading">
+    </button>
+  </div>
 </div>
 
 <div *ngIf="loading" class="flex justify-content-center align-items-center py-5">

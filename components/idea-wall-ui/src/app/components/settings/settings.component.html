@@ -1,16 +1,19 @@
-<div class="settings-outer">
-  <div class="settings-container">
-    <app-settings-menu
-      [selectedMenu]="selectedMenu"
-      (menuSelect)="onMenuSelect($event)">
-    </app-settings-menu>
-    
-    <main class="settings-content">
-      <app-user-management *ngIf="selectedMenu === 'user-management'">
-      </app-user-management>
-      
-      <app-tag-management *ngIf="selectedMenu === 'tag-management'">
-      </app-tag-management>
-    </main>
-  </div>
+<div class="settings-container">
+  <!-- Settings Menu -->
+  <nav class="settings-menu">
+    <ul class="menu-list">
+      <li *ngFor="let item of menuItems" 
+          [routerLink]="item.routerLink"
+          routerLinkActive="active"
+          class="menu-item">
+        <i [class]="item.icon"></i>
+        <span>{{ item.label }}</span>
+      </li>
+    </ul>
+  </nav>
+  
+  <!-- Settings Content -->
+  <main class="settings-content">
+    <router-outlet></router-outlet>
+  </main>
 </div>
