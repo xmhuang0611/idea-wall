@@ -24,6 +24,8 @@
   }
   
   .p-card {
+    position: relative;
+    
     .p-card-header {
       background-color: var(--surface-50);
       border-bottom: 1px solid var(--surface-200);
@@ -32,5 +34,25 @@
     .p-card-content {
       padding: 1.5rem;
     }
+  }
+  
+  .p-dropdown {
+    width: 100%;
+  }
+  
+  .p-divider {
+    margin: 2rem 0;
+  }
+  
+  .bg-blue-50 {
+    background-color: #eff6ff;
+  }
+  
+  .text-blue-700 {
+    color: #1d4ed8;
+  }
+  
+  .bg-gray-50 {
+    background-color: #f9fafb;
   }
 } 

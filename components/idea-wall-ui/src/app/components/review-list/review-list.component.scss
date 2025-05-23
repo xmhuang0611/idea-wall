@@ -1,0 +1,58 @@
+.review-list-container {
+  width: 100%;
+  
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    color: #ffffff;
+    font-weight: bold;
+    
+    &.excellent {
+      background-color: var(--green-500);
+    }
+    
+    &.good {
+      background-color: var(--blue-500);
+    }
+    
+    &.average {
+      background-color: var(--orange-500);
+    }
+    
+    &.poor {
+      background-color: var(--red-500);
+    }
+  }
+  
+  .reviewer-info {
+    display: flex;
+    align-items: center;
+    
+    .avatar {
+      margin-right: 0.5rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: bold;
+    }
+  }
+  
+  .empty-message {
+    text-align: center;
+    padding: 2rem;
+    
+    i {
+      font-size: 3rem;
+      color: var(--surface-300);
+      margin-bottom: 1rem;
+    }
+  }
+} 

@@ -99,9 +99,9 @@ export class SessionReviewFormComponent implements OnInit {
 
     this.isSubmitting = true;
     
-    const formData = this.sessionReviewForm.value;
-    
-    this.ideaService.submitSessionReview(this.ideaId, formData)
+    const sessionReviewData = this.sessionReviewForm.value;
+
+    this.ideaService.submitSessionReview(this.ideaId, sessionReviewData)
       .subscribe({
         next: (response) => {
           if (response.success) {
@@ -109,7 +109,7 @@ export class SessionReviewFormComponent implements OnInit {
           }
           this.isSubmitting = false;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error submitting session review:', error);
           this.isSubmitting = false;
         }
