@@ -97,6 +97,8 @@ export class TagService {
         tap(response => {
           if (response.success) {
             this.toastService.showSuccess('Tag created successfully');
+          } else {
+            this.toastService.showError(`Failed to create tag: ${response.error?.message}`);
           }
         }),
         catchError(this.errorHandler.handleError)
@@ -109,6 +111,8 @@ export class TagService {
       tap(response => {
         if (response.success) {
           this.toastService.showSuccess('Tag updated successfully');
+        } else {
+          this.toastService.showError(`Failed to update tag: ${response.error?.message}`);
         }
       }),
       catchError(this.errorHandler.handleError)
@@ -121,6 +125,8 @@ export class TagService {
       tap(response => {
         if (response.success) {
           this.toastService.showSuccess('Tag deleted successfully');
+        } else {
+          this.toastService.showError(`Failed to delete tag: ${response.error?.message}`);
         }
       }),
       catchError(this.errorHandler.handleError)

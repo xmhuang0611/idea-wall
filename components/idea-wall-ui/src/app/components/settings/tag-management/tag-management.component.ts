@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Tag } from '../../../models/tag.model';
 import { TagService } from '../../../services/tag.service';
@@ -26,7 +27,8 @@ import { ApiResponse } from '../../../shared/models/api-response.model';
     InputTextModule,
     DropdownModule,
     ToastModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    ProgressSpinnerModule
   ],
   providers: [MessageService, ConfirmationService]
 })
@@ -37,6 +39,7 @@ export class TagManagementComponent implements OnInit {
   isEditing = false;
   tagForm: FormGroup;
   expandedRowKeys: { [key: number]: boolean } = {};
+  loading = false;
 
   readonly defaultParentTag: Tag = {
     tag_id: 0,
@@ -69,6 +72,7 @@ export class TagManagementComponent implements OnInit {
   }
 
   fetchTags(): void {
+    this.loading = true;
     this.tagService.getTagsWithHierarchy().subscribe({
       next: (response: ApiResponse<Tag[]>) => {
         if (response.success && response.data) {
@@ -89,6 +93,9 @@ export class TagManagementComponent implements OnInit {
           detail: 'Failed to fetch tags'
         });
         console.error('Error fetching tags:', error);
+      },
+      complete: () => {
+        this.loading = false;
       }
     });
   }

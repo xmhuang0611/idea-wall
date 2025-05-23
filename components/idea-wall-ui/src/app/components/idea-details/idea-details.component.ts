@@ -125,25 +125,19 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['visible'] && changes['visible'].currentValue) || 
         (changes['ideaId'] && this.visible)) {
-      console.log('Data changed, loading idea details:', 
-        { visible: this.visible, ideaId: this.ideaId });
       this.loadIdeaDetails();
     }
   }
   
   loadIdeaDetails(): void {
     if (!this.ideaId || !this.visible) {
-      console.log('Skipping idea details load due to:', 
-        { ideaId: !this.ideaId ? 'missing' : 'present', visible: this.visible });
       return;
     }
     
     this.isLoading = true;
-    console.log('Loading idea details for ID:', this.ideaId);
     
     this.ideaService.getIdeaById(this.ideaId).subscribe({
       next: (response: any) => {
-        console.log('Idea details response:', response);
         if (response.data) {
           this.idea = response.data;
           this.loadComments();
@@ -190,7 +184,6 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
             }
             
             this.updateDisplayedComments();
-            console.log(`Loaded ${this.comments.length} comments`);
           } else {
             console.error('Failed to load comments:', response.error);
             this.comments = [];

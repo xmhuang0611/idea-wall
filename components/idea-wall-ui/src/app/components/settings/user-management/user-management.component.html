@@ -2,14 +2,27 @@
   <h2 class="m-0">User Management</h2>
   <button pButton pRipple label="Add User" icon="pi pi-plus" 
           class="p-button-rounded p-button-primary" 
-          (click)="openUserModal()">
+          (click)="openUserModal()"
+          [disabled]="loading">
   </button>
 </div>
 
-<p-table [value]="filteredUsers" 
-         styleClass="p-datatable-sm" 
-         [showCurrentPageReport]="false" 
-         [paginator]="false">
+<!-- Loading State -->
+<div *ngIf="loading" class="flex justify-content-center align-items-center py-5">
+  <p-progressSpinner 
+    [style]="{width: '50px', height: '50px'}" 
+    strokeWidth="4"
+    fill="var(--surface-ground)" 
+    animationDuration=".5s">
+  </p-progressSpinner>
+</div>
+
+<p-table *ngIf="!loading" [value]="filteredUsers" 
+          styleClass="p-datatable-sm" 
+          [showCurrentPageReport]="false" 
+          [paginator]="false"
+          [tableStyle]="{'min-width': '50rem'}"
+          [rowHover]="true">
   <ng-template pTemplate="header">
     <tr>
       <th>User Name</th>
@@ -51,19 +64,20 @@
     <div class="flex flex-column gap-2 mb-3">
       <label for="user_name" class="font-semibold">User Name <span class="required-field">*</span></label>
       <input id="user_name" type="text" pInputText formControlName="user_name"
-             [ngClass]="{'ng-invalid ng-dirty': userForm.get('user_name')?.invalid && userForm.get('user_name')?.touched}"
-             [readonly]="isEditing"
-             placeholder="Enter user name">
+              [ngClass]="{'ng-invalid ng-dirty': userForm.get('user_name')?.invalid && userForm.get('user_name')?.touched}"
+              [readonly]="isEditing"
+              placeholder="Enter user name">
       <small class="p-error" *ngIf="userForm.get('user_name')?.invalid && userForm.get('user_name')?.touched">
         User name is required
       </small>
     </div>
 
-    <div class="flex flex-column gap-2 mb-3" *ngIf="!isEditing">
+    <div class="flex flex-column gap-2 mb-3">
       <label for="user_id" class="font-semibold">User ID <span class="required-field">*</span></label>
       <input id="user_id" type="text" pInputText formControlName="user_id"
-             [ngClass]="{'ng-invalid ng-dirty': userForm.get('user_id')?.invalid && userForm.get('user_id')?.touched}"
-             placeholder="Enter user ID">
+              [ngClass]="{'ng-invalid ng-dirty': userForm.get('user_id')?.invalid && userForm.get('user_id')?.touched}"
+              [readonly]="isEditing"
+              placeholder="Enter user ID">
       <small class="p-error" *ngIf="userForm.get('user_id')?.invalid && userForm.get('user_id')?.touched">
         User ID is required
       </small>
@@ -74,9 +88,9 @@
       <div class="role-options">
         <div *ngFor="let role of availableRoles" class="role-option">
           <input type="checkbox" 
-                 [id]="role" 
-                 [checked]="isRoleSelected(role)" 
-                 (change)="toggleRole(role)">
+                  [id]="role" 
+                  [checked]="isRoleSelected(role)" 
+                  (change)="toggleRole(role)">
           <label [for]="role">{{ roleDisplayMap[role] }}</label>
         </div>
       </div>
@@ -104,4 +118,4 @@
 <!-- Confirmation Dialog -->
 <p-confirmDialog [style]="{width: '450px'}" 
                 styleClass="delete-confirm-dialog">
-</p-confirmDialog> 
+</p-confirmDialog>
