@@ -3,6 +3,7 @@ from typing import List, Optional
 from .audit import AuditModel
 from enum import Enum
 from datetime import datetime
+from .review import ReviewStatus
 
 class IdeaStatus(str, Enum):
     DRAFT = "DRAFT"
@@ -13,24 +14,6 @@ class IdeaStatus(str, Enum):
     INCUBATION_APPROVED = "INCUBATION_APPROVED"
     INCUBATION_REJECTED = "INCUBATION_REJECTED"
     ROLL_OUT = "ROLL_OUT"
-
-class ReviewStatus(str, Enum):
-    IN_REVIEW = "IN_REVIEW"
-    APPROVED = "APPROVED"
-    REJECTED = "REJECTED"
-    NEED_IMPROVEMENT = "NEED_IMPROVEMENT"
-
-class ReviewScoreItem(BaseModel):
-    score: int = Field(ge=1, le=5)
-    comment: str
-
-class ReviewResult(BaseModel):
-    innovation: ReviewScoreItem
-    value: ReviewScoreItem
-    feasibility: ReviewScoreItem
-    impact: ReviewScoreItem
-    return_on_investment: ReviewScoreItem
-    average_score: float
 
 class SessionReview(BaseModel):
     submitter_id: Optional[str] = None

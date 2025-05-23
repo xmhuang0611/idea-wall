@@ -5,8 +5,8 @@ from services.idea_service import idea_service
 from services.vote_service import vote_service
 from services.bookmark_service import bookmark_service
 from services.user_service import user_service
-from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaStatus, SessionReview, IncubatorReview, ReviewStatus, ReviewResult, SessionReviewCreate, LeanCanvasCreate
-from models.review import ReviewCreate, FinalDecisionCreate, TargetType
+from models.idea import Idea, IdeaCreate, IdeaUpdate, IdeaStatus, SessionReview, IncubatorReview, SessionReviewCreate, LeanCanvasCreate
+from models.review import ReviewCreate, FinalDecisionCreate, TargetType, ReviewStatus, ReviewResult
 from models.response import StandardResponse, Pagination, ErrorDetail
 from models.user import User
 from models.user import UserRole
