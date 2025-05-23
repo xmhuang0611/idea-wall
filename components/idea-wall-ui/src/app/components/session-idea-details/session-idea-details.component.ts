@@ -161,7 +161,7 @@ import { AuthService } from '../../auth/auth.service';
                 </div>
                 
                 <div class="mb-3">
-                  <label class="block text-md font-bold mb-1">Value to Business</label>
+                  <label class="block text-md font-bold mb-1">Values</label>
                   <div class="p-3 border-1 border-round surface-ground white-space-pre-line">{{idea.session_review.values || '-'}}</div>
                 </div>
               </div>
