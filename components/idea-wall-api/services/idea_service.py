@@ -1,15 +1,22 @@
+from typing import List, Dict, Any, Optional
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-from core.database import get_database
-from models.idea import IdeaCreate, IdeaUpdate, IdeaInDB, Idea, IdeaTag
 from bson import ObjectId
-from services.tag_service import tag_service
+from fastapi import HTTPException
+from models.idea import IdeaCreate, IdeaUpdate, IdeaInDB, Idea, IdeaTag, IdeaStatus, SessionReview, IncubatorReview, ReviewStatus, LeanCanvas, SessionReviewCreate, LeanCanvasCreate
 from models.log import ObjectType, OperationType
 from utils.logging_utils import record_operation_log
+from models.review import ReviewBase, TargetType
+from services.review_service import review_service
+from core.database import get_database
+from services.tag_service import tag_service
 
 class IdeaService:
     def __init__(self):
         self.collection_name = "ideas"
+
+    async def _db(self):
+        """Get database connection"""
+        return await get_database()
 
     async def _build_filter_query(
         self,
@@ -17,7 +24,8 @@ class IdeaService:
         tags: Optional[List[int]] = None,
         creator_id: Optional[str] = None,
         voted_by: Optional[str] = None,
-        bookmarked_by: Optional[str] = None
+        bookmarked_by: Optional[str] = None,
+        status: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         filter_query = {}
             
@@ -35,6 +43,13 @@ class IdeaService:
         # Filter by creator
         if creator_id:
             filter_query["creator_id"] = creator_id
+            
+        # Filter by status (multiple statuses)
+        if status:
+            if len(status) == 1:
+                filter_query["status"] = status[0]
+            else:
+                filter_query["status"] = {"$in": status}
 
         # Collect all idea IDs that need to be filtered
         idea_ids_to_filter = []
@@ -77,7 +92,7 @@ class IdeaService:
 
     async def _get_voted_idea_ids(self, user_id: str) -> List[ObjectId]:
         """Get all idea IDs that a user has voted for"""
-        db = await get_database()
+        db = await self._db()
         votes = await db["votes"].find({
             "creator_id": user_id,
             "target_type": "Idea",
@@ -87,7 +102,7 @@ class IdeaService:
 
     async def _get_bookmarked_idea_ids(self, user_id: str) -> List[ObjectId]:
         """Get all idea IDs that a user has bookmarked"""
-        db = await get_database()
+        db = await self._db()
         bookmarks = await db["bookmarks"].find({
             "creator_id": user_id,
             "target_type": "Idea",
@@ -101,10 +116,11 @@ class IdeaService:
         tags: Optional[List[int]] = None,
         creator_id: Optional[str] = None,
         voted_by: Optional[str] = None,
-        bookmarked_by: Optional[str] = None
+        bookmarked_by: Optional[str] = None,
+        status: Optional[List[str]] = None
     ) -> int:
-        db = await get_database()
-        filter_query = await self._build_filter_query(search, tags, creator_id, voted_by, bookmarked_by)
+        db = await self._db()
+        filter_query = await self._build_filter_query(search, tags, creator_id, voted_by, bookmarked_by, status)
         return await db[self.collection_name].count_documents(filter_query)
 
     async def get_ideas(
@@ -117,12 +133,13 @@ class IdeaService:
         tags: Optional[List[int]] = None,
         creator_id: Optional[str] = None,
         voted_by: Optional[str] = None,
-        bookmarked_by: Optional[str] = None
+        bookmarked_by: Optional[str] = None,
+        status: Optional[List[str]] = None
     ) -> List[Idea]:
-        db = await get_database()
+        db = await self._db()
         
         # Build filter conditions
-        filter_query = await self._build_filter_query(search, tags, creator_id, voted_by, bookmarked_by)
+        filter_query = await self._build_filter_query(search, tags, creator_id, voted_by, bookmarked_by, status)
             
         # Build sort conditions
         sort_options = {}
@@ -147,7 +164,7 @@ class IdeaService:
         return ideas
 
     async def get_idea(self, idea_id: str) -> Optional[Idea]:
-        db = await get_database()
+        db = await self._db()
         idea_dict = await db[self.collection_name].find_one({"_id": ObjectId(idea_id)})
         if idea_dict:
             idea_dict["id"] = str(idea_dict.pop("_id"))
@@ -157,7 +174,7 @@ class IdeaService:
         return None
 
     async def create_idea(self, idea: IdeaCreate, creator_id: str, creator_name: str = "Anonymous User") -> Idea:
-        db = await get_database()
+        db = await self._db()
         idea_dict = idea.model_dump()
         idea_in_db = IdeaInDB(
             **idea_dict,
@@ -166,7 +183,9 @@ class IdeaService:
             updater_id=creator_id,
             updater_name=creator_name,
             total_votes=0,
-            total_comments=0
+            total_comments=0,
+            total_bookmarks=0,
+            status=IdeaStatus.DRAFT
         )
         
         result = await db[self.collection_name].insert_one(idea_in_db.model_dump())
@@ -180,7 +199,9 @@ class IdeaService:
             updater_id=creator_id,
             updater_name=creator_name,
             total_votes=0,
-            total_comments=0
+            total_comments=0,
+            total_bookmarks=0,
+            status=IdeaStatus.DRAFT
         )
         
         # Add log record
@@ -196,47 +217,42 @@ class IdeaService:
         return result_idea
 
     async def update_idea(self, idea_id: str, idea: IdeaUpdate, updater_id: str, updater_name: str) -> Optional[Idea]:
-        db = await get_database()
+        db = await self._db()
         idea_dict = idea.model_dump()
         
-        # Get original idea to preserve some fields
-        original_idea = await self.get_idea(idea_id)
-        if not original_idea:
-            return None
-            
+        update_dict = {
+            **idea_dict,
+            "updater_id": updater_id,
+            "updater_name": updater_name,
+            "updated_at": datetime.utcnow()
+        }
+        
         # Update idea
         result = await db[self.collection_name].update_one(
             {"_id": ObjectId(idea_id)},
-            {
-                "$set": {
-                    **idea_dict,
-                    "updater_id": updater_id,
-                    "updater_name": updater_name,
-                    "updated_at": datetime.utcnow()
-                }
-            }
+            {"$set": update_dict}
         )
         
-        if result.modified_count > 0:
-            # Get updated idea
-            updated_idea = await self.get_idea(idea_id)
-            
-            # Add log record
-            if updated_idea:
-                await record_operation_log(
-                    object_type=ObjectType.IDEA,
-                    object_id=idea_id,
-                    object_data=updated_idea,
-                    operation_type=OperationType.UPDATE,
-                    user_id=updater_id,
-                    user_name=updater_name
-                )
-            
-            return updated_idea
-        return None
+        if result.modified_count == 0:
+            return None
+        
+        # Get updated idea
+        updated_idea = await self.get_idea(idea_id)
+        
+        # Add log record
+        await record_operation_log(
+            object_type=ObjectType.IDEA,
+            object_id=idea_id,
+            object_data=updated_idea,
+            operation_type=OperationType.UPDATE,
+            user_id=updater_id,
+            user_name=updater_name
+        )
+        
+        return updated_idea
 
     async def update_votes(self, idea_id: str, vote_change: int) -> bool:
-        db = await get_database()
+        db = await self._db()
         result = await db[self.collection_name].update_one(
             {"_id": ObjectId(idea_id)},
             {"$inc": {"total_votes": vote_change}}
@@ -244,62 +260,462 @@ class IdeaService:
         return result.modified_count > 0
 
     async def update_bookmarks(self, idea_id: str, bookmark_change: int) -> bool:
-        db = await get_database()
+        db = await self._db()
         result = await db[self.collection_name].update_one(
             {"_id": ObjectId(idea_id)},
             {"$inc": {"total_bookmarks": bookmark_change}}
         )
         return result.modified_count > 0
 
-    async def delete_idea(self, idea_id: str) -> bool:
-        """Delete the specified Idea
+    async def update_comments(self, idea_id: str, comment_change: int) -> bool:
+        db = await self._db()
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$inc": {"total_comments": comment_change}}
+        )
+        return result.modified_count > 0
+
+    async def delete_idea(self, idea_id: str, user_id: str, user_name: str) -> bool:
+        db = await self._db()
         
-        Args:
-            idea_id: ID of the Idea to be deleted
-            
-        Returns:
-            bool: Whether the deletion was successful
-        """
-        db = await get_database()
-        
-        # Get the Idea to be deleted for logging
-        idea_to_delete = await self.get_idea(idea_id)
-        if not idea_to_delete:
+        # Get idea before deletion for logging
+        idea = await self.get_idea(idea_id)
+        if not idea:
             return False
-            
-        # Delete the Idea
+        
+        # Delete idea
         result = await db[self.collection_name].delete_one({"_id": ObjectId(idea_id)})
         
         if result.deleted_count > 0:
-            # Log the deletion operation
+            # Add log record
             await record_operation_log(
                 object_type=ObjectType.IDEA,
                 object_id=idea_id,
-                object_data=idea_to_delete,
+                object_data=idea,
                 operation_type=OperationType.DELETE,
-                user_id=idea_to_delete.updater_id,
-                user_name=idea_to_delete.updater_name
+                user_id=user_id,
+                user_name=user_name
             )
-            
-            # Delete related vote records
-            await db["votes"].delete_many({
-                "target_id": idea_id,
-                "target_type": "Idea"
-            })
-            
-            # Delete related bookmark records
-            await db["bookmarks"].delete_many({
-                "target_id": idea_id,
-                "target_type": "Idea"
-            })
-            
-            # Delete related comments
-            await db["comments"].delete_many({
-                "idea_id": idea_id
-            })
-            
             return True
-            
         return False
+
+    # Session Review Methods
+    async def submit_session_review(
+        self, 
+        idea_id: str, 
+        session_review_data: SessionReviewCreate, 
+        submitter_id: str, 
+        submitter_name: str
+    ) -> Optional[Idea]:
+        db = await self._db()
+        
+        # Get current idea
+        idea = await self.get_idea(idea_id)
+        if not idea:
+            return None
+        
+        # Prepare session review data
+        session_review = SessionReview(
+            submitter_id=submitter_id,
+            submitter_name=submitter_name,
+            submitter_job=session_review_data.submitter_job,
+            manager=session_review_data.manager,
+            stream=session_review_data.stream,
+            clients=session_review_data.clients,
+            problem_statements=session_review_data.problem_statements,
+            solutions=session_review_data.solutions,
+            values=session_review_data.values,
+            status=ReviewStatus.IN_REVIEW,
+            review_count=0,
+            submitted_at=datetime.utcnow()
+        )
+        
+        # Update idea with session review and change status
+        update_dict = {
+            "session_review": session_review.model_dump(),
+            "status": IdeaStatus.IN_SESSION_REVIEW,
+            "updater_id": submitter_id,
+            "updater_name": submitter_name,
+            "updated_at": datetime.utcnow()
+        }
+        
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$set": update_dict}
+        )
+        
+        if result.modified_count == 0:
+            return None
+        
+        # Get updated idea
+        updated_idea = await self.get_idea(idea_id)
+        
+        # Add log record
+        await record_operation_log(
+            object_type=ObjectType.IDEA,
+            object_id=idea_id,
+            object_data=updated_idea,
+            operation_type=OperationType.UPDATE,
+            user_id=submitter_id,
+            user_name=submitter_name,
+        )
+        
+        return updated_idea
+
+    # Incubator Review Methods
+    async def submit_incubator_review(
+        self, 
+        idea_id: str, 
+        lean_canvas_data: LeanCanvasCreate, 
+        submitter_id: str, 
+        submitter_name: str
+    ) -> Optional[Idea]:
+        db = await self._db()
+        
+        # Get current idea
+        idea = await self.get_idea(idea_id)
+        if not idea:
+            return None
+        
+        # Check if idea is in correct status
+        if idea.status != IdeaStatus.SESSION_APPROVED:
+            return None
+        
+        # Prepare lean canvas
+        lean_canvas = LeanCanvas(
+            problem=lean_canvas_data.problem,
+            existing_alternatives=lean_canvas_data.existing_alternatives,
+            solution=lean_canvas_data.solution,
+            key_metrics=lean_canvas_data.key_metrics,
+            unique_value=lean_canvas_data.unique_value,
+            high_level_concept=lean_canvas_data.high_level_concept,
+            unfair_advantage=lean_canvas_data.unfair_advantage,
+            channels=lean_canvas_data.channels,
+            customer_segments=lean_canvas_data.customer_segments,
+            early_adopters=lean_canvas_data.early_adopters,
+            cost_structure=lean_canvas_data.cost_structure,
+            revenue_stream=lean_canvas_data.revenue_stream
+        )
+        
+        # Prepare incubator review
+        incubator_review = IncubatorReview(
+            lean_canvas=lean_canvas,
+            status=ReviewStatus.IN_REVIEW,
+            review_count=0,
+            submitted_at=datetime.utcnow()
+        )
+        
+        # Update idea with incubator review and change status
+        update_dict = {
+            "incubator_review": incubator_review.model_dump(),
+            "status": IdeaStatus.IN_INCUBATION_REVIEW,
+            "updater_id": submitter_id,
+            "updater_name": submitter_name,
+            "updated_at": datetime.utcnow()
+        }
+        
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$set": update_dict}
+        )
+        
+        if result.modified_count == 0:
+            return None
+        
+        # Get updated idea
+        updated_idea = await self.get_idea(idea_id)
+        
+        # Add log record
+        await record_operation_log(
+            object_type=ObjectType.IDEA,
+            object_id=idea_id,
+            object_data=updated_idea,
+            operation_type=OperationType.UPDATE,
+            user_id=submitter_id,
+            user_name=submitter_name,
+        )
+        
+        return updated_idea
+
+    # Review Results Methods
+    async def add_review_result(
+        self, 
+        idea_id: str, 
+        target_type: TargetType, 
+        review_result: Dict[str, Any], 
+        reviewer_id: str, 
+        reviewer_name: str
+    ) -> Optional[Idea]:
+        db = await self._db()
+        
+        # Get current idea
+        idea = await self.get_idea(idea_id)
+        if not idea:
+            return None
+        
+        # Calculate average score from review result
+        average_score = sum([
+            review_result["innovation"]["score"],
+            review_result["value"]["score"],
+            review_result["feasibility"]["score"],
+            review_result["impact"]["score"],
+            review_result["return_on_investment"]["score"]
+        ]) / 5.0
+        
+        # Update review count and recalculate average score
+        if target_type == TargetType.SESSION:
+            if not idea.session_review:
+                return None
+            
+            current_count = idea.session_review.review_count
+            current_avg = idea.session_review.average_score
+            new_count = current_count + 1
+            new_avg = ((current_avg * current_count) + average_score) / new_count if new_count > 0 else average_score
+            
+            update_dict = {
+                "session_review.review_count": new_count,
+                "session_review.average_score": new_avg,
+                "updater_id": reviewer_id,
+                "updater_name": reviewer_name,
+                "updated_at": datetime.utcnow()
+            }
+        else:  # Incubator
+            if not idea.incubator_review:
+                return None
+            
+            current_count = idea.incubator_review.review_count
+            current_avg = idea.incubator_review.average_score
+            new_count = current_count + 1
+            new_avg = ((current_avg * current_count) + average_score) / new_count if new_count > 0 else average_score
+            
+            update_dict = {
+                "incubator_review.review_count": new_count,
+                "incubator_review.average_score": new_avg,
+                "updater_id": reviewer_id,
+                "updater_name": reviewer_name,
+                "updated_at": datetime.utcnow()
+            }
+        
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$set": update_dict}
+        )
+        
+        if result.modified_count == 0:
+            return None
+        
+        # Save review to reviews collection
+        try:
+            review_data = ReviewBase(
+                idea_id=idea_id,
+                target_type=target_type,
+                review_result=review_result
+            )
+            await review_service.create_review(review_data, reviewer_id, reviewer_name)
+        except Exception as e:
+            print(f"Error saving review to database: {str(e)}")
+            # Continue even if saving to reviews collection fails
+        
+        # Get updated idea
+        updated_idea = await self.get_idea(idea_id)
+        
+        # Add log record
+        await record_operation_log(
+            object_type=ObjectType.IDEA,
+            object_id=idea_id,
+            object_data=updated_idea,
+            operation_type=OperationType.UPDATE,
+            user_id=reviewer_id,
+            user_name=reviewer_name,
+        )
+        
+        return updated_idea
+
+    # Final Decision Methods
+    async def make_final_decision(
+        self, 
+        idea_id: str, 
+        target_type: TargetType, 
+        decision: str, 
+        comments: str, 
+        decision_maker_id: str, 
+        decision_maker_name: str
+    ) -> Optional[Idea]:
+        db = await self._db()
+        
+        # Get current idea
+        idea = await self.get_idea(idea_id)
+        if not idea:
+            return None
+        
+        # Check if decision is valid
+        if decision not in ["APPROVED", "REJECTED", "NEED_IMPROVEMENT"]:
+            return None
+        
+        # Determine new idea status based on decision and target type
+        new_status = None
+        if target_type == TargetType.SESSION:
+            if decision == "APPROVED":
+                new_status = IdeaStatus.SESSION_APPROVED
+            elif decision == "REJECTED":
+                new_status = IdeaStatus.SESSION_REJECTED
+            # NEED_IMPROVEMENT keeps the current status
+        else:  # Incubator
+            if decision == "APPROVED":
+                new_status = IdeaStatus.INCUBATION_APPROVED
+            elif decision == "REJECTED":
+                new_status = IdeaStatus.INCUBATION_REJECTED
+            # NEED_IMPROVEMENT keeps the current status
+        
+        # Update idea with decision and potentially new status
+        update_dict = {
+            f"{target_type.value.lower()}_review.status": decision,
+            "updater_id": decision_maker_id,
+            "updater_name": decision_maker_name,
+            "updated_at": datetime.utcnow()
+        }
+        
+        # Only update status if it changed
+        if new_status:
+            update_dict["status"] = new_status
+        
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$set": update_dict}
+        )
+        
+        if result.modified_count == 0:
+            return None
+        
+        # Get updated idea
+        updated_idea = await self.get_idea(idea_id)
+        
+        # Add log record
+        await record_operation_log(
+            object_type=ObjectType.IDEA,
+            object_id=idea_id,
+            object_data=updated_idea,
+            operation_type=OperationType.UPDATE,
+            user_id=decision_maker_id,
+            user_name=decision_maker_name,
+        )
+        
+        return updated_idea
+
+    # Roll Out Method
+    async def roll_out_idea(
+        self,
+        idea_id: str,
+        user_id: str,
+        user_name: str
+    ) -> Optional[Idea]:
+        db = await self._db()
+        
+        # Get current idea
+        idea = await self.get_idea(idea_id)
+        if not idea:
+            return None
+        
+        # Check if idea is in correct status
+        if idea.status != IdeaStatus.INCUBATION_APPROVED:
+            return None
+        
+        # Update idea status to ROLL_OUT
+        update_dict = {
+            "status": IdeaStatus.ROLL_OUT,
+            "updater_id": user_id,
+            "updater_name": user_name,
+            "updated_at": datetime.utcnow()
+        }
+        
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$set": update_dict}
+        )
+        
+        if result.modified_count == 0:
+            return None
+        
+        # Get updated idea
+        updated_idea = await self.get_idea(idea_id)
+        
+        # Add log record
+        await record_operation_log(
+            object_type=ObjectType.IDEA,
+            object_id=idea_id,
+            object_data=updated_idea,
+            operation_type=OperationType.UPDATE,
+            user_id=user_id,
+            user_name=user_name
+        )
+        
+        return updated_idea
+
+    async def recalculate_review_scores(self, idea_id: str, target_type: TargetType) -> Optional[Idea]:
+        """
+        Recalculate average score for an idea based on all existing reviews.
+        This method should be called after a review is updated or deleted.
+        """
+        db = await self._db()
+        
+        # Get current idea
+        idea = await self.get_idea(idea_id)
+        if not idea:
+            return None
+        
+        # Get all reviews for this idea and target type
+        reviews = await review_service.get_reviews(idea_id, target_type.value)
+        
+        if not reviews:
+            # No reviews exist, set count to 0 and average to 0
+            new_count = 0
+            new_avg = 0.0
+        else:
+            # Calculate new average from all reviews
+            total_score = 0.0
+            for review in reviews:
+                review_avg = sum([
+                    review.review_result.innovation.score,
+                    review.review_result.value.score,
+                    review.review_result.feasibility.score,
+                    review.review_result.impact.score,
+                    review.review_result.return_on_investment.score
+                ]) / 5.0
+                total_score += review_avg
+            
+            new_count = len(reviews)
+            new_avg = total_score / new_count if new_count > 0 else 0.0
+        
+        # Update idea with new scores
+        if target_type == TargetType.SESSION:
+            if not idea.session_review:
+                return None
+            
+            update_dict = {
+                "session_review.review_count": new_count,
+                "session_review.average_score": new_avg,
+                "updated_at": datetime.utcnow()
+            }
+        else:  # Incubator
+            if not idea.incubator_review:
+                return None
+            
+            update_dict = {
+                "incubator_review.review_count": new_count,
+                "incubator_review.average_score": new_avg,
+                "updated_at": datetime.utcnow()
+            }
+        
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$set": update_dict}
+        )
+        
+        if result.modified_count == 0:
+            return None
+        
+        # Get updated idea
+        updated_idea = await self.get_idea(idea_id)
+        return updated_idea
 
 idea_service = IdeaService() 

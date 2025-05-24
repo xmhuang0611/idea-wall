@@ -3,6 +3,11 @@
 @import "primeng/resources/primeng.min.css";
 @import "primeicons/primeicons.css";
 
+/* Custom Color Overrides */
+:root {
+  --surface-ground: #eff3f8;
+}
+
 /* Global Custom Styles */
 body {
   margin: 0;

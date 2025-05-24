@@ -30,16 +30,41 @@ Stores user information and their roles.
 
 ### Ideas Collection
 
-Stores all ideas submitted to the platform.
+Stores all ideas and their review information.
 
-| Field          | Type     | Description                          | Example Value                          |
-|----------------|----------|--------------------------------------|----------------------------------------|
-| title          | String   | Idea title                           | "Improve User Experience"              |
-| description    | String   | Detailed description                 | "We should optimize the login flow..." |
-| feeling        | Number   | Feeling score                        | 8                                      |
-| tags           | Array    | Array of tag IDs                     | [1,2]                                  |
-| total_votes    | Number   | Total number of votes                | 42                                     |
-| total_comments | Number   | Total number of comments             | 10                                     |
+| Field                  | Type     | Description                          | Example Value                          |
+|------------------------|----------|--------------------------------------|----------------------------------------|
+| title                  | String   | Idea title                           | "Improve User Experience"              |
+| description            | String   | Detailed description                 | "We should optimize the login flow..." |
+| feeling                | Number   | Feeling score(1-5)                   | 3                                      |
+| tags                   | Array    | Array of tag IDs                     | [1,2]                                  |
+| total_votes            | Number   | Total number of votes                | 42                                     |
+| total_comments         | Number   | Total number of comments             | 10                                     |
+| total_bookmarks        | Number   | Total number of bookmarks            | 10                                     |
+| status                 | String   | Idea status                          | "IN_SESSION_REVIEW"                    |
+| session_review         | Object   | Session review information object    | Session Review Object                  |
+| incubator_review       | Object   | Incubator review information object  | Incubator Review Object                |
+
+### Idea Review Collection
+
+Stores individual review results for both sessions and incubators.
+
+| Field                     | Type     | Description                        | Example Value                  |
+|---------------------------|----------|------------------------------------|--------------------------------|
+| idea_id                   | String   | Reference to the idea              | "507f1f77bcf86cd799439013"     |
+| target_type               | String   | "Session" or "Incubator"           | "Session"                      |
+| review_result             | Object   | Individual review result           | Review Result                  |
+
+### Final Decision Collection
+
+Stores final decisions made by reviewers after the minimum required reviews are received.
+
+| Field                     | Type     | Description                        | Example Value                  |
+|---------------------------|----------|------------------------------------|--------------------------------|
+| idea_id                   | String   | Reference to the idea              | "507f1f77bcf86cd799439013"     |
+| target_type               | String   | "Session" or "Incubator"           | "Session"                      |
+| decision                  | String   | APPROVED/REJECTED/NEED_IMPROVEMENT | Decision                       |
+| comments                  | String   | Decision comments                  | "This idea is ready to proceed" |
 
 ### Comments Collection
 
@@ -99,46 +124,92 @@ Store notifications for all users.
 
 | Field           | Type        | Description                  | Example Value                             |
 |-----------------|-------------|------------------------------|-------------------------------------------|
-| notification_id | ObjectId    | Id of notification           | "234d234g234g34524g234233"                |
 | user_id         | ObjectId    | Id of receiver               | "user123"                                 |
 | is_readed       | Boolean     | If notification is readed    | True                                      |
 | context         | String      | Context of notification      | "New comments you have"                   |
 | read_at         | DateTime    | Date time when read          | 2024-03-20T10:30:00Z                      |
 | notify_status   | Object      | Status of notifaction        | {"channel": "email", "status": "success"} |
 
-## Indexes
+## Object Structures
 
-### Users Collection
+### Session Review
 
-- `user_id`: Unique index
-- `roles`: Index for role-based queries
+```json
+{
+  "submitter_id": "...",
+  "submitter_name": "...",
+  "submitter_job": "...",
+  "manager": "...",
+  "stream": "...",
+  "clients": "...",
+  "problem_statements": "...",
+  "solutions": "...",
+  "values": "...",
+  "average_score": 1,
+  "status": review_status,
+  "review_count": 1,
+  "submitted_at": "..."
+}
+```
 
-### Ideas Collection
+### Incubator Review
 
-- `tags`: Index for tag-based queries
-- `creator_id`: Index for user's ideas
-- `total_votes`: Index for sorting
+```json
+{
+  "lean_canvas": lean_canvas,
+  "average_score": 1,
+  "status": review_status,
+  "review_count": 1,
+  "submitted_at": "..."
+}
+```
 
-### Comments Collection
+### Lean Canvas
 
-- `idea_id`: Index for idea-based queries
-- `parent_id`: Index for comment threading
-- Compound index: `[idea_id, created_at]` for sorted comments
+```json
+{
+  "problem": "...",
+  "existing_alternatives": "...",
+  "solution": "...",
+  "key_metrics": "...",
+  "unique_value": "...",
+  "high_level_concept": "...",
+  "unfair_advantage": "...",
+  "channels": "...",
+  "customer_segments": "...",
+  "early_adopters": "...",
+  "cost_structure": "...",
+  "revenue_stream": "..."
+}
+```
 
-### Votes Collection
+### Review Result
 
-- `target_id`: Index for vote counts
-- Compound index: `[target_id, target_type, creator_id]`
-
-### Bookmarks Collection
-
-- `idea_id`: Index for bookmark counts
-- Compound index: `[idea_id, creator_id]`
-
-### Tags Collection
-
-- `tag`: Unique index
-- `parent_id`: Index for hierarchical tag queries
+```json
+{
+  "innovation": {
+    "score": 1,
+    "comment": "..."
+  },
+  "value": {
+    "score": 1,
+    "comment": "..."
+  },
+  "feasibility": {
+    "score": 1,
+    "comment": "..."
+  },
+  "impact": {
+    "score": 1,
+    "comment": "..."
+  },
+  "return_on_investment": {
+    "score": 1,
+    "comment": "..."
+  },
+  "average_score": 1
+}
+```
 
 ## Data Relationships
 
@@ -157,32 +228,6 @@ Store notifications for all users.
 - IDEA_INCUBATOR_REVIEWER
 - ADMIN
 
-## User Info
-
-### UserInfo Collection 
-
-| Field               | Type        | Description                                         | Example                          |
-|---------------------|-------------|-----------------------------------------------------|-----------------------------------|
-| user_id             | String      | Unique user identifier                              | "u123456"                        |
-| nickname            | String      | User's display name                                 | "Alice"                          |
-| avatar_url          | String      | URL of user's avatar                                | "https://..."                    |
-| email               | String      | User's email address                                | "alice@example.com"              |
-| bio                 | String      | User's personal introduction or bio                 | "Product manager, Innovator"     |
-| role                | String      | User role (e.g., USER, IDEA_SESSION_PANNEL_REVIEWER, IDEA_INCUBATOR_REVIEWER, ADMIN) | "USER" |
-| point_rank          | Number      | User's rank in the points leaderboard               | 8                                |
-| notification_prefs  | Object      | Notification preferences (channels, frequency, etc) | { "email": true, "in_app": true } |
-| privacy_settings    | Object      | Privacy settings for profile and notifications      | { "show_email": false }           |
-
-#### Notes
-
-- To get the total number of ideas or pain points for a user, aggregate queries can be performed on the Ideas Collection using `user_id`.
-- The `role` field indicates the user's role in the system, such as USER, IDEA_SESSION_PANNEL_REVIEWER, IDEA_INCUBATOR_REVIEWER, or ADMIN.
-
-
-#### Indexes
-
-- `user_id`: Unique index
-
 ### Vote Target Types
 
 - Idea
@@ -196,3 +241,29 @@ Store notifications for all users.
 - Bookmark
 - Tag
 - User
+- Review
+- FinalDecision
+
+### Idea Statuses
+
+- DRAFT
+- IN_SESSION_REVIEW
+- SESSION_APPROVED
+- SESSION_REJECTED
+- IN_INCUBATION_REVIEW
+- INCUBATION_APPROVED
+- INCUBATION_REJECTED
+- ROLL_OUT
+
+### Review Status
+
+- IN_REVIEW
+- APPROVED
+- REJECTED
+- NEED_IMPROVEMENT
+
+### Final Decision Types
+
+- APPROVED
+- REJECTED
+- NEED_IMPROVEMENT

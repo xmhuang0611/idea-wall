@@ -43,6 +43,7 @@ import { UserService } from './services/user.service';
       flex: 1;
       margin-top: 56px;
       padding: 24px 0;
+      background-color: var(--surface-ground);
     }
 
     .container {

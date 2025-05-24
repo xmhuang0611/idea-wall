@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
@@ -16,6 +16,7 @@ import { InputSwitchModule } from 'primeng/inputswitch';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { DialogModule } from 'primeng/dialog';
 import { IdeaDetailsComponent } from '../idea-details/idea-details.component';
 import { AuthService } from '../../auth/auth.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -28,6 +29,11 @@ import { ConfirmationService } from 'primeng/api';
 import { IdeaHistoryComponent } from '../idea-history/idea-history.component';
 import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 import { ApiResponse } from '../../shared/models/api-response.model';
+import { SessionReviewFormComponent } from '../session-review-form/session-review-form.component';
+import { IdeaStatus } from '../../models/idea.model';
+import { MenuModule } from 'primeng/menu';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { OverlayPanel } from 'primeng/overlaypanel';
 
 interface Topic {
   name: string;
@@ -53,15 +59,21 @@ interface Topic {
     ProgressSpinnerModule,
     TooltipModule,
     MultiSelectModule,
+    DialogModule,
     IdeaDetailsComponent,
     ConfirmDialogModule,
-    IdeaHistoryComponent
+    IdeaHistoryComponent,
+    SessionReviewFormComponent,
+    MenuModule,
+    OverlayPanelModule
   ],
   providers: [ConfirmationService],
   templateUrl: './idea-wall.component.html',
   styleUrls: ['./idea-wall.component.scss']
 })
 export class IdeaWallComponent implements OnInit {
+  @ViewChild('actionsMenu') actionsMenuRef!: OverlayPanel;
+  
   ideas: Idea[] = [];
   currentUserId: string = '';
   isAdmin: boolean = false;
@@ -100,6 +112,12 @@ export class IdeaWallComponent implements OnInit {
 
   hotTopics: Topic[] = [];
   newestIdeas: Idea[] = [];
+
+  // Session Review
+  sessionReviewDialogVisible = false;
+  selectedSessionIdeaId: string | null = null;
+
+  selectedIdeaForActions: Idea | null = null;
 
   constructor(
     private ideaService: IdeaService,
@@ -513,5 +531,92 @@ export class IdeaWallComponent implements OnInit {
 
   onIdeaClick(ideaId: string) {
     this.openDetails(ideaId);
+  }
+
+  /**
+   * Check if user can submit idea to session review
+   * Only creator can submit ideas that are in DRAFT status or have no status
+   */
+  canSubmitToSession(idea: Idea): boolean {
+    // Must be logged in and be the creator
+    if (!this.authService.isLoggedIn() || idea.creator_id !== this.currentUserId) {
+      return false;
+    }
+    
+    // Only DRAFT status or null/undefined status ideas can be submitted
+    return !idea.status || idea.status === IdeaStatus.DRAFT;
+  }
+
+  /**
+   * Get idea status label for display
+   */
+  getIdeaStatusLabel(status: IdeaStatus): string {
+    switch (status) {
+      case IdeaStatus.DRAFT:
+        return 'Draft';
+      case IdeaStatus.IN_SESSION_REVIEW:
+        return 'In Session Review';
+      case IdeaStatus.SESSION_APPROVED:
+        return 'Session Approved';
+      case IdeaStatus.SESSION_REJECTED:
+        return 'Session Rejected';
+      case IdeaStatus.IN_INCUBATION_REVIEW:
+        return 'In Incubation Review';
+      case IdeaStatus.INCUBATION_APPROVED:
+        return 'Incubation Approved';
+      case IdeaStatus.INCUBATION_REJECTED:
+        return 'Incubation Rejected';
+      case IdeaStatus.ROLL_OUT:
+        return 'Roll Out';
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Get idea status severity for tag styling
+   */
+  getIdeaStatusSeverity(status: IdeaStatus): 'success' | 'info' | 'warning' | 'danger' | 'secondary' {
+    switch (status) {
+      case IdeaStatus.DRAFT:
+        return 'secondary';
+      case IdeaStatus.IN_SESSION_REVIEW:
+      case IdeaStatus.IN_INCUBATION_REVIEW:
+        return 'info';
+      case IdeaStatus.SESSION_APPROVED:
+      case IdeaStatus.INCUBATION_APPROVED:
+      case IdeaStatus.ROLL_OUT:
+        return 'success';
+      case IdeaStatus.SESSION_REJECTED:
+      case IdeaStatus.INCUBATION_REJECTED:
+        return 'danger';
+      default:
+        return 'secondary';
+    }
+  }
+
+  /**
+   * Navigate to session review page for an idea
+   */
+  navigateToSessionReview(ideaId: string): void {
+    this.router.navigate(['/session-review', ideaId]);
+  }
+
+  onIdeaActions(event: any, idea: Idea) {
+    this.selectedIdeaForActions = idea;
+    event.stopPropagation();
+  }
+
+  onIdeaActionsClose() {
+    this.selectedIdeaForActions = null;
+  }
+
+  hasActions(idea: Idea): boolean {
+    return this.canSubmitToSession(idea) || this.canEditIdea(idea);
+  }
+
+  showActionsMenu(event: any, idea: Idea) {
+    this.selectedIdeaForActions = idea;
+    this.actionsMenuRef.show(event);
   }
 } 

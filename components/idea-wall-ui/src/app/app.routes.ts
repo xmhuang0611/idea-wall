@@ -6,6 +6,9 @@ import { IdeaFormComponent } from './components/idea-form/idea-form.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { UserManagementComponent } from './components/settings/user-management/user-management.component';
 import { TagManagementComponent } from './components/settings/tag-management/tag-management.component';
+import { IdeaSessionComponent } from './components/idea-session/idea-session.component';
+import { SessionReviewFormComponent } from './components/session-review-form/session-review-form.component';
+import { IdeaSessionDetailsComponent } from './components/idea-session-details/idea-session-details.component';
 
 export const routes: Routes = [
   { path: '', component: IdeaWallComponent },
@@ -22,5 +25,8 @@ export const routes: Routes = [
   },
   { path: 'idea-form', component: IdeaFormComponent, canActivate: [AuthGuard] },
   { path: 'idea-form/:id', component: IdeaFormComponent, canActivate: [AuthGuard] },
+  { path: 'idea-session', component: IdeaSessionComponent },
+  { path: 'session-review/:id', component: SessionReviewFormComponent, canActivate: [AuthGuard] },
+  { path: 'idea-session/:id', component: IdeaSessionDetailsComponent },
   { path: '**', redirectTo: '' }
 ];

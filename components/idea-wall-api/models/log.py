@@ -11,6 +11,8 @@ class ObjectType(str, Enum):
     BOOKMARK = "Bookmark"
     TAG = "Tag"
     USER = "User"
+    REVIEW = "Review"
+    FINAL_DECISION = "Final Decision"
 
 class OperationType(str, Enum):
     CREATE = "create"

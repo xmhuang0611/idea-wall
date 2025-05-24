@@ -1,0 +1,34 @@
+.review-form-container {
+  max-width: 100%;
+  
+  .criteria-header {
+    display: flex;
+    align-items: center;
+    
+    i {
+      margin-left: 0.5rem;
+      cursor: pointer;
+    }
+  }
+  
+  .score-group {
+    margin-bottom: 1rem;
+  }
+  
+  .score-option {
+    position: relative;
+    border: 1px solid var(--surface-200);
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    
+    &:hover {
+      background-color: var(--surface-50);
+    }
+    
+    &.selected {
+      border-color: var(--primary-color);
+      background-color: var(--primary-50);
+    }
+  }
+} 

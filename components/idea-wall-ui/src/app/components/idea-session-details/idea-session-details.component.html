@@ -1,0 +1,205 @@
+<div class="container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="flex justify-content-center align-items-center">
+      <p-progressSpinner></p-progressSpinner>
+    </div>
+  </div>
+
+  <!-- Idea Details -->
+  <div *ngIf="!isLoading && idea" class="content-container">
+    <!-- Header with back button -->
+    <div class="page-header">
+      <div class="flex justify-content-between align-items-center mb-3">
+        <h1 class="page-title">Session Idea Details</h1>
+        <button 
+          pButton 
+          icon="pi pi-arrow-left" 
+          label="Back to Idea Session" 
+          class="p-button-rounded p-button-secondary" 
+          (click)="goBack()">
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab View -->
+    <p-tabView styleClass="details-tabs">
+      <!-- Idea Details Tab -->
+      <p-tabPanel header="Idea Details">
+        <!-- Idea Information Card -->
+        <div class="idea-title-card mb-3">
+          <div class="card-header">
+            <i class="pi pi-lightbulb card-icon"></i>
+            <span class="card-title">Idea Information</span>
+            <div class="card-header-actions">
+              <p-tag 
+                *ngIf="idea.status" 
+                [value]="getIdeaStatusLabel(idea.status)" 
+                [severity]="getIdeaStatusSeverity(idea.status)"
+                [rounded]="true">
+              </p-tag>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="grid">
+              <!-- Title and Creator Info -->
+              <div class="col-12">
+                <div class="idea-header-section">
+                  <div class="idea-content">
+                    <h2 class="idea-title">{{idea.title}}</h2>
+                    <div class="idea-meta">
+                      <span class="meta-info">Created by {{idea.creator_name}} on {{formatDate(idea.created_at)}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div class="col-12">
+                <div class="field-group">
+                  <div class="field-label">Description</div>
+                  <div class="field-value">{{idea.description}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session Review Information Card -->
+        <div class="info-card mb-3" *ngIf="idea.session_review">
+          <div class="card-header">
+            <i class="pi pi-file-edit card-icon"></i>
+            <span class="card-title">Session Review Information</span>
+            <div class="card-header-actions">
+              <p-tag 
+                [value]="getReviewStatusLabel(idea.session_review.status)" 
+                [severity]="getReviewStatusSeverity(idea.session_review.status)"
+                [rounded]="true">
+              </p-tag>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="grid">
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Submitter Job</div>
+                  <div class="field-value">{{idea.session_review.submitter_job || 'N/A'}}</div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Manager</div>
+                  <div class="field-value">{{idea.session_review.manager || 'N/A'}}</div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Stream</div>
+                  <div class="field-value">{{idea.session_review.stream || 'N/A'}}</div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Clients</div>
+                  <div class="field-value">{{idea.session_review.clients || 'N/A'}}</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="field-group">
+                  <div class="field-label">Problem Statements</div>
+                  <div class="field-value multiline">{{idea.session_review.problem_statements || 'N/A'}}</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="field-group">
+                  <div class="field-label">Solutions</div>
+                  <div class="field-value multiline">{{idea.session_review.solutions || 'N/A'}}</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="field-group">
+                  <div class="field-label">Values</div>
+                  <div class="field-value multiline">{{idea.session_review.values || 'N/A'}}</div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Average Score</div>
+                  <div class="field-value score">
+                    <span class="score-number">{{idea.session_review.average_score | number:'1.1-1'}}</span>
+                    <span class="score-max">/5.0</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6" *ngIf="idea.session_review.submitted_at">
+                <div class="field-group">
+                  <div class="field-label">Submitted At</div>
+                  <div class="field-value">{{formatDate(idea.session_review.submitted_at)}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </p-tabPanel>
+
+      <!-- Reviews Tab -->
+      <p-tabPanel [header]="'Reviews (' + reviews.length + ')'">
+        <!-- Final Decision Button - Show when reviews count >= 2 -->
+        <div class="mb-3" *ngIf="canMakeFinalDecision()">
+          <div class="flex justify-content-end">
+            <button 
+              pButton 
+              icon="pi pi-check-circle" 
+              label="Make Final Decision" 
+              class="p-button-rounded p-button-success" 
+              [pTooltip]="'Make final decision based on ' + reviews.length + ' reviews'"
+              (click)="showFinalDecisionDialog = true">
+            </button>
+          </div>
+        </div>
+
+        <app-review-list
+          [reviews]="reviews"
+          [ideaId]="idea.id"
+          [targetType]="'Session'"
+          [currentUserName]="getCurrentUserName()"
+          (reviewsUpdated)="onReviewsUpdated()">
+        </app-review-list>
+      </p-tabPanel>
+    </p-tabView>
+
+    <!-- Final Decision Dialog -->
+    <p-dialog 
+      header="Make Final Decision" 
+      [(visible)]="showFinalDecisionDialog"
+      [modal]="true"
+      [style]="{width: '90vw', maxWidth: '800px'}"
+      [closable]="true"
+      [draggable]="false"
+      [resizable]="false"
+      styleClass="final-decision-dialog">
+      <app-final-decision
+        *ngIf="showFinalDecisionDialog && idea"
+        [ideaId]="idea.id"
+        [reviewCount]="reviews.length"
+        [averageScore]="idea.session_review?.average_score || 0"
+        (decisionSubmitted)="onFinalDecisionSubmitted($event)"
+        (cancelled)="onFinalDecisionCancelled()">
+      </app-final-decision>
+    </p-dialog>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !idea" class="error-container">
+    <div class="text-center p-4">
+      <i class="pi pi-exclamation-triangle text-3xl text-500 mb-3"></i>
+      <p class="text-500 m-0">Idea not found or failed to load.</p>
+      <button 
+        pButton 
+        label="Go Back" 
+        class="p-button-rounded mt-3" 
+        (click)="goBack()">
+      </button>
+    </div>
+  </div>
+</div> 

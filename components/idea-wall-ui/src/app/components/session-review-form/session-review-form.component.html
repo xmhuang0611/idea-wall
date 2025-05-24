@@ -1,0 +1,196 @@
+<div class="container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Submit to Idea Session Review</h1>
+    <div *ngIf="ideaTitle" class="idea-title-card">
+      <div class="flex align-items-center gap-2">
+        <i class="pi pi-lightbulb text-primary"></i>
+        <span class="font-semibold text-600">Idea:</span>
+        <span class="text-900">{{ ideaTitle }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <p-card styleClass="form-card">
+    <ng-template pTemplate="content">
+      <div class="form-content">
+        <form [formGroup]="sessionReviewForm" (ngSubmit)="onSubmit()" class="p-fluid">
+          <!-- Loading Overlay -->
+          <div *ngIf="isSubmitting" class="submit-overlay">
+            <p-progressSpinner></p-progressSpinner>
+          </div>
+
+          <!-- Basic Information Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <i class="pi pi-info-circle section-icon"></i>
+              <span class="section-title">Basic Information</span>
+            </div>
+            
+            <div class="section-content">
+              <div class="grid">
+                <!-- Submitter Job -->
+                <div class="col-12 md:col-6">
+                  <div class="field">
+                    <label for="submitter_job" class="field-label">Your Job and Responsibilities <span class="required">*</span></label>
+                    <input 
+                      id="submitter_job" 
+                      type="text" 
+                      pInputText 
+                      formControlName="submitter_job"
+                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('submitter_job')?.invalid && sessionReviewForm.get('submitter_job')?.touched}">
+                    <small 
+                      class="p-error" 
+                      *ngIf="sessionReviewForm.get('submitter_job')?.invalid && sessionReviewForm.get('submitter_job')?.touched">
+                      Job and Responsibilities is required
+                    </small>
+                  </div>
+                </div>
+
+                <!-- Manager -->
+                <div class="col-12 md:col-6">
+                  <div class="field">
+                    <label for="manager" class="field-label">Manager <span class="required">*</span></label>
+                    <input 
+                      id="manager" 
+                      type="text" 
+                      pInputText 
+                      formControlName="manager"
+                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('manager')?.invalid && sessionReviewForm.get('manager')?.touched}">
+                    <small 
+                      class="p-error" 
+                      *ngIf="sessionReviewForm.get('manager')?.invalid && sessionReviewForm.get('manager')?.touched">
+                      Manager name is required
+                    </small>
+                  </div>
+                </div>
+
+                <!-- Stream -->
+                <div class="col-12 md:col-6">
+                  <div class="field">
+                    <label for="stream" class="field-label">Stream <span class="required">*</span></label>
+                    <input 
+                      id="stream" 
+                      type="text" 
+                      pInputText 
+                      formControlName="stream"
+                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('stream')?.invalid && sessionReviewForm.get('stream')?.touched}">
+                    <small 
+                      class="p-error" 
+                      *ngIf="sessionReviewForm.get('stream')?.invalid && sessionReviewForm.get('stream')?.touched">
+                      Stream is required
+                    </small>
+                  </div>
+                </div>
+
+                <!-- Clients -->
+                <div class="col-12 md:col-6">
+                  <div class="field">
+                    <label for="clients" class="field-label">Clients/Users</label>
+                    <input 
+                      id="clients" 
+                      type="text" 
+                      pInputText 
+                      formControlName="clients">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Solution Details Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <i class="pi pi-file-edit section-icon"></i>
+              <span class="section-title">Details</span>
+            </div>
+            
+            <div class="section-content">
+              <div class="grid">
+                <!-- Problem Statements -->
+                <div class="col-12">
+                  <div class="field">
+                    <label for="problem_statements" class="field-label">Problem Statements <span class="required">*</span></label>
+                    <textarea 
+                      id="problem_statements" 
+                      pInputTextarea 
+                      formControlName="problem_statements"
+                      [rows]="3"
+                      placeholder="Describe the problems this idea aims to solve"
+                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('problem_statements')?.invalid && sessionReviewForm.get('problem_statements')?.touched}">
+                    </textarea>
+                    <small 
+                      class="p-error" 
+                      *ngIf="sessionReviewForm.get('problem_statements')?.invalid && sessionReviewForm.get('problem_statements')?.touched">
+                      Problem statements are required
+                    </small>
+                  </div>
+                </div>
+
+                <!-- Solutions -->
+                <div class="col-12">
+                  <div class="field">
+                    <label for="solutions" class="field-label">Solutions <span class="required">*</span></label>
+                    <textarea 
+                      id="solutions" 
+                      pInputTextarea 
+                      formControlName="solutions"
+                      [rows]="3"
+                      placeholder="Provide detailed solutions and implementation approach"
+                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('solutions')?.invalid && sessionReviewForm.get('solutions')?.touched}">
+                    </textarea>
+                    <small 
+                      class="p-error" 
+                      *ngIf="sessionReviewForm.get('solutions')?.invalid && sessionReviewForm.get('solutions')?.touched">
+                      Solutions are required
+                    </small>
+                  </div>
+                </div>
+
+                <!-- Values -->
+                <div class="col-12">
+                  <div class="field">
+                    <label for="values" class="field-label">Values <span class="required">*</span></label>
+                    <textarea 
+                      id="values" 
+                      pInputTextarea 
+                      formControlName="values"
+                      [rows]="3"
+                      placeholder="Explain the business value and expected benefits"
+                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('values')?.invalid && sessionReviewForm.get('values')?.touched}">
+                    </textarea>
+                    <small 
+                      class="p-error" 
+                      *ngIf="sessionReviewForm.get('values')?.invalid && sessionReviewForm.get('values')?.touched">
+                      Value description is required
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button 
+              pButton 
+              type="button" 
+              label="Cancel" 
+              class="p-button-rounded p-button-secondary" 
+              (click)="onCancel()"
+              [disabled]="isSubmitting">
+            </button>
+            <button 
+              pButton 
+              type="submit" 
+              label="Submit for Review" 
+              class="p-button-rounded" 
+              [disabled]="isSubmitting">
+            </button>
+          </div>
+        </form>
+      </div>
+    </ng-template>
+  </p-card>
+</div> 
