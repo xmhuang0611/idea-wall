@@ -27,6 +27,6 @@ export const routes: Routes = [
   { path: 'idea-form/:id', component: IdeaFormComponent, canActivate: [AuthGuard] },
   { path: 'idea-session', component: IdeaSessionComponent },
   { path: 'session-review/:id', component: SessionReviewFormComponent, canActivate: [AuthGuard] },
-  { path: 'session-idea-details/:id', component: IdeaSessionDetailsComponent },
+  { path: 'idea-session/:id', component: IdeaSessionDetailsComponent },
   { path: '**', redirectTo: '' }
 ];

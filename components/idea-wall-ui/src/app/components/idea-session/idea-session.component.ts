@@ -147,6 +147,6 @@ export class IdeaSessionComponent implements OnInit {
   }
 
   viewIdea(id: string): void {
-    this.router.navigate(['/session-idea-details', id]);
+    this.router.navigate(['/idea-session', id]);
   }
 } 
