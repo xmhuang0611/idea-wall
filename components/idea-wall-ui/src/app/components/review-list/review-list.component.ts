@@ -27,20 +27,6 @@ import { AuthService } from 'src/app/auth/auth.service';
   ],
   template: `
     <div class="review-list-container">
-      <!-- Header -->
-      <div class="list-header mb-3">
-        <h3 class="list-title">Reviews ({{ reviews.length }})</h3>
-        <button 
-          pButton 
-          icon="pi pi-plus" 
-          label="Add Review" 
-          class="p-button-rounded p-button-primary" 
-          [disabled]="!canAddReview()"
-          [pTooltip]="canAddReview() ? 'Add your review for this idea' : 'You have already submitted a review'"
-          (click)="openAddReviewForm()">
-        </button>
-      </div>
-
       <!-- No Reviews State -->
       <div *ngIf="reviews.length === 0" class="no-reviews-card">
         <p-card>
@@ -173,11 +159,12 @@ import { AuthService } from 'src/app/auth/auth.service';
                 <td>
                   <div class="action-buttons">
                     <button 
-                      *ngIf="canEditReview(review)"
+                      *ngIf="review.creator_id === authService.getId()"
                       pButton 
                       icon="pi pi-pencil" 
                       class="p-button-rounded p-button-outlined p-button-sm"
-                      pTooltip="Edit Review"
+                      [pTooltip]="getEditReviewTooltip(review)"
+                      [disabled]="!canEditReview(review)"
                       (click)="editReview(review)">
                     </button>
                   </div>
@@ -207,25 +194,6 @@ import { AuthService } from 'src/app/auth/auth.service';
           (cancel)="closeEditDialog()">
         </app-review-form>
       </p-dialog>
-
-      <!-- Add Review Dialog -->
-      <p-dialog 
-        header="Add Review" 
-        [(visible)]="showAddDialog"
-        [modal]="true"
-        [style]="{width: '90vw', maxWidth: '800px'}"
-        [closable]="true"
-        [draggable]="false"
-        [resizable]="false"
-        styleClass="review-add-dialog">
-        <app-review-form
-          *ngIf="showAddDialog"
-          [ideaId]="ideaId"
-          [targetType]="targetType"
-          (reviewSubmitted)="onReviewSubmitted()"
-          (cancel)="closeAddDialog()">
-        </app-review-form>
-      </p-dialog>
     </div>
   `,
   styleUrls: ['./review-list.component.scss']
@@ -235,13 +203,13 @@ export class ReviewListComponent implements OnInit {
   @Input() ideaId: string = '';
   @Input() targetType: string = 'Session';
   @Input() currentUserName: string = ''; // For checking edit permissions
+  @Input() ideaStatus: string = ''; // For checking if idea is in correct status for editing
   @Output() reviewsUpdated = new EventEmitter<void>();
 
   showEditDialog = false;
-  showAddDialog = false;
   selectedReview: Review | null = null;
 
-  constructor(private authService: AuthService) {}
+  constructor(public authService: AuthService) {}
 
   ngOnInit(): void {
     // Initialize component
@@ -258,8 +226,10 @@ export class ReviewListComponent implements OnInit {
   }
 
   canEditReview(review: Review): boolean {
-    // Allow editing if current user is the reviewer
-    return review.creator_id === this.authService.getId();
+    // Allow editing if current user is the reviewer AND idea is in session review status
+    const isOwner = review.creator_id === this.authService.getId();
+    const isInSessionReview = this.ideaStatus === 'IN_SESSION_REVIEW';
+    return isOwner && isInSessionReview;
   }
 
   editReview(review: Review): void {
@@ -267,36 +237,29 @@ export class ReviewListComponent implements OnInit {
     this.showEditDialog = true;
   }
 
-  openAddReviewForm(): void {
-    this.showAddDialog = true;
-  }
-
   closeEditDialog(): void {
     this.showEditDialog = false;
     this.selectedReview = null;
   }
 
-  closeAddDialog(): void {
-    this.showAddDialog = false;
-  }
-
   onReviewSubmitted(): void {
     this.showEditDialog = false;
-    this.showAddDialog = false;
     this.selectedReview = null;
     this.reviewsUpdated.emit();
   }
 
-  /**
-   * Check if current user can add a review (hasn't already submitted one)
-   */
-  canAddReview(): boolean {
-    if (!this.authService.getId()) {
-      return false;
+  getEditReviewTooltip(review: Review): string {
+    const isOwner = review.creator_id === this.authService.getId();
+    const isInSessionReview = this.ideaStatus === 'IN_SESSION_REVIEW';
+    
+    if (!isOwner) {
+      return 'You can only edit your own reviews';
     }
     
-    const currentUserId = this.authService.getId();
-    const hasExistingReview = this.reviews.some(review => review.creator_id === currentUserId);
-    return !hasExistingReview;
+    if (!isInSessionReview) {
+      return 'Reviews can only be edited when idea is in session review status';
+    }
+    
+    return 'Edit Review';
   }
 } 

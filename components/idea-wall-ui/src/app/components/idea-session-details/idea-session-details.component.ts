@@ -229,19 +229,60 @@ export class IdeaSessionDetailsComponent implements OnInit {
   }
 
   canAddReview(): boolean {
-    // Check if user is authenticated and hasn't already submitted a review
     if (!this.authService.getId()) {
       return false;
     }
     
     const currentUserId = this.authService.getId();
     const hasExistingReview = this.reviews.some(review => review.creator_id === currentUserId);
-    return !hasExistingReview;
+    const isInSessionReview = this.idea?.status === IdeaStatus.IN_SESSION_REVIEW;
+    
+    return !hasExistingReview && isInSessionReview;
+  }
+
+  getAddReviewTooltip(): string {
+    if (!this.authService.getId()) {
+      return 'You must be logged in to add a review';
+    }
+    
+    if (this.idea?.status !== IdeaStatus.IN_SESSION_REVIEW) {
+      return 'Reviews can only be added when idea is in session review status';
+    }
+    
+    const currentUserId = this.authService.getId();
+    const hasExistingReview = this.reviews.some(review => review.creator_id === currentUserId);
+    
+    if (hasExistingReview) {
+      return 'You have already submitted a review';
+    }
+    
+    return 'Add your review for this idea';
+  }
+
+  showAddReviewDialog = false;
+
+  openAddReviewForm(): void {
+    this.showAddReviewDialog = true;
+  }
+
+  closeAddReviewDialog(): void {
+    this.showAddReviewDialog = false;
   }
 
   canMakeFinalDecision(): boolean {
-    // Can make final decision if there are at least 2 reviews
-    return this.reviews.length >= 2;
+    // Can make final decision if there are at least 2 reviews AND idea is in session review status
+    return this.reviews.length >= 2 && 
+           this.idea?.status === IdeaStatus.IN_SESSION_REVIEW;
+  }
+
+  getFinalDecisionTooltip(): string {
+    if (this.idea?.status !== IdeaStatus.IN_SESSION_REVIEW) {
+      return 'Idea must be in session review status to make final decision';
+    }
+    if (this.reviews.length < 2) {
+      return 'At least 2 reviews required for final decision';
+    }
+    return `Make final decision based on ${this.reviews.length} reviews`;
   }
 
   onFinalDecisionSubmitted(updatedIdea: Idea): void {

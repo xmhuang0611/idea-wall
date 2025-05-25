@@ -159,16 +159,26 @@
 
       <!-- Reviews Tab -->
       <p-tabPanel [header]="'Reviews (' + reviews.length + ')'">
-        <!-- Final Decision Button - Show when reviews count >= 2 -->
-        <div class="mb-3" *ngIf="canMakeFinalDecision()">
-          <div class="flex justify-content-end">
+        <!-- Action Buttons Row - Make Final Decision and Add Review -->
+        <div class="mb-3">
+          <div class="flex justify-content-end gap-2">
             <button 
               pButton 
               icon="pi pi-check-circle" 
               label="Make Final Decision" 
               class="p-button-rounded p-button-success" 
-              [pTooltip]="'Make final decision based on ' + reviews.length + ' reviews'"
+              [pTooltip]="getFinalDecisionTooltip()"
+              [disabled]="!canMakeFinalDecision()"
               (click)="showFinalDecisionDialog = true">
+            </button>
+            <button 
+              pButton 
+              icon="pi pi-plus" 
+              label="Add Review" 
+              class="p-button-rounded p-button-primary" 
+              [disabled]="!canAddReview()"
+              [pTooltip]="getAddReviewTooltip()"
+              (click)="openAddReviewForm()">
             </button>
           </div>
         </div>
@@ -178,6 +188,7 @@
           [ideaId]="idea.id"
           [targetType]="'Session'"
           [currentUserName]="getCurrentUserName()"
+          [ideaStatus]="idea.status || ''"
           (reviewsUpdated)="onReviewsUpdated()">
         </app-review-list>
       </p-tabPanel>
@@ -201,6 +212,25 @@
         (decisionSubmitted)="onFinalDecisionSubmitted($event)"
         (cancelled)="onFinalDecisionCancelled()">
       </app-final-decision>
+    </p-dialog>
+
+    <!-- Add Review Dialog -->
+    <p-dialog 
+      header="Add Review" 
+      [(visible)]="showAddReviewDialog"
+      [modal]="true"
+      [style]="{width: '90vw', maxWidth: '800px'}"
+      [closable]="true"
+      [draggable]="false"
+      [resizable]="false"
+      styleClass="review-add-dialog">
+      <app-review-form
+        *ngIf="showAddReviewDialog && idea"
+        [ideaId]="idea.id"
+        [targetType]="'Session'"
+        (reviewSubmitted)="onReviewsUpdated(); closeAddReviewDialog()"
+        (cancel)="closeAddReviewDialog()">
+      </app-review-form>
     </p-dialog>
   </div>
 

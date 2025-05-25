@@ -26,7 +26,7 @@
           <th>Title</th>
           <th>Stream</th>
           <th>Submitter</th>
-          <th>Submitted Date</th>
+          <th>Submitted At</th>
           <th>Reviews</th>
           <th>Avg Score</th>
           <th>Action</th>
@@ -44,7 +44,7 @@
           <td>{{idea.creator_name}}</td>
           <td>
             <span *ngIf="idea.session_review?.submitted_at">
-              {{idea.session_review?.submitted_at | date:'MMM d, y'}}
+              {{idea.session_review?.submitted_at | date:'MMM d, y, h:mm a'}}
             </span>
             <span *ngIf="!idea.session_review?.submitted_at" class="text-500">-</span>
           </td>
