@@ -185,7 +185,7 @@
             <button 
               pButton 
               type="submit" 
-              label="Submit for Review" 
+              [label]="isEditMode ? 'Resubmit for Review' : 'Submit for Review'" 
               class="p-button-rounded" 
               [disabled]="isSubmitting">
             </button>
