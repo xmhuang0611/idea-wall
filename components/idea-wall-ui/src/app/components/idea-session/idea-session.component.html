@@ -84,6 +84,15 @@
           <td>
             <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm"
                     (click)="viewIdea(idea.id)" pTooltip="View Details" tooltipPosition="top"></button>
+            <button 
+              *ngIf="canEditSessionReview(idea)"
+              pButton 
+              icon="pi pi-pencil" 
+              class="p-button-rounded p-button-text p-button-sm ml-2"
+              (click)="editSessionReview(idea)" 
+              pTooltip="Resubmit" 
+              tooltipPosition="top">
+            </button>
           </td>
         </tr>
       </ng-template>

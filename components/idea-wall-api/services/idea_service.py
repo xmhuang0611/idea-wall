@@ -362,6 +362,76 @@ class IdeaService:
         
         return updated_idea
 
+    async def resubmit_session_review(
+        self, 
+        idea_id: str, 
+        session_review_data: SessionReviewCreate, 
+        submitter_id: str, 
+        submitter_name: str
+    ) -> Optional[Idea]:
+        """
+        Resubmit session review when status is NEED_IMPROVEMENT
+        This will reset the review process and clear existing reviews
+        """
+        db = await self._db()
+        
+        # Get current idea
+        idea = await self.get_idea(idea_id)
+        if not idea:
+            return None
+        
+        # Prepare updated session review data
+        session_review = SessionReview(
+            submitter_id=submitter_id,
+            submitter_name=submitter_name,
+            submitter_job=session_review_data.submitter_job,
+            manager=session_review_data.manager,
+            stream=session_review_data.stream,
+            clients=session_review_data.clients,
+            problem_statements=session_review_data.problem_statements,
+            solutions=session_review_data.solutions,
+            values=session_review_data.values,
+            status=ReviewStatus.IN_REVIEW,  # Reset to IN_REVIEW
+            review_count=0,  # Reset review count
+            average_score=0.0,  # Reset average score
+            submitted_at=datetime.utcnow()  # Update submission time
+        )
+        
+        # Update idea with new session review data and reset status
+        update_dict = {
+            "session_review": session_review.model_dump(),
+            "status": IdeaStatus.IN_SESSION_REVIEW,  # Reset to IN_SESSION_REVIEW
+            "updater_id": submitter_id,
+            "updater_name": submitter_name,
+            "updated_at": datetime.utcnow()
+        }
+        
+        result = await db[self.collection_name].update_one(
+            {"_id": ObjectId(idea_id)},
+            {"$set": update_dict}
+        )
+        
+        if result.modified_count == 0:
+            return None
+        
+        # Clear existing reviews for this idea (session reviews)
+        await review_service.clear_reviews_by_idea_and_type(idea_id, TargetType.SESSION)
+        
+        # Get updated idea
+        updated_idea = await self.get_idea(idea_id)
+        
+        # Add log record
+        await record_operation_log(
+            object_type=ObjectType.IDEA,
+            object_id=idea_id,
+            object_data=updated_idea,
+            operation_type=OperationType.UPDATE,
+            user_id=submitter_id,
+            user_name=submitter_name,
+        )
+        
+        return updated_idea
+
     # Incubator Review Methods
     async def submit_incubator_review(
         self, 

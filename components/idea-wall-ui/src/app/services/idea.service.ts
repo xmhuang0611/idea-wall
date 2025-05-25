@@ -240,6 +240,24 @@ export class IdeaService {
   }
 
   /**
+   * Resubmit an idea for session review when status is NEED_IMPROVEMENT
+   * @param ideaId Idea ID
+   * @param sessionReviewData Updated session review data
+   * @returns Observable with operation result
+   */
+  resubmitSessionReview(ideaId: string, sessionReviewData: Partial<SessionReview>): Observable<ApiResponse<Idea>> {
+    return this.http.put<ApiResponse<Idea>>(`${this.apiUrl}/${ideaId}/session-review/resubmit`, sessionReviewData)
+      .pipe(
+        tap(response => {
+          if (response.success) {
+            this.toastService.showSuccess('Idea resubmitted for session review successfully');
+          }
+        }),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  /**
    * Get ideas submitted for session review
    * @param params Query parameters
    * @returns Observable with session ideas

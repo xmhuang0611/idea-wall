@@ -13,8 +13,9 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { IdeaService } from '../../services/idea.service';
-import { Idea, ReviewStatus } from '../../models/idea.model';
+import { Idea, ReviewStatus, IdeaStatus } from '../../models/idea.model';
 import { ApiResponse } from '../../shared/models/api-response.model';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-idea-session',
@@ -46,7 +47,8 @@ export class IdeaSessionComponent implements OnInit {
 
   constructor(
     private ideaService: IdeaService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -163,5 +165,25 @@ export class IdeaSessionComponent implements OnInit {
 
   viewIdea(id: string): void {
     this.router.navigate(['/idea-session', id]);
+  }
+
+  /**
+   * Check if current user can edit the idea session review
+   */
+  canEditSessionReview(idea: Idea): boolean {
+    // Can edit if:
+    // 1. User is the idea creator
+    // 2. Session review status is NEED_IMPROVEMENT
+    const isCreator = idea.creator_id === this.authService.getId();
+    const isNeedImprovement = idea.session_review?.status === ReviewStatus.NEED_IMPROVEMENT;
+    
+    return isCreator && isNeedImprovement;
+  }
+
+  /**
+   * Navigate to session review form for editing
+   */
+  editSessionReview(idea: Idea): void {
+    this.router.navigate(['/session-review', idea.id]);
   }
 } 

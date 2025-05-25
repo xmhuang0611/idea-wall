@@ -511,6 +511,77 @@ async def make_session_final_decision(
         data=updated_idea
     )
 
+@router.put("/{idea_id}/session-review/resubmit", response_model=StandardResponse[Idea])
+async def resubmit_session_review(
+    idea_id: str,
+    session_review_data: SessionReviewCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Resubmit session review when the current status is NEED_IMPROVEMENT
+    """
+    # Check if idea exists
+    existing_idea = await idea_service.get_idea(idea_id)
+    if not existing_idea:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=404,
+                message="Idea not found"
+            )
+        )
+    
+    # Check if user is the creator
+    if existing_idea.creator_id != current_user.user_id:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=403,
+                message="Only the creator can resubmit a session review"
+            )
+        )
+    
+    # Check if session review exists and status is NEED_IMPROVEMENT
+    if not existing_idea.session_review:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=400,
+                message="No existing session review found"
+            )
+        )
+    
+    if existing_idea.session_review.status != ReviewStatus.NEED_IMPROVEMENT:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=400,
+                message="Session review can only be resubmitted when status is NEED_IMPROVEMENT"
+            )
+        )
+    
+    # Resubmit session review (this will reset the review process)
+    updated_idea = await idea_service.resubmit_session_review(
+        idea_id,
+        session_review_data,
+        current_user.user_id,
+        current_user.user_name
+    )
+    
+    if not updated_idea:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=500,
+                message="Failed to resubmit session review"
+            )
+        )
+    
+    return StandardResponse(
+        success=True,
+        data=updated_idea
+    )
+
 # Incubator Review Routes
 @router.put("/{idea_id}/incubator-review", response_model=StandardResponse[Idea])
 async def submit_incubator_review(
