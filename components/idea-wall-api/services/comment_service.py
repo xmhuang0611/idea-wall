@@ -89,4 +89,36 @@ class CommentService:
         )
         return result.modified_count > 0
 
+    async def delete_comment(self, comment_id: str, user_id: str, user_name: str) -> bool:
+        """Delete a comment by ID"""
+        db = await get_database()
+        
+        # Get comment first for logging
+        comment = await self.get_comment(comment_id)
+        if not comment:
+            return False
+            
+        # Delete comment
+        result = await db[self.collection_name].delete_one({"_id": ObjectId(comment_id)})
+        if result.deleted_count == 0:
+            return False
+            
+        # Update idea comment count
+        await db["ideas"].update_one(
+            {"_id": ObjectId(comment.idea_id)},
+            {"$inc": {"total_comments": -1}}
+        )
+        
+        # Add log record for delete operation
+        await record_operation_log(
+            object_type=ObjectType.COMMENT,
+            object_id=comment_id,
+            object_data=comment,
+            operation_type=OperationType.DELETE,
+            user_id=user_id,
+            user_name=user_name
+        )
+        
+        return True
+
 comment_service = CommentService() 

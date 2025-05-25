@@ -24,6 +24,8 @@ import { ToastService } from '../../shared/services/toast.service';
 import { AuthService } from '../../auth/auth.service';
 import { UserService } from '../../services/user.service';
 import { FeelingUtilService } from '../../shared/services/feeling-util.service';
+import { MessageService } from 'primeng/api';
+import { CommentService } from '../../services/comment.service';
 
 @Component({
   selector: 'app-idea-details-drawer',
@@ -79,6 +81,8 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
     private authService: AuthService,
     private userService: UserService,
     public feelingUtil: FeelingUtilService,
+    private messageService: MessageService,
+    private commentService: CommentService
   ) {
     this.commentForm = this.fb.group({
       comment: ['', Validators.required]
@@ -345,7 +349,7 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
       return false;
     }
     const currentUserId = this.authService.getId();
-    return this.isAdmin || this.idea === currentUserId;
+    return this.isAdmin || this.idea.creator_id === currentUserId;
   }
 
   confirmDelete(): void {
@@ -376,6 +380,53 @@ export class IdeaDetailsComponent implements OnInit, OnChanges, OnDestroy {
       error: (error) => {
         console.error('Failed to delete idea', error);
         this.toastService.showError('Failed to delete idea');
+      }
+    });
+  }
+
+  canDeleteComment(comment: Comment): boolean {
+    if (!this.authService.isLoggedIn()) {
+      return false;
+    }
+    const currentUserId = this.authService.getId();
+    return comment.creator_id === currentUserId || this.isAdmin;
+  }
+
+  async deleteComment(comment: Comment): Promise<void> {
+    if (!this.canDeleteComment(comment)) {
+      return;
+    }
+
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to delete this comment? This action cannot be undone.',
+      header: 'Delete Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger p-button-rounded',
+      rejectButtonStyleClass: 'p-button-secondary p-button-rounded',
+      accept: async () => {
+        this.isSubmitting = true;
+        const response = await this.commentService.deleteComment(comment.id).subscribe({
+          next: (response) => {
+            this.isSubmitting = false;
+            if (response.success) {
+              // Remove comment from list
+              this.comments = this.comments.filter(c => c.id !== comment.id);
+              // Update total comments count
+              if (this.idea) {
+                // this.idea.total_comments--;
+                this.commentCountChange.emit({
+                  ideaId: this.ideaId,
+                  count: --this.idea.total_comments
+                });
+              }
+            }
+          },
+          error: (error) => {
+            this.isSubmitting = false;
+            console.error('Failed to delete comment', error);
+            this.toastService.showError('Failed to delete comment');
+          }
+        });
       }
     });
   }

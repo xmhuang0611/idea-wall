@@ -105,12 +105,19 @@ async def update_tag(
         )
 
 @router.delete("/{tag_id}", response_model=StandardResponse[bool])
-async def delete_tag(tag_id: int):
+async def delete_tag(
+    tag_id: int,
+    current_user: User = Depends(get_current_user)
+):
     """
     Delete a tag
     """
     try:
-        deleted = await tag_service.delete_tag(tag_id)
+        deleted = await tag_service.delete_tag(
+            tag_id,
+            user_id=current_user.user_id,
+            user_name=current_user.user_name
+        )
         if not deleted:
             return StandardResponse(
                 success=False,

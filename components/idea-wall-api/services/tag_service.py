@@ -2,6 +2,8 @@ from typing import List, Optional, Tuple
 from datetime import datetime
 from core.database import get_database
 from models.tag import Tag, TagCreate, TagUpdate
+from models.log import ObjectType, OperationType
+from utils.logging_utils import record_operation_log
 
 class TagService:
     def __init__(self):
@@ -57,7 +59,19 @@ class TagService:
         # Insert the new tag
         result = await db[self.collection_name].insert_one(tag_doc)
         created_tag = await db[self.collection_name].find_one({"_id": result.inserted_id})
-        return Tag(**created_tag)
+        tag_obj = Tag(**created_tag)
+
+        # Add log record
+        await record_operation_log(
+            object_type=ObjectType.TAG,
+            object_id=str(next_id),
+            object_data=tag_obj,
+            operation_type=OperationType.CREATE,
+            user_id=creator_id,
+            user_name=creator_name
+        )
+
+        return tag_obj
 
     async def update_tag(self, tag_id: int, tag: TagUpdate, updater_id: str, updater_name: str) -> Optional[Tag]:
         """
@@ -91,13 +105,29 @@ class TagService:
         
         # Return updated tag
         updated_tag = await db[self.collection_name].find_one({"tag_id": tag_id})
-        return Tag(**updated_tag) if updated_tag else None
+        if updated_tag:
+            tag_obj = Tag(**updated_tag)
+            
+            # Add log record
+            await record_operation_log(
+                object_type=ObjectType.TAG,
+                object_id=str(tag_id),
+                object_data=tag_obj,
+                operation_type=OperationType.UPDATE,
+                user_id=updater_id,
+                user_name=updater_name
+            )
+            
+            return tag_obj
+        return None
 
-    async def delete_tag(self, tag_id: int) -> bool:
+    async def delete_tag(self, tag_id: int, user_id: str, user_name: str) -> bool:
         """
         Delete a tag
         Args:
             tag_id: ID of the tag to delete
+            user_id: ID of the user deleting the tag
+            user_name: Name of the user deleting the tag
         Returns:
             True if tag was deleted, False if tag not found
         """
@@ -112,8 +142,22 @@ class TagService:
         if child_count > 0:
             raise ValueError("Cannot delete tag with existing children")
             
+        # Get tag data for logging before deletion
+        tag_obj = Tag(**existing_tag)
+            
         # Delete the tag
         result = await db[self.collection_name].delete_one({"tag_id": tag_id})
-        return result.deleted_count > 0
+        if result.deleted_count > 0:
+            # Add log record
+            await record_operation_log(
+                object_type=ObjectType.TAG,
+                object_id=str(tag_id),
+                object_data=tag_obj,
+                operation_type=OperationType.DELETE,
+                user_id=user_id,
+                user_name=user_name
+            )
+            return True
+        return False
 
 tag_service = TagService() 
