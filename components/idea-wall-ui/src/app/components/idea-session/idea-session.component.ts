@@ -146,6 +146,21 @@ export class IdeaSessionComponent implements OnInit {
     return this.getReviewStatusLabel(idea.session_review.status);
   }
 
+  /**
+   * Get score severity based on average score value
+   */
+  getScoreSeverity(score: number): 'success' | 'info' | 'warning' | 'danger' | 'secondary' {
+    if (score >= 4.0) {
+      return 'success';
+    } else if (score >= 3.0) {
+      return 'info';
+    } else if (score >= 2.0) {
+      return 'warning';
+    } else {
+      return 'danger';
+    }
+  }
+
   viewIdea(id: string): void {
     this.router.navigate(['/idea-session', id]);
   }
