@@ -163,6 +163,7 @@
         <div class="mb-3">
           <div class="flex justify-content-end gap-2">
             <button 
+              *ngIf="hasSessionPanelReviewerRole()"
               pButton 
               icon="pi pi-check-circle" 
               label="Make Final Decision" 
@@ -172,6 +173,7 @@
               (click)="showFinalDecisionDialog = true">
             </button>
             <button 
+              *ngIf="hasSessionPanelReviewerRole()"
               pButton 
               icon="pi pi-plus" 
               label="Add Review" 

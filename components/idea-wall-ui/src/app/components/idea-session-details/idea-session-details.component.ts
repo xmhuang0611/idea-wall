@@ -47,6 +47,7 @@ export class IdeaSessionDetailsComponent implements OnInit {
   isLoading = false;
   reviewCriteria = REVIEW_CRITERIA;
   showFinalDecisionDialog = false;
+  userRoles: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -59,6 +60,7 @@ export class IdeaSessionDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadIdeaDetails();
+    this.loadUserRoles();
   }
 
   private loadIdeaDetails(): void {
@@ -99,6 +101,25 @@ export class IdeaSessionDetailsComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  private loadUserRoles(): void {
+    this.authService.getUserRoles().subscribe({
+      next: (roles: string[]) => {
+        this.userRoles = roles;
+      },
+      error: (error: any) => {
+        console.error('Error loading user roles:', error);
+        this.userRoles = [];
+      }
+    });
+  }
+
+  /**
+   * Check if current user has IDEA_SESSION_PANEL_REVIEWER role
+   */
+  hasSessionPanelReviewerRole(): boolean {
+    return this.userRoles.includes('IDEA_SESSION_PANEL_REVIEWER');
   }
 
   getIdeaStatusLabel(status?: IdeaStatus): string {
