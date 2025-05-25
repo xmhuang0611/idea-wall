@@ -127,5 +127,31 @@ class ReviewService:
         except Exception:
             return None
 
+    async def clear_reviews_by_idea_and_type(self, idea_id: str, target_type: str) -> bool:
+        """
+        Clear all reviews for a specific idea and target type.
+        This is used when resubmitting a review to reset the review process.
+        
+        Args:
+            idea_id: The ID of the idea
+            target_type: The type of target ("Session" or "Incubator")
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        db = await get_database()
+        
+        try:
+            # Delete all reviews for this idea and target type
+            result = await db[self.collection_name].delete_many({
+                "idea_id": idea_id,
+                "target_type": target_type
+            })
+            
+            return True
+        except Exception as e:
+            print(f"Error clearing reviews: {e}")
+            return False
+
 # Create an instance of the service
 review_service = ReviewService() 

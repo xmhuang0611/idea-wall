@@ -1,7 +1,8 @@
 <div class="container">
   <!-- Page Header -->
   <div class="page-header">
-    <h1 class="page-title">Submit to Idea Session Review</h1>
+    <h1 class="page-title" *ngIf="!isEditMode">Submit to Idea Session</h1>
+    <h1 class="page-title" *ngIf="isEditMode">Resubmit to Idea Session</h1>
     <div *ngIf="ideaTitle" class="idea-title-card">
       <div class="flex align-items-center gap-2">
         <i class="pi pi-lightbulb text-primary"></i>
@@ -15,7 +16,7 @@
   <p-card styleClass="form-card">
     <ng-template pTemplate="content">
       <div class="form-content">
-        <form [formGroup]="sessionReviewForm" (ngSubmit)="onSubmit()" class="p-fluid">
+        <form *ngIf="sessionReviewForm" [formGroup]="sessionReviewForm" (ngSubmit)="onSubmit()" class="p-fluid">
           <!-- Loading Overlay -->
           <div *ngIf="isSubmitting" class="submit-overlay">
             <p-progressSpinner></p-progressSpinner>
@@ -184,7 +185,7 @@
             <button 
               pButton 
               type="submit" 
-              label="Submit for Review" 
+              [label]="isEditMode ? 'Resubmit for Review' : 'Submit for Review'" 
               class="p-button-rounded" 
               [disabled]="isSubmitting">
             </button>

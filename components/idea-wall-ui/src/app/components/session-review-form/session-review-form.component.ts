@@ -30,10 +30,15 @@ import { AuthService } from '../../auth/auth.service';
   styleUrls: ['./session-review-form.component.scss']
 })
 export class SessionReviewFormComponent implements OnInit {
-  ideaId: string | null = null;
+  @Input() ideaId: string | null = null;
+  @Input() existingSessionReview: SessionReview | null = null;
+  @Output() sessionReviewSubmitted = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
+  
   sessionReviewForm!: FormGroup;
   isSubmitting = false;
   ideaTitle: string = '';
+  isEditMode = false;
 
   constructor(
     private fb: FormBuilder,
@@ -41,11 +46,22 @@ export class SessionReviewFormComponent implements OnInit {
     private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router
-  ) {}
+  ) {
+    // Initialize form in constructor to ensure it's available before template renders
+    this.initForm();
+  }
 
   ngOnInit(): void {
-    this.initForm();
     this.getIdeaDetails();
+  }
+
+  private getIdeaDetails(): void {
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.ideaId = params['id'];
+        this.loadIdeaWithSessionReview();
+      }
+    });
   }
 
   private initForm(): void {
@@ -60,25 +76,42 @@ export class SessionReviewFormComponent implements OnInit {
     });
   }
 
-  private getIdeaDetails(): void {
-    this.route.params.subscribe(params => {
-      if (params['id']) {
-        this.ideaId = params['id'];
-        
-        if (this.ideaId) {
-          this.ideaService.getIdeaById(this.ideaId).subscribe({
-            next: (response) => {
-              if (response.success && response.data) {
-                this.ideaTitle = response.data.title;
-              }
-            },
-            error: (error) => {
-              console.error('Error fetching idea details:', error);
+  private populateFormWithExistingData(): void {
+    if (this.existingSessionReview) {
+      this.sessionReviewForm.patchValue({
+        submitter_job: this.existingSessionReview.submitter_job || '',
+        manager: this.existingSessionReview.manager || '',
+        stream: this.existingSessionReview.stream || '',
+        clients: this.existingSessionReview.clients || '',
+        problem_statements: this.existingSessionReview.problem_statements || '',
+        solutions: this.existingSessionReview.solutions || '',
+        values: this.existingSessionReview.values || ''
+      });
+    }
+  }
+
+  private loadIdeaWithSessionReview(): void {
+    if (this.ideaId) {
+      this.ideaService.getIdeaById(this.ideaId).subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.ideaTitle = response.data.title;
+            
+            // Check if there's existing session review data
+            if (response.data.session_review) {
+              this.existingSessionReview = response.data.session_review;
+              this.isEditMode = true;
+              this.populateFormWithExistingData();
+            } else {
+              this.isEditMode = false;
             }
-          });
+          }
+        },
+        error: (error) => {
+          console.error('Error fetching idea details:', error);
         }
-      }
-    });
+      });
+    }
   }
 
   onSubmit(): void {
@@ -101,22 +134,30 @@ export class SessionReviewFormComponent implements OnInit {
     
     const sessionReviewData = this.sessionReviewForm.value;
 
-    this.ideaService.submitSessionReview(this.ideaId, sessionReviewData)
-      .subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.router.navigate(['/idea-session']);
-          }
-          this.isSubmitting = false;
-        },
-        error: (error: any) => {
-          console.error('Error submitting session review:', error);
-          this.isSubmitting = false;
+    // Use different API endpoint based on mode
+    const submitObservable = this.isEditMode 
+      ? this.ideaService.resubmitSessionReview(this.ideaId, sessionReviewData)
+      : this.ideaService.submitSessionReview(this.ideaId, sessionReviewData);
+
+    submitObservable.subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.router.navigate(['/idea-session']);
         }
-      });
+        this.isSubmitting = false;
+      },
+      error: (error: any) => {
+        console.error('Error submitting session review:', error);
+        this.isSubmitting = false;
+      }
+    });
   }
 
   onCancel(): void {
-    this.router.navigate(['/']);
+    if (this.isEditMode) {
+      this.router.navigate(['/idea-session']);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 } 

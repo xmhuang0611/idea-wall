@@ -5,9 +5,8 @@
       <div class="flex align-items-center">
         <a routerLink="/" class="logo-link">Idea Wall</a>
         <div class="nav-links">
-          <a routerLink="/">Home</a>
-          <a routerLink="/ideas">Ideas</a>
-          <a routerLink="/idea-session">Idea Session</a>
+          <a routerLink="/" [class.active]="isRouteActive('/')">Ideas</a>
+          <a routerLink="/idea-session" [class.active]="isRouteActive('/idea-session')">Idea Session</a>
         </div>
       </div>
 

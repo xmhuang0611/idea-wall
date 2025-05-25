@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-header',
@@ -16,6 +17,7 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
 export class HeaderComponent implements OnInit {
   isAdmin = false;
   username = '';
+  currentRoute = '';
 
   get isLoggedIn(): boolean {
     return this.authService.isLoggedIn();
@@ -30,6 +32,24 @@ export class HeaderComponent implements OnInit {
       });
       this.username = this.authService.getUserName();
     }
+
+    // Track current route
+    this.currentRoute = this.router.url;
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.currentRoute = (event as NavigationEnd).url;
+      });
+  }
+
+  /**
+   * Check if the given route is currently active
+   */
+  isRouteActive(route: string): boolean {
+    if (route === '/') {
+      return this.currentRoute === '/' || this.currentRoute.startsWith('/idea/');
+    }
+    return this.currentRoute.startsWith(route);
   }
 
   login() {

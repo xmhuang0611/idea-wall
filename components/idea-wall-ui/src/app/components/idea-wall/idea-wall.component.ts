@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
@@ -31,9 +31,6 @@ import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 import { ApiResponse } from '../../shared/models/api-response.model';
 import { SessionReviewFormComponent } from '../session-review-form/session-review-form.component';
 import { IdeaStatus } from '../../models/idea.model';
-import { MenuModule } from 'primeng/menu';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
-import { OverlayPanel } from 'primeng/overlaypanel';
 
 interface Topic {
   name: string;
@@ -63,17 +60,13 @@ interface Topic {
     IdeaDetailsComponent,
     ConfirmDialogModule,
     IdeaHistoryComponent,
-    SessionReviewFormComponent,
-    MenuModule,
-    OverlayPanelModule
+    SessionReviewFormComponent
   ],
   providers: [ConfirmationService],
   templateUrl: './idea-wall.component.html',
   styleUrls: ['./idea-wall.component.scss']
 })
 export class IdeaWallComponent implements OnInit {
-  @ViewChild('actionsMenu') actionsMenuRef!: OverlayPanel;
-  
   ideas: Idea[] = [];
   currentUserId: string = '';
   isAdmin: boolean = false;
@@ -116,8 +109,6 @@ export class IdeaWallComponent implements OnInit {
   // Session Review
   sessionReviewDialogVisible = false;
   selectedSessionIdeaId: string | null = null;
-
-  selectedIdeaForActions: Idea | null = null;
 
   constructor(
     private ideaService: IdeaService,
@@ -548,6 +539,21 @@ export class IdeaWallComponent implements OnInit {
   }
 
   /**
+   * Get tooltip text for submit button
+   */
+  getSubmitTooltip(idea: Idea): string {
+    if (!this.authService.isLoggedIn()) {
+      return 'Please login to submit ideas';
+    }
+    
+    if (idea.creator_id !== this.currentUserId) {
+      return 'Only the creator can submit this idea';
+    }
+    
+    return 'Submit to Idea Session';
+  }
+
+  /**
    * Get idea status label for display
    */
   getIdeaStatusLabel(status: IdeaStatus): string {
@@ -600,23 +606,5 @@ export class IdeaWallComponent implements OnInit {
    */
   navigateToSessionReview(ideaId: string): void {
     this.router.navigate(['/session-review', ideaId]);
-  }
-
-  onIdeaActions(event: any, idea: Idea) {
-    this.selectedIdeaForActions = idea;
-    event.stopPropagation();
-  }
-
-  onIdeaActionsClose() {
-    this.selectedIdeaForActions = null;
-  }
-
-  hasActions(idea: Idea): boolean {
-    return this.canSubmitToSession(idea) || this.canEditIdea(idea);
-  }
-
-  showActionsMenu(event: any, idea: Idea) {
-    this.selectedIdeaForActions = idea;
-    this.actionsMenuRef.show(event);
   }
 } 

@@ -32,7 +32,7 @@ import { Idea } from '../../models/idea.model';
       <form [formGroup]="decisionForm" (ngSubmit)="onSubmit()">
         <!-- Decision Options -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-3 text-700">Decision *</label>
+          <label class="block text-sm font-medium mb-3 text-700">Decision <span class="text-red-500">*</span></label>
           <div class="flex flex-column gap-3">
             <div class="flex align-items-center">
               <p-radioButton 
@@ -89,7 +89,7 @@ import { Idea } from '../../models/idea.model';
 
         <!-- Comments -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2 text-700">Comments *</label>
+          <label class="block text-sm font-medium mb-2 text-700">Comments</label>
           <textarea 
             pInputTextarea 
             formControlName="comments"
@@ -97,12 +97,6 @@ import { Idea } from '../../models/idea.model';
             placeholder="Provide detailed reasoning for your decision..."
             class="w-full">
           </textarea>
-          
-          <div 
-            *ngIf="decisionForm.get('comments')?.invalid && decisionForm.get('comments')?.touched"
-            class="text-red-500 text-sm mt-1">
-            Comments are required.
-          </div>
         </div>
 
         <!-- Review Summary -->
@@ -163,7 +157,7 @@ export class FinalDecisionComponent {
   ) {
     this.decisionForm = this.fb.group({
       decision: ['', Validators.required],
-      comments: ['', [Validators.required, Validators.minLength(10)]]
+      comments: ['']
     });
   }
 

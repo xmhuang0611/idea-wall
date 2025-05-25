@@ -10,6 +10,8 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { RatingModule } from 'primeng/rating';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { MenuItem } from 'primeng/api';
 import { Idea, IdeaStatus, ReviewStatus } from '../../models/idea.model';
 import { Review, REVIEW_CRITERIA } from '../../models/review.model';
 import { IdeaService } from '../../services/idea.service';
@@ -34,6 +36,7 @@ import { AuthService } from '../../auth/auth.service';
     RatingModule,
     TooltipModule,
     DialogModule,
+    BreadcrumbModule,
     ReviewFormComponent,
     ReviewListComponent,
     FinalDecisionComponent
@@ -47,6 +50,11 @@ export class IdeaSessionDetailsComponent implements OnInit {
   isLoading = false;
   reviewCriteria = REVIEW_CRITERIA;
   showFinalDecisionDialog = false;
+  userRoles: string[] = [];
+
+  // Breadcrumb items
+  breadcrumbItems: MenuItem[] = [];
+  homeItem: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
 
   constructor(
     private route: ActivatedRoute,
@@ -59,6 +67,7 @@ export class IdeaSessionDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadIdeaDetails();
+    this.loadUserRoles();
   }
 
   private loadIdeaDetails(): void {
@@ -72,6 +81,7 @@ export class IdeaSessionDetailsComponent implements OnInit {
           next: (response: any) => {
             if (response.success && response.data) {
               this.idea = response.data;
+              this.updateBreadcrumb();
               this.loadReviews(ideaId);
             } else {
               this.isLoading = false;
@@ -99,6 +109,25 @@ export class IdeaSessionDetailsComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  private loadUserRoles(): void {
+    this.authService.getUserRoles().subscribe({
+      next: (roles: string[]) => {
+        this.userRoles = roles;
+      },
+      error: (error: any) => {
+        console.error('Error loading user roles:', error);
+        this.userRoles = [];
+      }
+    });
+  }
+
+  /**
+   * Check if current user has IDEA_SESSION_PANEL_REVIEWER role
+   */
+  hasSessionPanelReviewerRole(): boolean {
+    return this.userRoles.includes('IDEA_SESSION_PANEL_REVIEWER');
   }
 
   getIdeaStatusLabel(status?: IdeaStatus): string {
@@ -229,19 +258,60 @@ export class IdeaSessionDetailsComponent implements OnInit {
   }
 
   canAddReview(): boolean {
-    // Check if user is authenticated and hasn't already submitted a review
     if (!this.authService.getId()) {
       return false;
     }
     
     const currentUserId = this.authService.getId();
     const hasExistingReview = this.reviews.some(review => review.creator_id === currentUserId);
-    return !hasExistingReview;
+    const isInSessionReview = this.idea?.status === IdeaStatus.IN_SESSION_REVIEW;
+    
+    return !hasExistingReview && isInSessionReview;
+  }
+
+  getAddReviewTooltip(): string {
+    if (!this.authService.getId()) {
+      return 'You must be logged in to add a review';
+    }
+    
+    if (this.idea?.status !== IdeaStatus.IN_SESSION_REVIEW) {
+      return 'Reviews can only be added when idea is in session review status';
+    }
+    
+    const currentUserId = this.authService.getId();
+    const hasExistingReview = this.reviews.some(review => review.creator_id === currentUserId);
+    
+    if (hasExistingReview) {
+      return 'You have already submitted a review';
+    }
+    
+    return 'Add your review for this idea';
+  }
+
+  showAddReviewDialog = false;
+
+  openAddReviewForm(): void {
+    this.showAddReviewDialog = true;
+  }
+
+  closeAddReviewDialog(): void {
+    this.showAddReviewDialog = false;
   }
 
   canMakeFinalDecision(): boolean {
-    // Can make final decision if there are at least 2 reviews
-    return this.reviews.length >= 2;
+    // Can make final decision if there are at least 2 reviews AND idea is in session review status
+    return this.reviews.length >= 2 && 
+           this.idea?.status === IdeaStatus.IN_SESSION_REVIEW;
+  }
+
+  getFinalDecisionTooltip(): string {
+    if (this.idea?.status !== IdeaStatus.IN_SESSION_REVIEW) {
+      return 'Idea must be in session review status to make final decision';
+    }
+    if (this.reviews.length < 2) {
+      return 'At least 2 reviews required for final decision';
+    }
+    return `Make final decision based on ${this.reviews.length} reviews`;
   }
 
   onFinalDecisionSubmitted(updatedIdea: Idea): void {
@@ -253,5 +323,12 @@ export class IdeaSessionDetailsComponent implements OnInit {
   onFinalDecisionCancelled(): void {
     // Close the dialog
     this.showFinalDecisionDialog = false;
+  }
+
+  private updateBreadcrumb(): void {
+    this.breadcrumbItems = [
+      { label: 'Idea Session', routerLink: '/idea-session' },
+      { label: this.idea?.title || 'Idea Details' }
+    ];
   }
 } 
