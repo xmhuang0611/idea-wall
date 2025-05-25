@@ -145,21 +145,12 @@
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--surface-200);
     
-    .idea-content {
-      .idea-title {
-        margin: 0 0 0.25rem 0;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-color);
-        line-height: 1.3;
-      }
-      
-      .idea-meta {
-        .meta-info {
-          font-size: 0.85rem;
-          color: var(--text-color-secondary);
-        }
-      }
+    .idea-title {
+      margin: 0 0 0.75rem 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-color);
+      line-height: 1.3;
     }
   }
 }
@@ -167,6 +158,13 @@
 // Field Groups with elegant styling
 .field-group {
   margin-bottom: 0.75rem;
+  min-height: 4rem;
+  display: flex;
+  flex-direction: column;
+  
+  &.multiline-field {
+    min-height: auto;
+  }
   
   .field-label {
     font-size: 0.9rem;
@@ -174,6 +172,8 @@
     color: var(--text-color);
     margin-bottom: 0.5rem;
     display: block;
+    flex-shrink: 0;
+    height: 1.5rem;
   }
   
   .field-value {
@@ -183,6 +183,10 @@
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--surface-200);
     transition: border-color 0.2s ease;
+    display: block;
+    width: 100%;
+    flex-grow: 1;
+    min-height: 1.5rem;
     
     &.multiline {
       white-space: pre-line;
@@ -191,18 +195,21 @@
     
     &.score {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 0.25rem;
+      min-height: 1.5rem;
       
       .score-number {
         font-size: 1.5rem;
         font-weight: 700;
         color: var(--primary-color);
+        line-height: 1;
       }
       
       .score-max {
         color: var(--text-color-secondary);
         font-size: 1rem;
+        line-height: 1;
       }
     }
     
@@ -448,18 +455,8 @@
   }
   
   .idea-header-section {
-    flex-direction: column;
-    text-align: center;
-    
-    .idea-content {
-      .idea-title {
-        font-size: 1.5rem;
-        text-align: center;
-      }
-      
-      .idea-meta {
-        text-align: center;
-      }
+    .idea-title {
+      font-size: 1.25rem;
     }
   }
   

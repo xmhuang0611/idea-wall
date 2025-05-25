@@ -45,20 +45,29 @@
               <!-- Title and Creator Info -->
               <div class="col-12">
                 <div class="idea-header-section">
-                  <div class="idea-content">
-                    <h2 class="idea-title">{{idea.title}}</h2>
-                    <div class="idea-meta">
-                      <span class="meta-info">Created by {{idea.creator_name}} on {{formatDate(idea.created_at)}}</span>
-                    </div>
-                  </div>
+                  <h2 class="idea-title">{{idea.title}}</h2>
+                </div>
+              </div>
+              
+              <!-- Creator Information -->
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Created By</div>
+                  <div class="field-value">{{idea.creator_name}}</div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Created At</div>
+                  <div class="field-value">{{formatDate(idea.created_at)}}</div>
                 </div>
               </div>
 
               <!-- Description -->
               <div class="col-12">
-                <div class="field-group">
+                <div class="field-group multiline-field">
                   <div class="field-label">Description</div>
-                  <div class="field-value">{{idea.description}}</div>
+                  <div class="field-value multiline">{{idea.description}}</div>
                 </div>
               </div>
             </div>
@@ -80,6 +89,18 @@
           </div>
           <div class="card-content">
             <div class="grid">
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Submitter</div>
+                  <div class="field-value">{{idea.session_review.submitter_name || 'N/A'}}</div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Submitted At</div>
+                  <div class="field-value">{{idea.session_review.submitted_at ? formatDate(idea.session_review.submitted_at) : 'N/A'}}</div>
+                </div>
+              </div>
               <div class="col-12 md:col-6">
                 <div class="field-group">
                   <div class="field-label">Submitter Job</div>
@@ -105,36 +126,30 @@
                 </div>
               </div>
               <div class="col-12">
-                <div class="field-group">
+                <div class="field-group multiline-field">
                   <div class="field-label">Problem Statements</div>
                   <div class="field-value multiline">{{idea.session_review.problem_statements || 'N/A'}}</div>
                 </div>
               </div>
               <div class="col-12">
-                <div class="field-group">
+                <div class="field-group multiline-field">
                   <div class="field-label">Solutions</div>
                   <div class="field-value multiline">{{idea.session_review.solutions || 'N/A'}}</div>
                 </div>
               </div>
               <div class="col-12">
-                <div class="field-group">
+                <div class="field-group multiline-field">
                   <div class="field-label">Values</div>
                   <div class="field-value multiline">{{idea.session_review.values || 'N/A'}}</div>
                 </div>
               </div>
-              <div class="col-12 md:col-6">
+              <div class="col-12 md:col-12">
                 <div class="field-group">
                   <div class="field-label">Average Score</div>
                   <div class="field-value score">
                     <span class="score-number">{{idea.session_review.average_score | number:'1.1-1'}}</span>
                     <span class="score-max">/5.0</span>
                   </div>
-                </div>
-              </div>
-              <div class="col-12 md:col-6" *ngIf="idea.session_review.submitted_at">
-                <div class="field-group">
-                  <div class="field-label">Submitted At</div>
-                  <div class="field-value">{{formatDate(idea.session_review.submitted_at)}}</div>
                 </div>
               </div>
             </div>
