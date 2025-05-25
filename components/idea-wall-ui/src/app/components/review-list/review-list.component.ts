@@ -78,8 +78,7 @@ import { AuthService } from 'src/app/auth/auth.service';
                 <!-- Reviewer Column -->
                 <td>
                   <div class="reviewer-info">
-                    <i class="pi pi-user text-primary mr-2"></i>
-                    <span class="reviewer-name">{{ review.reviewer_name }}</span>
+                    <span class="reviewer-name">{{ review.creator_name }}</span>
                   </div>
                 </td>
 
