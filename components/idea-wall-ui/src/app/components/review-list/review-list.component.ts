@@ -46,14 +46,14 @@ import { AuthService } from 'src/app/auth/auth.service';
             <!-- Table Header -->
             <ng-template pTemplate="header">
               <tr>
-                <th style="width: 15%">Reviewer</th>
-                <th style="width: 10%">Avg Score</th>
-                <th style="width: 15%">Innovation</th>
-                <th style="width: 15%">Value Creation</th>
-                <th style="width: 15%">Feasibility</th>
-                <th style="width: 15%">Impact</th>
-                <th style="width: 15%">ROI</th>
-                <th style="width: 10%">Date</th>
+                <th style="width: 12%">Reviewer</th>
+                <th style="width: 8%">Avg Score</th>
+                <th style="width: 13%">Innovation</th>
+                <th style="width: 13%">Value Creation</th>
+                <th style="width: 13%">Feasibility</th>
+                <th style="width: 13%">Impact</th>
+                <th style="width: 13%">ROI</th>
+                <th style="width: 15%">Date</th>
                 <th style="width: 8%">Actions</th>
               </tr>
             </ng-template>
