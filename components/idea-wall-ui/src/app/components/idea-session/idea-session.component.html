@@ -29,6 +29,7 @@
           <th>Submitted At</th>
           <th>Reviews</th>
           <th>Avg Score</th>
+          <th>Status</th>
           <th>Action</th>
         </tr>
       </ng-template>
@@ -69,6 +70,18 @@
             </ng-template>
           </td>
           <td>
+            <div *ngIf="idea.session_review?.status; else noStatus">
+              <p-tag 
+                [value]="getReviewStatusLabel(idea.session_review.status)" 
+                [severity]="getReviewStatusSeverity(idea.session_review.status)"
+                [rounded]="true">
+              </p-tag>
+            </div>
+            <ng-template #noStatus>
+              <span class="text-500">-</span>
+            </ng-template>
+          </td>
+          <td>
             <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm"
                     (click)="viewIdea(idea.id)" pTooltip="View Details" tooltipPosition="top"></button>
           </td>
@@ -76,7 +89,7 @@
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="7" class="text-center p-4">
+          <td colspan="8" class="text-center p-4">
             <div class="flex flex-column align-items-center">
               <i class="pi pi-info-circle text-500 text-4xl mb-3"></i>
               <span class="text-lg font-medium">No session ideas found</span>
