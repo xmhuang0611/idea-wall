@@ -8,19 +8,8 @@
 
   <!-- Idea Details -->
   <div *ngIf="!isLoading && idea" class="content-container">
-    <!-- Header with back button -->
-    <div class="page-header">
-      <div class="flex justify-content-between align-items-center mb-3">
-        <h1 class="page-title">Session Idea Details</h1>
-        <button 
-          pButton 
-          icon="pi pi-arrow-left" 
-          label="Back to Idea Session" 
-          class="p-button-rounded p-button-secondary" 
-          (click)="goBack()">
-        </button>
-      </div>
-    </div>
+    <!-- Breadcrumb Navigation -->
+    <p-breadcrumb [model]="breadcrumbItems" [home]="homeItem" styleClass="mb-4"></p-breadcrumb>
 
     <!-- Tab View -->
     <p-tabView styleClass="details-tabs">

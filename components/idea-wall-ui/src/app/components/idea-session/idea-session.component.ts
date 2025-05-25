@@ -12,6 +12,8 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { MenuItem } from 'primeng/api';
 import { IdeaService } from '../../services/idea.service';
 import { Idea, ReviewStatus, IdeaStatus } from '../../models/idea.model';
 import { ApiResponse } from '../../shared/models/api-response.model';
@@ -32,7 +34,8 @@ import { AuthService } from '../../auth/auth.service';
     ProgressSpinnerModule,
     TooltipModule,
     ConfirmDialogModule,
-    DialogModule
+    DialogModule,
+    BreadcrumbModule
   ],
   templateUrl: './idea-session.component.html',
   styleUrls: ['./idea-session.component.scss']
@@ -45,6 +48,10 @@ export class IdeaSessionComponent implements OnInit {
   isLoading = true;
   searchQuery = '';
 
+  // Breadcrumb items
+  breadcrumbItems: MenuItem[] = [];
+  homeItem: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+
   constructor(
     private ideaService: IdeaService,
     private router: Router,
@@ -52,7 +59,14 @@ export class IdeaSessionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.initializeBreadcrumb();
     this.loadSessionIdeas();
+  }
+
+  private initializeBreadcrumb(): void {
+    this.breadcrumbItems = [
+      { label: 'Idea Session', routerLink: '/idea-session' }
+    ];
   }
 
   loadSessionIdeas(page: number = 1): void {

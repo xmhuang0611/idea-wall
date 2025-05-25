@@ -10,6 +10,8 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { RatingModule } from 'primeng/rating';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { MenuItem } from 'primeng/api';
 import { Idea, IdeaStatus, ReviewStatus } from '../../models/idea.model';
 import { Review, REVIEW_CRITERIA } from '../../models/review.model';
 import { IdeaService } from '../../services/idea.service';
@@ -34,6 +36,7 @@ import { AuthService } from '../../auth/auth.service';
     RatingModule,
     TooltipModule,
     DialogModule,
+    BreadcrumbModule,
     ReviewFormComponent,
     ReviewListComponent,
     FinalDecisionComponent
@@ -48,6 +51,10 @@ export class IdeaSessionDetailsComponent implements OnInit {
   reviewCriteria = REVIEW_CRITERIA;
   showFinalDecisionDialog = false;
   userRoles: string[] = [];
+
+  // Breadcrumb items
+  breadcrumbItems: MenuItem[] = [];
+  homeItem: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
 
   constructor(
     private route: ActivatedRoute,
@@ -74,6 +81,7 @@ export class IdeaSessionDetailsComponent implements OnInit {
           next: (response: any) => {
             if (response.success && response.data) {
               this.idea = response.data;
+              this.updateBreadcrumb();
               this.loadReviews(ideaId);
             } else {
               this.isLoading = false;
@@ -315,5 +323,12 @@ export class IdeaSessionDetailsComponent implements OnInit {
   onFinalDecisionCancelled(): void {
     // Close the dialog
     this.showFinalDecisionDialog = false;
+  }
+
+  private updateBreadcrumb(): void {
+    this.breadcrumbItems = [
+      { label: 'Idea Session', routerLink: '/idea-session' },
+      { label: this.idea?.title || 'Idea Details' }
+    ];
   }
 } 
