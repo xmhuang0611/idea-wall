@@ -147,15 +147,25 @@
         <div *ngIf="!commentsLoading && comments.length > 0" class="comments-section">
           <div class="comment-list">
             <div *ngFor="let comment of displayedComments" class="comment-item surface-ground p-2 mb-2 border-round">
-              <div class="flex align-items-center mb-1">
-                <p-avatar 
-                  icon="pi pi-user" 
-                  shape="circle"
-                  [style]="{'width': '2rem', 'height': '2rem'}"
-                  class="mr-2">
-                </p-avatar>
-                <span class="font-medium text-900 mr-2">{{comment.creator_name}}</span>
-                <span class="text-xs text-400">{{comment.created_at | date:'medium'}}</span>
+              <div class="flex align-items-center justify-content-between mb-1">
+                <div class="flex align-items-center">
+                  <p-avatar 
+                    icon="pi pi-user" 
+                    shape="circle"
+                    [style]="{'width': '2rem', 'height': '2rem'}"
+                    class="mr-2">
+                  </p-avatar>
+                  <span class="font-medium text-900 mr-2">{{comment.creator_name}}</span>
+                  <span class="text-xs text-400">{{comment.created_at | date:'medium'}}</span>
+                </div>
+                <button *ngIf="canDeleteComment(comment)"
+                        pButton
+                        icon="pi pi-trash"
+                        class="p-button-rounded p-button-danger p-button-text"
+                        (click)="deleteComment(comment)"
+                        pTooltip="Delete Comment"
+                        tooltipPosition="left">
+                </button>
               </div>
               <p class="m-0 line-height-3 text-700 white-space-pre-line">{{comment.description}}</p>
             </div>

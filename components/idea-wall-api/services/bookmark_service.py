@@ -6,6 +6,8 @@ from models.bookmark import BookmarkCreate, BookmarkInDB, Bookmark
 from .idea_service import idea_service
 from .comment_service import comment_service
 from bson import ObjectId
+from models.log import ObjectType, OperationType
+from utils.logging_utils import record_operation_log
 
 class BookmarkService:
     def __init__(self):
@@ -86,7 +88,7 @@ class BookmarkService:
             if bookmark_change != 0 and bookmark.target_type == "Idea":
                 await idea_service.update_bookmarks(bookmark.target_id, bookmark_change)
             
-            return Bookmark(
+            updated_bookmark = Bookmark(
                 id=existing_bookmark.id,
                 bookmark_status=bookmark.bookmark_status,
                 target_id=bookmark.target_id,
@@ -98,6 +100,18 @@ class BookmarkService:
                 updater_id=creator_id,
                 updater_name=creator_name
             )
+
+            # Add log record for update operation
+            await record_operation_log(
+                object_type=ObjectType.BOOKMARK,
+                object_id=existing_bookmark.id,
+                object_data=updated_bookmark,
+                operation_type=OperationType.UPDATE,
+                user_id=creator_id,
+                user_name=creator_name
+            )
+            
+            return updated_bookmark
         
         # Create new bookmark
         bookmark_in_db = BookmarkInDB(
@@ -114,7 +128,7 @@ class BookmarkService:
         if bookmark.bookmark_status != 0 and bookmark.target_type == "Idea":
             await idea_service.update_bookmarks(bookmark.target_id, bookmark.bookmark_status)
         
-        return Bookmark(
+        result_bookmark = Bookmark(
             id=str(result.inserted_id),
             **bookmark.model_dump(),
             created_at=bookmark_in_db.created_at,
@@ -124,5 +138,17 @@ class BookmarkService:
             updater_id=creator_id,
             updater_name=creator_name
         )
+
+        # Add log record for create operation
+        await record_operation_log(
+            object_type=ObjectType.BOOKMARK,
+            object_id=str(result.inserted_id),
+            object_data=result_bookmark,
+            operation_type=OperationType.CREATE,
+            user_id=creator_id,
+            user_name=creator_name
+        )
+        
+        return result_bookmark
 
 bookmark_service = BookmarkService() 
