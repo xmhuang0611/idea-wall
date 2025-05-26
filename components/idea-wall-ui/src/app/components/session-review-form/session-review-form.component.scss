@@ -181,12 +181,16 @@
   }
   
   // Custom form validation styles
-  .ng-invalid.ng-dirty .p-inputtext,
-  .ng-invalid.ng-dirty .p-inputtextarea {
-    border-color: var(--red-500);
+  .error-input {
+    border-color: var(--red-500) !important;
     
     &:focus {
-      box-shadow: 0 0 0 0.2rem rgba(var(--red-500-rgb), 0.2);
+      border-color: var(--red-500) !important;
+      box-shadow: 0 0 0 0.2rem rgba(var(--red-500-rgb), 0.2) !important;
+    }
+    
+    &:hover:not(:focus) {
+      border-color: var(--red-500) !important;
     }
   }
   

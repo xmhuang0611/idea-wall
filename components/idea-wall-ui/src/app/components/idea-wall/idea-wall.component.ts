@@ -76,7 +76,7 @@ export class IdeaWallComponent implements OnInit {
   
   // Search and filter conditions
   searchQuery = '';
-  sortBy = 'created_at';
+  sortBy = 'total_votes';
   sortOrder: 'asc' | 'desc' = 'desc';
   
   // Tag filter

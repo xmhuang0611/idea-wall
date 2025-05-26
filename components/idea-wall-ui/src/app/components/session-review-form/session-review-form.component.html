@@ -40,7 +40,7 @@
                       type="text" 
                       pInputText 
                       formControlName="submitter_job"
-                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('submitter_job')?.invalid && sessionReviewForm.get('submitter_job')?.touched}">
+                      [class.error-input]="sessionReviewForm.get('submitter_job')?.invalid && sessionReviewForm.get('submitter_job')?.touched">
                     <small 
                       class="p-error" 
                       *ngIf="sessionReviewForm.get('submitter_job')?.invalid && sessionReviewForm.get('submitter_job')?.touched">
@@ -58,7 +58,7 @@
                       type="text" 
                       pInputText 
                       formControlName="manager"
-                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('manager')?.invalid && sessionReviewForm.get('manager')?.touched}">
+                      [class.error-input]="sessionReviewForm.get('manager')?.invalid && sessionReviewForm.get('manager')?.touched">
                     <small 
                       class="p-error" 
                       *ngIf="sessionReviewForm.get('manager')?.invalid && sessionReviewForm.get('manager')?.touched">
@@ -76,7 +76,7 @@
                       type="text" 
                       pInputText 
                       formControlName="stream"
-                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('stream')?.invalid && sessionReviewForm.get('stream')?.touched}">
+                      [class.error-input]="sessionReviewForm.get('stream')?.invalid && sessionReviewForm.get('stream')?.touched">
                     <small 
                       class="p-error" 
                       *ngIf="sessionReviewForm.get('stream')?.invalid && sessionReviewForm.get('stream')?.touched">
@@ -119,7 +119,7 @@
                       formControlName="problem_statements"
                       [rows]="3"
                       placeholder="Describe the problems this idea aims to solve"
-                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('problem_statements')?.invalid && sessionReviewForm.get('problem_statements')?.touched}">
+                      [class.error-input]="sessionReviewForm.get('problem_statements')?.invalid && sessionReviewForm.get('problem_statements')?.touched">
                     </textarea>
                     <small 
                       class="p-error" 
@@ -139,7 +139,7 @@
                       formControlName="solutions"
                       [rows]="3"
                       placeholder="Provide detailed solutions and implementation approach"
-                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('solutions')?.invalid && sessionReviewForm.get('solutions')?.touched}">
+                      [class.error-input]="sessionReviewForm.get('solutions')?.invalid && sessionReviewForm.get('solutions')?.touched">
                     </textarea>
                     <small 
                       class="p-error" 
@@ -159,7 +159,7 @@
                       formControlName="values"
                       [rows]="3"
                       placeholder="Explain the business value and expected benefits"
-                      [ngClass]="{'ng-invalid ng-dirty': sessionReviewForm.get('values')?.invalid && sessionReviewForm.get('values')?.touched}">
+                      [class.error-input]="sessionReviewForm.get('values')?.invalid && sessionReviewForm.get('values')?.touched">
                     </textarea>
                     <small 
                       class="p-error" 
