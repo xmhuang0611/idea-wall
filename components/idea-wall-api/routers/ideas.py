@@ -14,10 +14,39 @@ from services.log_service import log_service
 from services.tag_service import tag_service
 from models.log import ObjectType, OperationType
 import json
-from datetime import datetime
 from bson import ObjectId
 
 router = APIRouter()
+
+@router.get("/hot-topics", response_model=StandardResponse[List[dict]])
+async def get_hot_topics(
+    limit: int = Query(5, ge=1, le=50, description="Number of top topics to return"),
+    days: int = Query(90, ge=1, le=365, description="Number of days to look back for ideas")
+):
+    """
+    Get the most popular topics (tags) from ideas created in the specified time period
+    
+    Args:
+        limit: Number of top topics to return (default: 5, max: 50)
+        days: Number of days to look back for ideas (default: 90, max: 365)
+        
+    Returns:
+        List of topics with their counts
+    """
+    try:
+        hot_topics = await idea_service.get_hot_topics(limit=limit, days=days)
+        return StandardResponse(
+            success=True,
+            data=hot_topics
+        )
+    except Exception as e:
+        return StandardResponse(
+            success=False,
+            error=ErrorDetail(
+                code=500,
+                message=str(e)
+            )
+        )
 
 @router.get("", response_model=StandardResponse[List[Idea]])
 async def get_ideas(

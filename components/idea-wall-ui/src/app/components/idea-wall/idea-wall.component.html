@@ -203,9 +203,20 @@
   </div>
   <!-- Right Column (25%) -->
   <div class="col-3">
-    <!-- Hot Topics Card -->
+    <!-- Hot Topics of the Past 90 Days -->
     <p-card header="Hot Topics" styleClass="mb-4">
-      <div class="flex flex-column gap-3">
+      <!-- Loading State -->
+      <div *ngIf="hotTopicsLoading" class="flex justify-content-center align-items-center py-5">
+        <p-progressSpinner 
+          [style]="{width: '50px', height: '50px'}" 
+          strokeWidth="4"
+          fill="var(--surface-ground)" 
+          animationDuration=".5s">
+        </p-progressSpinner>
+      </div>
+
+      <!-- Topics List -->
+      <div *ngIf="!hotTopicsLoading" class="flex flex-column gap-3">
         <div *ngFor="let topic of hotTopics"
           class="flex align-items-center justify-content-between p-2 border-round cursor-pointer"
           (click)="onTopicClick(topic)">

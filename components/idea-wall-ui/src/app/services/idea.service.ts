@@ -9,6 +9,17 @@ import { Comment } from '../models/comment.model';
 import { ApiErrorHandlerService } from '../shared/services/api-error-handler.service';
 import { IdeaHistory } from '../models/idea.model';
 
+export interface HotTopic {
+  tag_id: number;
+  name: string;
+  count: number;
+}
+
+export interface HotTopicsParams {
+  limit?: number;
+  days?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -332,5 +343,13 @@ export class IdeaService {
       }),
       catchError(this.errorHandler.handleError)
     );
+  }
+
+  getHotTopics(params?: HotTopicsParams): Observable<ApiResponse<HotTopic[]>> {
+    const queryParams = new HttpParams()
+      .set('limit', params?.limit?.toString() || '5')
+      .set('days', params?.days?.toString() || '90');
+    
+    return this.http.get<ApiResponse<HotTopic[]>>(`${this.apiUrl}/hot-topics`, { params: queryParams });
   }
 } 

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { IdeaService } from '../../services/idea.service';
+import { IdeaService, HotTopic } from '../../services/idea.service';
 import { Idea } from '../../models/idea.model';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
@@ -97,14 +97,15 @@ export class IdeaWallComponent implements OnInit {
   commentCounts: { [ideaId: string]: number } = {};
 
   isLoading = false;
-  newestIdeasLoading = false;
 
   // Idea History dialog
   historyDialogVisible = false;
   historyIdeaId = '';
 
-  hotTopics: Topic[] = [];
+  hotTopics: HotTopic[] = [];
+  hotTopicsLoading = false;
   newestIdeas: Idea[] = [];
+  newestIdeasLoading = false;
 
   // Session Review
   sessionReviewDialogVisible = false;
@@ -479,21 +480,27 @@ export class IdeaWallComponent implements OnInit {
   }
 
   private loadHotTopics() {
-    // TODO: Implement hot topics fetching logic
-    // Using mock data temporarily
-    this.hotTopics = [
-      { name: 'Product Improvement', count: 15 },
-      { name: 'User Experience', count: 12 },
-      { name: 'New Features', count: 10 },
-      { name: 'Bug Fixes', count: 8 },
-      { name: 'Performance Optimization', count: 6 }
-    ];
+    this.hotTopicsLoading = true;
+    this.ideaService.getHotTopics({limit: 5, days: 90}).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.hotTopics = response.data;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading hot topics:', error);
+        this.toastService.showError('Failed to load hot topics');
+      },
+      complete: () => {
+        this.hotTopicsLoading = false;
+      }
+    });
   }
 
   private loadNewestIdeas(): void {
     this.newestIdeasLoading = true;
     this.ideaService.getIdeas({
-      limit: 5,
+      limit: 10,
       sort_by: 'created_at',
       sort_order: 'desc'
     }).subscribe({
@@ -511,12 +518,9 @@ export class IdeaWallComponent implements OnInit {
     });
   }
 
-  onTopicClick(topic: Topic) {
-    // When clicking a topic, filter the ideas list by matching tags
-    const matchingTags = this.availableTags.filter(tag => 
-      tag.label.toLowerCase().includes(topic.name.toLowerCase())
-    );
-    this.selectedTags = matchingTags.map(tag => tag.tag_id);
+  onTopicClick(topic: HotTopic) {
+    // When clicking a topic, filter the ideas list by the selected tag
+    this.selectedTags = [topic.tag_id];
     this.onTagFilterChange();
   }
 
