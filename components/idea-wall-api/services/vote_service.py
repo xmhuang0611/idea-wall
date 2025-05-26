@@ -8,6 +8,8 @@ from .comment_service import comment_service
 from bson import ObjectId
 from models.log import ObjectType, OperationType
 from utils.logging_utils import record_operation_log
+from services.notification_service import notification_service
+from models.notification import NotificationType, NotificationCreate
 
 class VoteService:
     def __init__(self):
@@ -112,6 +114,22 @@ class VoteService:
                 user_name=creator_name
             )
             
+            # Create notification for the idea creator only for positive votes (likes)
+            # and only if no similar notification exists
+            idea = await idea_service.get_idea(vote.target_id)
+            if (idea and idea.creator_id != creator_id and  # Don't notify if user votes on their own idea
+                vote.vote_status > 0):  # Only create notification for positive votes (likes)
+                await notification_service.create_notification_if_not_exists(
+                    NotificationCreate(
+                        user_id=idea.creator_id,
+                        type=NotificationType.VOTE,
+                        content=f"{creator_name} liked your idea: {idea.title}",
+                        related_id=vote.target_id  # Use idea_id instead of vote_id for deduplication
+                    ),
+                    creator_id=creator_id,
+                    creator_name=creator_name
+                )
+            
             return updated_vote
         
         # Create new vote
@@ -151,6 +169,22 @@ class VoteService:
             user_id=creator_id,
             user_name=creator_name
         )
+        
+        # Create notification for the idea creator only for positive votes (likes)
+        # and only if no similar notification exists
+        idea = await idea_service.get_idea(vote.target_id)
+        if (idea and idea.creator_id != creator_id and  # Don't notify if user votes on their own idea
+            vote.vote_status > 0):  # Only create notification for positive votes (likes)
+            await notification_service.create_notification_if_not_exists(
+                NotificationCreate(
+                    user_id=idea.creator_id,
+                    type=NotificationType.VOTE,
+                    content=f"{creator_name} liked your idea: {idea.title}",
+                    related_id=vote.target_id  # Use idea_id instead of vote_id for deduplication
+                ),
+                creator_id=creator_id,
+                creator_name=creator_name
+            )
         
         return result_vote
 

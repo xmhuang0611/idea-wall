@@ -4,6 +4,9 @@ from models.comment import CommentCreate, CommentInDB, Comment
 from bson import ObjectId
 from models.log import ObjectType, OperationType
 from utils.logging_utils import record_operation_log
+from services.notification_service import notification_service
+from models.notification import NotificationType, NotificationCreate
+from .idea_service import idea_service
 
 class CommentService:
     def __init__(self):
@@ -78,6 +81,20 @@ class CommentService:
             user_id=creator_id,
             user_name=creator_name
         )
+        
+        # Create notification for the idea creator
+        idea = await idea_service.get_idea(comment.idea_id)
+        if idea and idea.creator_id != creator_id:  # Don't notify if user comments on their own idea
+            await notification_service.create_notification(
+                NotificationCreate(
+                    user_id=idea.creator_id,
+                    type=NotificationType.COMMENT,
+                    content=f"{creator_name} commented on your idea: {idea.title}",
+                    related_id=str(result.inserted_id)
+                ),
+                creator_id=creator_id,
+                creator_name=creator_name
+            )
         
         return result_comment
 

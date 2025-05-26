@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from core.database import connect_to_mongo, close_mongo_connection
 from core.oauth2_config import get_oauth2_settings
-from routers import ideas, comments, votes, tags, users, bookmarks, logs, reviews
+from routers import ideas, comments, votes, tags, users, bookmarks, logs, reviews, notifications
+from services.scheduler_service import scheduler_service
 
 oauth2_settings = get_oauth2_settings()
 
@@ -51,10 +52,12 @@ app.openapi = custom_openapi
 @app.on_event("startup")
 async def startup_event():
     await connect_to_mongo()
+    scheduler_service.start()  # Start the scheduler
 
 @app.on_event("shutdown")
 async def shutdown_event():
     await close_mongo_connection()
+    scheduler_service.stop()  # Stop the scheduler
 
 # Include routers
 app.include_router(ideas.router, prefix="/api/ideas", tags=["ideas"])
@@ -65,6 +68,7 @@ app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(bookmarks.router, prefix="/api/bookmarks", tags=["bookmarks"])
 app.include_router(logs.router, prefix="/api/logs", tags=["logs"])
 app.include_router(reviews.router, prefix="/api/reviews", tags=["reviews"])
+app.include_router(notifications.router, prefix="/api", tags=["notifications"])
 
 @app.get("/")
 async def root():
