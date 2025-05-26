@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 from bson import ObjectId
 from fastapi import HTTPException
 from models.idea import IdeaCreate, IdeaUpdate, IdeaInDB, Idea, IdeaTag, IdeaStatus, SessionReview, IncubatorReview, ReviewStatus, LeanCanvas, SessionReviewCreate, LeanCanvasCreate
@@ -787,5 +787,62 @@ class IdeaService:
         # Get updated idea
         updated_idea = await self.get_idea(idea_id)
         return updated_idea
+
+    async def get_hot_topics(self, limit: int = 5, days: int = 90) -> List[dict]:
+        """
+        Get the most popular topics (tags) from ideas created in the specified time period
+        
+        Args:
+            limit: Number of top topics to return (default: 5)
+            days: Number of days to look back for ideas (default: 90)
+            
+        Returns:
+            List of topics with their counts
+        """
+        try:
+            # Calculate date N days ago
+            start_date = datetime.utcnow() - timedelta(days=days)
+            
+            # Get database connection
+            db = await self._db()
+            
+            # Aggregate query: group by tags and count
+            pipeline = [
+                # Only query ideas from specified time period
+                {"$match": {
+                    "created_at": {"$gte": start_date}
+                }},
+                # Unwind tags array to create a document for each tag
+                {"$unwind": "$tags"},
+                # Group by tag and count
+                {"$group": {
+                    "_id": "$tags",
+                    "count": {"$sum": 1}
+                }},
+                # Sort by count in descending order
+                {"$sort": {"count": -1}},
+                # Limit number of results
+                {"$limit": limit},
+                # Get tag details
+                {"$lookup": {
+                    "from": "tags",
+                    "localField": "_id",
+                    "foreignField": "tag_id",
+                    "as": "tag_info"
+                }},
+                # Unwind tag_info array
+                {"$unwind": "$tag_info"},
+                # Restructure output format
+                {"$project": {
+                    "tag_id": "$_id",
+                    "name": "$tag_info.tag_name",
+                    "count": 1,
+                    "_id": 0
+                }}
+            ]
+            
+            return await db[self.collection_name].aggregate(pipeline).to_list(None)
+        except Exception as e:
+            raise Exception(f"Failed to get hot topics: {str(e)}")
 
 idea_service = IdeaService() 
