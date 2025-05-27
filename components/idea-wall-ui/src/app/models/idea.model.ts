@@ -31,6 +31,7 @@ export interface Idea {
   updater_name: string;
   status?: IdeaStatus;
   session_review?: SessionReview;
+  incubator_review?: IncubatorReview;
 }
 
 export interface IdeaHistory {
@@ -64,6 +65,29 @@ export interface SessionReview {
   problem_statements?: string;
   solutions?: string;
   values?: string;
+  average_score: number;
+  status: ReviewStatus;
+  review_count: number;
+  submitted_at?: Date;
+}
+
+export interface LeanCanvas {
+  problem?: string;
+  existing_alternatives?: string;
+  solution?: string;
+  key_metrics?: string;
+  unique_value?: string;
+  high_level_concept?: string;
+  unfair_advantage?: string;
+  channels?: string;
+  customer_segments?: string;
+  early_adopters?: string;
+  cost_structure?: string;
+  revenue_stream?: string;
+}
+
+export interface IncubatorReview {
+  lean_canvas?: LeanCanvas;
   average_score: number;
   status: ReviewStatus;
   review_count: number;

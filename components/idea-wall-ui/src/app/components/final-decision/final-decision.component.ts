@@ -6,6 +6,7 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { IdeaService } from '../../services/idea.service';
+import { ReviewService } from '../../services/review.service';
 import { Idea } from '../../models/idea.model';
 
 @Component({
@@ -153,7 +154,8 @@ export class FinalDecisionComponent {
 
   constructor(
     private fb: FormBuilder,
-    private ideaService: IdeaService
+    private ideaService: IdeaService,
+    private reviewService: ReviewService
   ) {
     this.decisionForm = this.fb.group({
       decision: ['', Validators.required],
@@ -170,16 +172,16 @@ export class FinalDecisionComponent {
     this.isSubmitting = true;
     const { decision, comments } = this.decisionForm.value;
 
-    this.ideaService.makeSessionFinalDecision(this.ideaId, decision, comments)
+    this.reviewService.makeSessionFinalDecision(this.ideaId, decision, comments)
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           if (response.success && response.data) {
             this.decisionSubmitted.emit(response.data);
             this.resetForm();
           }
           this.isSubmitting = false;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error submitting decision:', error);
           this.isSubmitting = false;
         }

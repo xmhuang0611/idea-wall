@@ -651,8 +651,12 @@ export class ReviewFormComponent implements OnInit {
         }
       });
     } else {
-      // Add new review
-      this.reviewService.addReview(this.ideaId, this.targetType, reviewResult).subscribe({
+      // Add new review based on target type
+      const reviewObservable = this.targetType === 'Session' 
+        ? this.reviewService.addSessionReview(this.ideaId, reviewResult)
+        : this.reviewService.addIncubatorReview(this.ideaId, reviewResult);
+        
+      reviewObservable.subscribe({
         next: (response: any) => {
           this.isSubmitting = false;
           if (response.success) {

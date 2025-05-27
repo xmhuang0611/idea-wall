@@ -13,6 +13,7 @@ class ObjectType(str, Enum):
     USER = "User"
     REVIEW = "Review"
     FINAL_DECISION = "Final Decision"
+    IDEA_LIFECYCLE = "Idea Lifecycle"
 
 class OperationType(str, Enum):
     CREATE = "create"

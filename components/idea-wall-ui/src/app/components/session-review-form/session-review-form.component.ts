@@ -10,6 +10,7 @@ import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SessionReview } from '../../models/idea.model';
 import { IdeaService } from '../../services/idea.service';
+import { ReviewService } from '../../services/review.service';
 import { AuthService } from '../../auth/auth.service';
 
 @Component({
@@ -43,6 +44,7 @@ export class SessionReviewFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private ideaService: IdeaService,
+    private reviewService: ReviewService,
     private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router
@@ -136,11 +138,11 @@ export class SessionReviewFormComponent implements OnInit {
 
     // Use different API endpoint based on mode
     const submitObservable = this.isEditMode 
-      ? this.ideaService.resubmitSessionReview(this.ideaId, sessionReviewData)
-      : this.ideaService.submitSessionReview(this.ideaId, sessionReviewData);
+      ? this.reviewService.resubmitSessionReview(this.ideaId, sessionReviewData)
+      : this.reviewService.submitSessionReview(this.ideaId, sessionReviewData);
 
     submitObservable.subscribe({
-      next: (response) => {
+      next: (response: any) => {
         if (response.success) {
           this.router.navigate(['/idea-session']);
         }
