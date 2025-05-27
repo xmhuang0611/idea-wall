@@ -1,0 +1,111 @@
+---
+description: Python Web Application Development Standards
+type: Always
+globs: ["*.py", "*.html", "*.css", "*.js"]
+---
+
+# Python Web Application Development Standards
+
+## Code Style
+
+- Follow PEP 8 guidelines with 4 spaces for indentation
+- Limit lines to 79 characters for code, 72 for comments
+- Use blank lines strategically: 2 before top-level functions/classes, 1 between methods
+- Organize imports in groups: standard library, third-party, local application
+- Avoid wildcard imports (from module import *)
+- Use absolute imports rather than relative imports
+
+## Naming Conventions
+
+- Modules/Packages: lowercase with underscores (user_authentication)
+- Classes: CapWords/PascalCase (UserAuthentication)
+- Functions/Methods/Variables: lowercase with underscores (calculate_total)
+- Constants: ALL_UPPERCASE with underscores (MAX_CONNECTIONS)
+- Private attributes: prefix with single underscore (_internal_method)
+- "Private" class members: prefix with double underscores (__private_method)
+- Use descriptive names that convey purpose
+
+## Project Structure
+
+```
+project_root/
+├── src/                    # Source code
+│   ├── __init__.py
+│   ├── main.py             # Application entry point
+│   ├── config/             # Configuration files
+│   ├── api/                # API endpoints
+│   ├── models/             # Data models
+│   ├── services/           # Business logic
+│   ├── utils/              # Utility functions
+│   └── templates/          # Templates for web views
+├── tests/                  # Test suite
+├── docs/                   # Documentation
+├── static/                 # Static files (CSS, JS, images)
+├── requirements.txt        # Project dependencies
+└── README.md               # Project overview
+```
+
+## Function Design
+
+- Functions should do one thing and do it well
+- Keep functions under 40 lines
+- Use type hints for parameters and return values
+- Break complex operations into smaller functions
+- Implement appropriate error handling
+- Use default values for optional parameters
+
+## Documentation
+
+- Use Google style docstrings for all modules, classes, functions, and methods
+- Include: purpose summary, detailed description, parameters, return values, exceptions, examples
+- Write comments for complex algorithms or business rules
+- Comments should explain why, not what
+- Include code examples in docstrings when appropriate
+
+## Error Handling
+
+- Catch specific exceptions, not broad exception handlers
+- Include context in error messages
+- Re-raise exceptions when appropriate
+- Use custom exceptions for application-specific errors
+- Don't use exceptions for flow control
+
+## Logging
+
+- Use Python's built-in logging module
+- Apply appropriate log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+- Include relevant context in log messages
+- Avoid logging sensitive information
+- Configure logging appropriately for different environments
+
+## Testing
+
+- Write tests for all functionality including edge cases
+- Organize tests to mirror application structure
+- Name test files with test_ prefix
+- Follow Arrange-Act-Assert pattern
+- Tests should be independent and idempotent
+
+## Security
+
+- Validate and sanitize all user input
+- Follow authentication/authorization best practices
+- Securely store passwords using strong hashing
+- Encrypt sensitive data at rest and in transit
+- Follow relevant data protection regulations
+
+## Performance
+
+- Use efficient algorithms and data structures
+- Optimize database interactions (indexes, query minimization)
+- Consider asynchronous programming for I/O-bound operations
+- Implement caching where appropriate
+- Use generators and iterators for large data sets
+
+## Version Control
+
+- Write meaningful commit messages (concise summary, detailed explanation)
+- Reference issue numbers in commit messages
+- Keep changes focused and cohesive
+- Document complex logic
+- Handle edge cases and test thoroughly
