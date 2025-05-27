@@ -700,12 +700,12 @@ async def add_incubator_review_result(
         )
     
     # Check if idea is in correct status
-    if existing_idea.status != IdeaStatus.IN_INCUBATION_REVIEW:
+    if existing_idea.status != IdeaStatus.IN_INCUBATOR_REVIEW:
         return StandardResponse(
             success=False,
             error=ErrorDetail(
                 code=400,
-                message="Idea must be in IN_INCUBATION_REVIEW status to add a review"
+                message="Idea must be in IN_INCUBATOR_REVIEW status to add a review"
             )
         )
     
@@ -761,12 +761,12 @@ async def make_incubator_final_decision(
         )
     
     # Check if idea is in correct status
-    if existing_idea.status != IdeaStatus.IN_INCUBATION_REVIEW:
+    if existing_idea.status != IdeaStatus.IN_INCUBATOR_REVIEW:
         return StandardResponse(
             success=False,
             error=ErrorDetail(
                 code=400,
-                message="Idea must be in IN_INCUBATION_REVIEW status to make a decision"
+                message="Idea must be in IN_INCUBATOR_REVIEW status to make a decision"
             )
         )
     
@@ -834,12 +834,12 @@ async def roll_out_idea(
             )
     
     # Check if idea is in correct status
-    if existing_idea.status != IdeaStatus.INCUBATION_APPROVED:
+    if existing_idea.status != IdeaStatus.INCUBATOR_APPROVED:
         return StandardResponse(
             success=False,
             error=ErrorDetail(
                 code=400,
-                message="Idea must be in INCUBATION_APPROVED status to roll out"
+                message="Idea must be in INCUBATOR_APPROVED status to roll out"
             )
         )
     

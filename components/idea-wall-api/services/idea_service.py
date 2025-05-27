@@ -478,7 +478,7 @@ class IdeaService:
         # Update idea with incubator review and change status
         update_dict = {
             "incubator_review": incubator_review.model_dump(),
-            "status": IdeaStatus.IN_INCUBATION_REVIEW,
+            "status": IdeaStatus.IN_INCUBATOR_REVIEW,
             "updater_id": submitter_id,
             "updater_name": submitter_name,
             "updated_at": datetime.utcnow()
@@ -632,9 +632,9 @@ class IdeaService:
             # NEED_IMPROVEMENT keeps the current status
         else:  # Incubator
             if decision == "APPROVED":
-                new_status = IdeaStatus.INCUBATION_APPROVED
+                new_status = IdeaStatus.INCUBATOR_APPROVED
             elif decision == "REJECTED":
-                new_status = IdeaStatus.INCUBATION_REJECTED
+                new_status = IdeaStatus.INCUBATOR_REJECTED
             # NEED_IMPROVEMENT keeps the current status
         
         # Update idea with decision and potentially new status
@@ -687,7 +687,7 @@ class IdeaService:
             return None
         
         # Check if idea is in correct status
-        if idea.status != IdeaStatus.INCUBATION_APPROVED:
+        if idea.status != IdeaStatus.INCUBATOR_APPROVED:
             return None
         
         # Update idea status to ROLL_OUT
