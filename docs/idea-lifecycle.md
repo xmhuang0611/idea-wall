@@ -86,7 +86,7 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
 
 #### 数据流
 - 更新Ideas的incubator_review对象
-- 更新Ideas的status为"IN_INCUBATION_REVIEW"
+- 更新Ideas的status为"IN_INCUBATOR_REVIEW"
 - 创建相关通知
 
 #### 前端流程 (创意提交者)
@@ -117,13 +117,13 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
 #### 后端处理
 1. 更新Ideas记录的incubator_review对象:
    - 设置status为"IN_REVIEW"
-   - 更新idea的status为"IN_INCUBATION_REVIEW"
+   - 更新idea的status为"IN_INCUBATOR_REVIEW"
 2. **处理单独评估结果（第一步）**:
    - 接收并保存孵化成员提交的评估结果到Idea Review Collection
    - 更新incubator_review的review_count计数
 3. **处理最终决定（第二步）**:
    - 保存最终决定到Final Decision Collection
-   - 更新Ideas的status（如INCUBATION_APPROVED、INCUBATION_REJECTED等）
+   - 更新Ideas的status（如INCUBATOR_APPROVED、INCUBATOR_REJECTED等）
    - 发送通知给创意提交者
 4. 记录操作日志
 
@@ -157,7 +157,7 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
               ↓                ↓
               ↓      用户修改重新提交
               ↓
-提交Incubator Review → [IN_INCUBATION_REVIEW] → 评估提交个人结果
+提交Incubator Review → [IN_INCUBATOR_REVIEW] → 评估提交个人结果
               ↓                              ↓
                                达到最低评估数量 → 任意评审人做出最终决定
                                                  ↓

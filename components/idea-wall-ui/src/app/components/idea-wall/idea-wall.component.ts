@@ -570,12 +570,12 @@ export class IdeaWallComponent implements OnInit {
         return 'Session Approved';
       case IdeaStatus.SESSION_REJECTED:
         return 'Session Rejected';
-      case IdeaStatus.IN_INCUBATION_REVIEW:
-        return 'In Incubation Review';
-      case IdeaStatus.INCUBATION_APPROVED:
-        return 'Incubation Approved';
-      case IdeaStatus.INCUBATION_REJECTED:
-        return 'Incubation Rejected';
+      case IdeaStatus.IN_INCUBATOR_REVIEW:
+        return 'In Incubator Review';
+      case IdeaStatus.INCUBATOR_APPROVED:
+        return 'Incubator Approved';
+      case IdeaStatus.INCUBATOR_REJECTED:
+        return 'Incubator Rejected';
       case IdeaStatus.ROLL_OUT:
         return 'Roll Out';
       default:
@@ -591,14 +591,14 @@ export class IdeaWallComponent implements OnInit {
       case IdeaStatus.DRAFT:
         return 'secondary';
       case IdeaStatus.IN_SESSION_REVIEW:
-      case IdeaStatus.IN_INCUBATION_REVIEW:
+      case IdeaStatus.IN_INCUBATOR_REVIEW:
         return 'info';
       case IdeaStatus.SESSION_APPROVED:
-      case IdeaStatus.INCUBATION_APPROVED:
+      case IdeaStatus.INCUBATOR_APPROVED:
       case IdeaStatus.ROLL_OUT:
         return 'success';
       case IdeaStatus.SESSION_REJECTED:
-      case IdeaStatus.INCUBATION_REJECTED:
+      case IdeaStatus.INCUBATOR_REJECTED:
         return 'danger';
       default:
         return 'secondary';

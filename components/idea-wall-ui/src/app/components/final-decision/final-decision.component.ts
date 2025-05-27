@@ -44,7 +44,7 @@ import { Idea } from '../../models/idea.model';
               <label for="approved" class="ml-2 cursor-pointer">
                 <span class="font-medium text-green-600">Approve</span>
                 <span class="block text-sm text-500">
-                  Approve for next stage (incubation)
+                  Approve for next stage (incubator)
                 </span>
               </label>
             </div>
