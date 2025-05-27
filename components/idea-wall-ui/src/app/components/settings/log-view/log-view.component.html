@@ -1,0 +1,96 @@
+<div class="flex flex-column gap-3">
+  <!-- Title and search form -->
+  <div class="flex justify-content-between align-items-center">
+    <h2 class="m-0">System Logs</h2>
+  </div>
+
+  <!-- Search form -->
+  <div class="card">
+    <form [formGroup]="searchForm" class="flex flex-column md:flex-row gap-3">
+      <div class="flex flex-column gap-2 flex-1">
+        <label for="object_type" class="font-semibold">Object Type</label>
+        <p-dropdown id="object_type" [options]="objectTypes" formControlName="object_type" optionLabel="label"
+          optionValue="value" placeholder="Select object type" [showClear]="true" styleClass="w-full">
+        </p-dropdown>
+      </div>
+
+      <div class="flex flex-column gap-2 flex-1">
+        <label for="object_id" class="font-semibold">Object ID</label>
+        <input id="object_id" type="text" pInputText formControlName="object_id" placeholder="Enter object ID"
+          class="w-full">
+      </div>
+
+      <div class="flex align-items-end">
+        <button pButton type="button" label="Compare" icon="pi pi-exchange" class="p-button-rounded p-button-primary"
+          [disabled]="selectedLogs.length !== 2" (click)="compareSelectedLogs()">
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-content-center align-items-center py-5">
+    <p-progressSpinner [style]="{width: '50px', height: '50px'}" strokeWidth="4" fill="var(--surface-ground)"
+      animationDuration=".5s">
+    </p-progressSpinner>
+  </div>
+
+  <!-- Log Table -->
+  <div *ngIf="!loading" class="card">
+    <p-table [value]="logs" styleClass="p-datatable-sm" [tableStyle]="{'min-width': '50rem'}" [rowHover]="true"
+      [(selection)]="selectedLogs" dataKey="id">
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 40px">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th>Time</th>
+          <th>Operation</th>
+          <th>Object Type</th>
+          <th>Object ID</th>
+          <th>User</th>
+          <th style="width: 80px">Action</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-log>
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="log"></p-tableCheckbox>
+          </td>
+          <td>{{ log.created_at | date:'medium' }}</td>
+          <td>{{ log.operation_type }}</td>
+          <td>{{ log.object_type }}</td>
+          <td>{{ log.object_id }}</td>
+          <td>{{ log.creator_name }} ({{ log.creator_id }})</td>
+          <td>
+            <button pButton pRipple type="button" icon="pi pi-eye" class="p-button-rounded p-button-text"
+              (click)="showObjectData(log)"></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <!-- Pagination -->
+    <p-paginator [rows]="rows" [totalRecords]="totalRecords" [first]="first" [rowsPerPageOptions]="[10, 20, 50]"
+      [showCurrentPageReport]="true" currentPageReportTemplate="{first}-{last} of {totalRecords}"
+      (onPageChange)="onPageChange($event)">
+    </p-paginator>
+    <!-- <p-card *ngIf="!isLoading" styleClass="mt-4">
+      <p-paginator [rows]="pageSize" [totalRecords]="totalItems" [rowsPerPageOptions]="pageSizeOptions"
+        [showCurrentPageReport]="true" currentPageReportTemplate="{first}-{last} of {totalRecords}"
+        [first]="(currentPage - 1) * pageSize" styleClass="border-none" (onPageChange)="onPageChange($event)">
+      </p-paginator>
+    </p-card> -->
+  </div>
+
+  <p-dialog [(visible)]="objectDataDialogVisible" [modal]="true" [style]="{width: '600px'}" [draggable]="false"
+    [resizable]="false" [closable]="true" header="Object Data">
+    <pre
+      style="max-height: 400px; overflow: auto; background: #f8f9fa; border-radius: 4px; padding: 1rem;">{{ objectDataDialogContent }}</pre>
+  </p-dialog>
+
+  <p-dialog [(visible)]="compareDialogVisible" [modal]="true" [style]="{width: '700px'}" [draggable]="false"
+    [resizable]="false" header="Compare Object Data">
+    <div [innerHTML]="compareDiffHtml"></div>
+  </p-dialog>
+</div>
