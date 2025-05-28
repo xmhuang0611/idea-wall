@@ -16,8 +16,6 @@ class IdeaStatus(str, Enum):
     ROLL_OUT = "ROLL_OUT"
 
 class SessionReview(BaseModel):
-    submitter_id: Optional[str] = None
-    submitter_name: Optional[str] = None
     submitter_job: Optional[str] = None
     manager: Optional[str] = None
     stream: Optional[str] = None

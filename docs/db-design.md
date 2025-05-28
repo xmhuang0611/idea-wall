@@ -136,8 +136,6 @@ Store notifications for all users.
 
 ```json
 {
-  "submitter_id": "...",
-  "submitter_name": "...",
   "submitter_job": "...",
   "manager": "...",
   "stream": "...",
