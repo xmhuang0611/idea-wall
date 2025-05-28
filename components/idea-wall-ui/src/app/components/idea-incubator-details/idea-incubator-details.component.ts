@@ -238,49 +238,40 @@ export class IdeaIncubatorDetailsComponent implements OnInit {
 
   onReviewsUpdated(): void {
     if (this.idea) {
-      // Reload idea details to get updated review count and average score
-      this.ideaService.getIdeaById(this.idea.id).subscribe({
-        next: (response: any) => {
-          if (response.success && response.data) {
-            this.idea = response.data;
-          }
-        },
-        error: (error: any) => {
-          console.error('Error reloading idea details:', error);
-        }
-      });
+      // Reload the idea details to get updated review summary
+      this.loadIdeaDetails();
       
-      // Reload reviews list
+      // Also reload just the reviews
       this.loadReviews(this.idea.id);
     }
   }
 
-  // Review form dialog
+  // Review form dialog management
   showAddReviewDialog = false;
 
   canAddReview(): boolean {
     if (!this.idea || !this.hasIncubatorReviewerRole()) {
       return false;
     }
-    
-    // Can add review if idea is in incubator review status
+
+    // Check if idea is in incubator review status
     return this.idea.status === IdeaStatus.IN_INCUBATOR_REVIEW;
   }
 
   getAddReviewTooltip(): string {
-    if (!this.idea) {
-      return 'Idea not loaded';
-    }
-    
     if (!this.hasIncubatorReviewerRole()) {
       return 'You need IDEA_INCUBATOR_REVIEWER role to add reviews';
+    }
+    
+    if (!this.idea) {
+      return 'No idea loaded';
     }
     
     if (this.idea.status !== IdeaStatus.IN_INCUBATOR_REVIEW) {
       return 'Idea must be in incubator review status to add reviews';
     }
     
-    return 'Add your review for this idea';
+    return 'Add a new incubator review for this idea';
   }
 
   openAddReviewForm(): void {

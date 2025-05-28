@@ -1,337 +1,370 @@
-<div class="idea-incubator-details-container" *ngIf="!isLoading">
-  <!-- Breadcrumb -->
-  <p-breadcrumb 
-    [model]="breadcrumbItems" 
-    [home]="homeItem"
-    class="mb-4">
-  </p-breadcrumb>
+<div class="container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="flex justify-content-center align-items-center">
+      <p-progressSpinner></p-progressSpinner>
+    </div>
+  </div>
 
-  <div class="grid" *ngIf="idea">
-    <!-- Main Content -->
-    <div class="col-12 lg:col-8">
-      <!-- Idea Details Card -->
-      <p-card class="mb-4">
-        <ng-template pTemplate="header">
-          <div class="flex align-items-center justify-content-between p-3">
-            <div class="flex align-items-center gap-3">
-              <p-button 
-                icon="pi pi-arrow-left" 
-                severity="secondary" 
-                [rounded]="true"
-                size="small"
-                (onClick)="goBack()"
-                pTooltip="Back to Incubator List">
-              </p-button>
-              <div>
-                <h2 class="m-0 text-primary">{{ idea.title }}</h2>
-                <div class="flex align-items-center gap-2 mt-2">
-                  <p-tag 
-                    [value]="getIdeaStatusLabel(idea.status)" 
-                    [severity]="getIdeaStatusSeverity(idea.status)"
-                    [rounded]="true">
-                  </p-tag>
-                  <span class="text-sm text-600">
-                    by {{ idea.creator_name }} on {{ formatDate(idea.created_at) }}
-                  </span>
+  <!-- Idea Details -->
+  <div *ngIf="!isLoading && idea" class="content-container">
+    <!-- Breadcrumb Navigation -->
+    <p-breadcrumb [model]="breadcrumbItems" [home]="homeItem" styleClass="mb-4"></p-breadcrumb>
+
+    <!-- Tab View -->
+    <p-tabView styleClass="details-tabs">
+      <!-- Idea Details Tab -->
+      <p-tabPanel header="Idea Details">
+        <!-- Idea Information Card -->
+        <div class="idea-title-card mb-3">
+          <div class="card-header">
+            <i class="pi pi-lightbulb card-icon"></i>
+            <span class="card-title">Idea Information</span>
+            <div class="card-header-actions">
+              <p-tag 
+                *ngIf="idea.status" 
+                [value]="getIdeaStatusLabel(idea.status)" 
+                [severity]="getIdeaStatusSeverity(idea.status)"
+                [rounded]="true">
+              </p-tag>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="grid">
+              <!-- Title and Creator Info -->
+              <div class="col-12">
+                <div class="idea-header-section">
+                  <h2 class="idea-title">{{idea.title}}</h2>
+                </div>
+              </div>
+              
+              <!-- Creator Information -->
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Created By</div>
+                  <div class="field-value">{{idea.creator_name}}</div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Created At</div>
+                  <div class="field-value">{{formatDate(idea.created_at)}}</div>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div class="col-12">
+                <div class="field-group multiline-field">
+                  <div class="field-label">Description</div>
+                  <div class="field-value multiline">{{idea.description}}</div>
+                </div>
+              </div>
+
+              <!-- Feeling -->
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Feeling</div>
+                  <div class="field-value">
+                    <div class="flex align-items-center gap-2">
+                      <i [class]="feelingUtil.getFeelingIcon(idea.feeling)" 
+                         [style.color]="feelingUtil.getFeelingColor(idea.feeling)"></i>
+                      <span>{{ feelingUtil.getFeelingLabel(idea.feeling) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tags -->
+              <div class="col-12 md:col-6" *ngIf="idea.tag_details && idea.tag_details.length > 0">
+                <div class="field-group">
+                  <div class="field-label">Tags</div>
+                  <div class="field-value">
+                    <div class="flex flex-wrap gap-2">
+                      <p-tag 
+                        *ngFor="let tag of idea.tag_details" 
+                        [value]="tag.tag_name"
+                        severity="info"
+                        [rounded]="true">
+                      </p-tag>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </ng-template>
+        </div>
 
-        <ng-template pTemplate="content">
-          <div class="flex flex-column gap-4">
-            <!-- Description -->
-            <div>
-              <h4 class="text-900 mb-2">Description</h4>
-              <p class="text-700 line-height-3">{{ idea.description }}</p>
-            </div>
-
-            <!-- Feeling -->
-            <div class="flex align-items-center gap-2">
-              <h4 class="text-900 mb-0">Feeling:</h4>
-              <div class="flex align-items-center gap-2">
-                <i [class]="feelingUtil.getFeelingIcon(idea.feeling)" 
-                   [style.color]="feelingUtil.getFeelingColor(idea.feeling)"></i>
-                <span class="font-medium">{{ feelingUtil.getFeelingLabel(idea.feeling) }}</span>
-              </div>
-            </div>
-
-            <!-- Tags -->
-            <div *ngIf="idea.tag_details && idea.tag_details.length > 0">
-              <h4 class="text-900 mb-2">Tags</h4>
-              <div class="flex flex-wrap gap-2">
-                <p-tag 
-                  *ngFor="let tag of idea.tag_details" 
-                  [value]="tag.tag_name"
-                  severity="info"
-                  [rounded]="true">
-                </p-tag>
-              </div>
-            </div>
-          </div>
-        </ng-template>
-      </p-card>
-
-      <!-- Lean Canvas Card -->
-      <p-card class="mb-4" *ngIf="idea.incubator_review?.lean_canvas">
-        <ng-template pTemplate="header">
-          <div class="p-3">
-            <h3 class="m-0 text-primary">Lean Canvas</h3>
-          </div>
-        </ng-template>
-
-        <ng-template pTemplate="content">
-          <div class="grid">
-            <!-- Problem -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Problem</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.problem || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- Solution -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Solution</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.solution || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- Key Metrics -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Key Metrics</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.key_metrics || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- Unique Value -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Unique Value Proposition</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.unique_value || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- High Level Concept -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">High Level Concept</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.high_level_concept || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- Unfair Advantage -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Unfair Advantage</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.unfair_advantage || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- Channels -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Channels</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.channels || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- Customer Segments -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Customer Segments</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.customer_segments || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- Cost Structure -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Cost Structure</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.cost_structure || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- Revenue Stream -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Revenue Stream</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.revenue_stream || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- Existing Alternatives -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Existing Alternatives</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.existing_alternatives || 'Not specified' }}</p>
-              </div>
-            </div>
-
-            <!-- Early Adopters -->
-            <div class="col-12 md:col-6">
-              <div class="field">
-                <label class="font-semibold text-900">Early Adopters</label>
-                <p class="text-700 mt-2">{{ idea.incubator_review?.lean_canvas?.early_adopters || 'Not specified' }}</p>
-              </div>
-            </div>
-          </div>
-        </ng-template>
-      </p-card>
-
-      <!-- Reviews Section -->
-      <p-card>
-        <ng-template pTemplate="header">
-          <div class="flex align-items-center justify-content-between p-3">
-            <h3 class="m-0 text-primary">Incubator Reviews</h3>
-            <div class="flex gap-2">
-              <p-button 
-                label="Add Review" 
-                icon="pi pi-plus" 
-                [rounded]="true"
-                size="small"
-                [disabled]="!canAddReview()"
-                [pTooltip]="getAddReviewTooltip()"
-                (onClick)="openAddReviewForm()">
-              </p-button>
-              <p-button 
-                label="Final Decision" 
-                icon="pi pi-check" 
-                severity="success"
-                [rounded]="true"
-                size="small"
-                [disabled]="!canMakeFinalDecision()"
-                [pTooltip]="getFinalDecisionTooltip()"
-                (onClick)="showFinalDecisionDialog = true">
-              </p-button>
-            </div>
-          </div>
-        </ng-template>
-
-        <ng-template pTemplate="content">
-          <app-review-list 
-            [reviews]="reviews"
-            [targetType]="'Incubator'"
-            (reviewsUpdated)="onReviewsUpdated()">
-          </app-review-list>
-        </ng-template>
-      </p-card>
-    </div>
-
-    <!-- Sidebar -->
-    <div class="col-12 lg:col-4">
-      <!-- Review Summary Card -->
-      <p-card class="mb-4" *ngIf="idea.incubator_review">
-        <ng-template pTemplate="header">
-          <div class="p-3">
-            <h4 class="m-0 text-primary">Review Summary</h4>
-          </div>
-        </ng-template>
-
-        <ng-template pTemplate="content">
-          <div class="flex flex-column gap-3">
-            <!-- Status -->
-            <div class="flex align-items-center justify-content-between">
-              <span class="font-medium">Status:</span>
+        <!-- Incubator Review Information Card -->
+        <div class="info-card mb-3" *ngIf="idea.incubator_review">
+          <div class="card-header">
+            <i class="pi pi-building card-icon"></i>
+            <span class="card-title">Incubator Review Information</span>
+            <div class="card-header-actions">
               <p-tag 
                 [value]="getReviewStatusLabel(idea.incubator_review.status)" 
                 [severity]="getReviewStatusSeverity(idea.incubator_review.status)"
                 [rounded]="true">
               </p-tag>
             </div>
-
-            <!-- Average Score -->
-            <div class="flex align-items-center justify-content-between">
-              <span class="font-medium">Average Score:</span>
-              <div class="flex align-items-center gap-2">
-                <span class="font-bold text-primary">{{ idea.incubator_review.average_score.toFixed(1) }}/5.0</span>
+          </div>
+          <div class="card-content">
+            <div class="grid">
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Submitted At</div>
+                  <div class="field-value">{{idea.incubator_review.submitted_at ? formatDate(idea.incubator_review.submitted_at) : 'N/A'}}</div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <div class="field-label">Review Count</div>
+                  <div class="field-value">{{idea.incubator_review.review_count || 0}}</div>
+                </div>
+              </div>
+              <div class="col-12 md:col-12">
+                <div class="field-group">
+                  <div class="field-label">Average Score</div>
+                  <div class="field-value score">
+                    <span class="score-number">{{idea.incubator_review.average_score | number:'1.1-1'}}</span>
+                    <span class="score-max">/5.0</span>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <!-- Review Count -->
-            <div class="flex align-items-center justify-content-between">
-              <span class="font-medium">Reviews:</span>
-              <span class="font-bold">{{ idea.incubator_review.review_count }}</span>
-            </div>
+        <!-- Lean Canvas Card -->
+        <div class="info-card mb-3" *ngIf="idea.incubator_review?.lean_canvas">
+          <div class="card-header">
+            <i class="pi pi-chart-line card-icon"></i>
+            <span class="card-title">Lean Canvas</span>
+          </div>
+          <div class="card-content">
+            <!-- Lean Canvas Grid -->
+            <div class="lean-canvas-grid">
+              <!-- Main Canvas Grid (5 columns) -->
+              <div class="canvas-main-grid">
+                <!-- Column 1: Problem -->
+                <div class="canvas-column">
+                  <div class="canvas-block problem-block full-height">
+                    <div class="block-header">
+                      <span class="block-number">2</span>
+                      <span class="block-title">Problem</span>
+                    </div>
+                    <div class="block-content">
+                      <div class="block-text">{{ idea.incubator_review?.lean_canvas?.problem || 'Not specified' }}</div>
+                      
+                      <div class="mt-3" *ngIf="idea.incubator_review?.lean_canvas?.existing_alternatives">
+                        <label class="sub-field-label">Existing Alternatives</label>
+                        <div class="block-text">{{ idea.incubator_review?.lean_canvas?.existing_alternatives }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-            <!-- Submitted Date -->
-            <div class="flex align-items-center justify-content-between" *ngIf="idea.incubator_review.submitted_at">
-              <span class="font-medium">Submitted:</span>
-              <span>{{ formatDate(idea.incubator_review.submitted_at) }}</span>
+                <!-- Column 2: Solution + Key Metrics -->
+                <div class="canvas-column">
+                  <div class="canvas-block solution-block">
+                    <div class="block-header">
+                      <span class="block-number">4</span>
+                      <span class="block-title">Solution</span>
+                    </div>
+                    <div class="block-content">
+                      <div class="block-text">{{ idea.incubator_review?.lean_canvas?.solution || 'Not specified' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="canvas-block metrics-block">
+                    <div class="block-header">
+                      <span class="block-number">8</span>
+                      <span class="block-title">Key Metrics</span>
+                    </div>
+                    <div class="block-content">
+                      <div class="block-text">{{ idea.incubator_review?.lean_canvas?.key_metrics || 'Not specified' }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Column 3: Unique Value Proposition -->
+                <div class="canvas-column">
+                  <div class="canvas-block uvp-block full-height">
+                    <div class="block-header">
+                      <span class="block-number">3</span>
+                      <span class="block-title">Unique Value Proposition</span>
+                    </div>
+                    <div class="block-content">
+                      <div class="block-text">{{ idea.incubator_review?.lean_canvas?.unique_value || 'Not specified' }}</div>
+                      
+                      <div class="mt-3" *ngIf="idea.incubator_review?.lean_canvas?.high_level_concept">
+                        <label class="sub-field-label">High Level Concept</label>
+                        <div class="block-text">{{ idea.incubator_review?.lean_canvas?.high_level_concept }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Column 4: Unfair Advantage + Channels -->
+                <div class="canvas-column">
+                  <div class="canvas-block advantage-block">
+                    <div class="block-header">
+                      <span class="block-number">9</span>
+                      <span class="block-title">Unfair Advantage</span>
+                    </div>
+                    <div class="block-content">
+                      <div class="block-text">{{ idea.incubator_review?.lean_canvas?.unfair_advantage || 'Not specified' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="canvas-block channels-block">
+                    <div class="block-header">
+                      <span class="block-number">5</span>
+                      <span class="block-title">Channels</span>
+                    </div>
+                    <div class="block-content">
+                      <div class="block-text">{{ idea.incubator_review?.lean_canvas?.channels || 'Not specified' }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Column 5: Customer Segments -->
+                <div class="canvas-column">
+                  <div class="canvas-block customer-block full-height">
+                    <div class="block-header">
+                      <span class="block-number">1</span>
+                      <span class="block-title">Customer Segments</span>
+                    </div>
+                    <div class="block-content">
+                      <div class="block-text">{{ idea.incubator_review?.lean_canvas?.customer_segments || 'Not specified' }}</div>
+                      
+                      <div class="mt-3" *ngIf="idea.incubator_review?.lean_canvas?.early_adopters">
+                        <label class="sub-field-label">Early Adopters</label>
+                        <div class="block-text">{{ idea.incubator_review?.lean_canvas?.early_adopters }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bottom Row: Cost Structure + Revenue Streams -->
+              <div class="canvas-bottom-row">
+                <!-- Cost Structure -->
+                <div class="canvas-block cost-block">
+                  <div class="block-header">
+                    <span class="block-number">7</span>
+                    <span class="block-title">Cost Structure</span>
+                  </div>
+                  <div class="block-content">
+                    <div class="block-text">{{ idea.incubator_review?.lean_canvas?.cost_structure || 'Not specified' }}</div>
+                  </div>
+                </div>
+
+                <!-- Revenue Streams -->
+                <div class="canvas-block revenue-block">
+                  <div class="block-header">
+                    <span class="block-number">6</span>
+                    <span class="block-title">Revenue Streams</span>
+                  </div>
+                  <div class="block-content">
+                    <div class="block-text">{{ idea.incubator_review?.lean_canvas?.revenue_stream || 'Not specified' }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </ng-template>
-      </p-card>
+        </div>
+      </p-tabPanel>
 
-      <!-- Idea Stats Card -->
-      <p-card>
-        <ng-template pTemplate="header">
-          <div class="p-3">
-            <h4 class="m-0 text-primary">Idea Statistics</h4>
+      <!-- Reviews Tab -->
+      <p-tabPanel [header]="'Reviews (' + reviews.length + ')'">
+        <!-- Action Buttons Row - Make Final Decision and Add Review -->
+        <div class="mb-3">
+          <div class="flex justify-content-end gap-2">
+            <button 
+              *ngIf="hasIncubatorReviewerRole()"
+              pButton 
+              icon="pi pi-check-circle" 
+              label="Make Final Decision" 
+              class="p-button-rounded p-button-success" 
+              [pTooltip]="getFinalDecisionTooltip()"
+              [disabled]="!canMakeFinalDecision()"
+              (click)="showFinalDecisionDialog = true">
+            </button>
+            <button 
+              *ngIf="hasIncubatorReviewerRole()"
+              pButton 
+              icon="pi pi-plus" 
+              label="Add Review" 
+              class="p-button-rounded p-button-primary" 
+              [disabled]="!canAddReview()"
+              [pTooltip]="getAddReviewTooltip()"
+              (click)="openAddReviewForm()">
+            </button>
           </div>
-        </ng-template>
+        </div>
 
-        <ng-template pTemplate="content">
-          <div class="flex flex-column gap-3">
-            <div class="flex align-items-center justify-content-between">
-              <span class="font-medium">Votes:</span>
-              <span class="font-bold">{{ idea.total_votes }}</span>
-            </div>
-            <div class="flex align-items-center justify-content-between">
-              <span class="font-medium">Comments:</span>
-              <span class="font-bold">{{ idea.total_comments }}</span>
-            </div>
-            <div class="flex align-items-center justify-content-between">
-              <span class="font-medium">Bookmarks:</span>
-              <span class="font-bold">{{ idea.total_bookmarks }}</span>
-            </div>
-          </div>
-        </ng-template>
-      </p-card>
+        <app-review-list
+          [reviews]="reviews"
+          [ideaId]="idea.id"
+          [targetType]="'Incubator'"
+          [currentUserName]="getCurrentUserName()"
+          [ideaStatus]="idea.status || ''"
+          (reviewsUpdated)="onReviewsUpdated()">
+        </app-review-list>
+      </p-tabPanel>
+    </p-tabView>
+
+    <!-- Final Decision Dialog -->
+    <p-dialog 
+      header="Make Final Decision" 
+      [(visible)]="showFinalDecisionDialog"
+      [modal]="true"
+      [style]="{width: '90vw', maxWidth: '800px'}"
+      [closable]="true"
+      [draggable]="false"
+      [resizable]="false"
+      styleClass="final-decision-dialog">
+      <app-final-decision
+        *ngIf="showFinalDecisionDialog && idea"
+        [idea]="idea"
+        [targetType]="'Incubator'"
+        [reviews]="reviews"
+        (decisionSubmitted)="onFinalDecisionSubmitted($event)"
+        (cancelled)="onFinalDecisionCancelled()">
+      </app-final-decision>
+    </p-dialog>
+
+    <!-- Add Review Dialog -->
+    <p-dialog 
+      header="Add Review" 
+      [(visible)]="showAddReviewDialog"
+      [modal]="true"
+      [style]="{width: '90vw', maxWidth: '800px'}"
+      [closable]="true"
+      [draggable]="false"
+      [resizable]="false"
+      styleClass="review-add-dialog">
+      <app-review-form
+        *ngIf="showAddReviewDialog && idea"
+        [ideaId]="idea.id"
+        [targetType]="'Incubator'"
+        (reviewSubmitted)="onReviewsUpdated(); closeAddReviewDialog()"
+        (cancel)="closeAddReviewDialog()">
+      </app-review-form>
+    </p-dialog>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !idea" class="error-container">
+    <div class="text-center p-4">
+      <i class="pi pi-exclamation-triangle text-3xl text-500 mb-3"></i>
+      <p class="text-500 m-0">Idea not found or failed to load.</p>
+      <button 
+        pButton 
+        label="Go Back" 
+        class="p-button-rounded mt-3" 
+        (click)="goBack()">
+      </button>
     </div>
   </div>
-</div>
-
-<!-- Loading Spinner -->
-<div *ngIf="isLoading" class="flex justify-content-center align-items-center" style="height: 400px;">
-  <p-progressSpinner></p-progressSpinner>
-</div>
-
-<!-- Add Review Dialog -->
-<p-dialog 
-  header="Add Incubator Review" 
-  [(visible)]="showAddReviewDialog" 
-  [modal]="true" 
-  [closable]="true"
-  [style]="{ width: '90vw', maxWidth: '800px' }"
-  (onHide)="closeAddReviewDialog()">
-  
-  <app-review-form 
-    *ngIf="showAddReviewDialog && idea"
-    [ideaId]="idea.id"
-    [targetType]="'Incubator'"
-    (reviewSubmitted)="onReviewsUpdated(); closeAddReviewDialog()"
-    (cancelled)="closeAddReviewDialog()">
-  </app-review-form>
-</p-dialog>
-
-<!-- Final Decision Dialog -->
-<p-dialog 
-  header="Make Final Decision" 
-  [(visible)]="showFinalDecisionDialog" 
-  [modal]="true" 
-  [closable]="true"
-  [style]="{ width: '90vw', maxWidth: '600px' }">
-  
-  <app-final-decision 
-    *ngIf="showFinalDecisionDialog && idea"
-    [idea]="idea"
-    [targetType]="'Incubator'"
-    [reviews]="reviews"
-    (decisionSubmitted)="onFinalDecisionSubmitted($event)"
-    (cancelled)="onFinalDecisionCancelled()">
-  </app-final-decision>
-</p-dialog> 
+</div> 
