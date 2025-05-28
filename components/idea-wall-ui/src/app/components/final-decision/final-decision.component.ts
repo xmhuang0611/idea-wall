@@ -5,6 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
 import { IdeaService } from '../../services/idea.service';
 import { ReviewService } from '../../services/review.service';
 import { Idea } from '../../models/idea.model';
@@ -20,7 +21,8 @@ import { Review } from '../../models/review.model';
     ButtonModule,
     InputTextareaModule,
     RadioButtonModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    TooltipModule
   ],
   template: `
     <div class="final-decision-form">
@@ -114,9 +116,9 @@ import { Review } from '../../models/review.model';
               <span class="ml-2 font-medium text-700">{{ getAverageScore() | number:'1.1-1' }}/5</span>
             </div>
           </div>
-          <div *ngIf="getReviewCount() < getMinimumReviews()" class="text-orange-600 text-sm mt-2">
+          <div *ngIf="getReviewCount() < getMinimumReviews() && decisionForm.get('decision')?.value === 'APPROVED'" class="text-orange-600 text-sm mt-2">
             <i class="pi pi-exclamation-triangle mr-1"></i>
-            Minimum {{ getMinimumReviews() }} reviews required for final decision.
+            Minimum {{ getMinimumReviews() }} reviews required for approval.
           </div>
         </div>
 
@@ -135,7 +137,8 @@ import { Review } from '../../models/review.model';
             label="Submit Decision" 
             class="p-button-rounded"
             [loading]="isSubmitting"
-            [disabled]="decisionForm.invalid || getReviewCount() < getMinimumReviews()">
+            [disabled]="decisionForm.invalid || !canSubmitDecision()"
+            [pTooltip]="getSubmitTooltip()">
           </button>
         </div>
       </form>
@@ -181,7 +184,7 @@ export class FinalDecisionComponent {
   }
 
   getMinimumReviews(): number {
-    return this.targetType === 'Session' ? 2 : 3;
+    return 2; // Both Session and Incubator require 2 reviews for approval
   }
 
   getApprovalText(): string {
@@ -190,8 +193,33 @@ export class FinalDecisionComponent {
       'Approve the idea';
   }
 
+  canSubmitDecision(): boolean {
+    const decision = this.decisionForm.get('decision')?.value;
+    const reviewCount = this.getReviewCount();
+    
+    // For APPROVED decisions, require minimum reviews
+    if (decision === 'APPROVED') {
+      return reviewCount >= this.getMinimumReviews();
+    }
+    
+    // For REJECTED and NEED_IMPROVEMENT, no minimum review requirement
+    return true;
+  }
+
+  getSubmitTooltip(): string {
+    const decision = this.decisionForm.get('decision')?.value;
+    const reviewCount = this.getReviewCount();
+    const minReviews = this.getMinimumReviews();
+    
+    if (decision === 'APPROVED' && reviewCount < minReviews) {
+      return `Need at least ${minReviews} reviews to approve (currently ${reviewCount})`;
+    }
+    
+    return 'Submit final decision';
+  }
+
   onSubmit(): void {
-    if (this.decisionForm.invalid || this.getReviewCount() < this.getMinimumReviews()) {
+    if (this.decisionForm.invalid || !this.canSubmitDecision()) {
       this.markFormGroupTouched();
       return;
     }

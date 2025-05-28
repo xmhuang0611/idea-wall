@@ -321,15 +321,16 @@ async def make_session_final_decision(
             )
         )
     
-    # Check if enough reviews have been submitted
-    if not existing_idea.session_review or existing_idea.session_review.review_count < 2:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=400,
-                message="At least 2 reviews are required before making a final decision"
+    # Check if enough reviews have been submitted (only for APPROVED decisions)
+    if decision.decision.value == "APPROVED":
+        if not existing_idea.session_review or existing_idea.session_review.review_count < 2:
+            return StandardResponse(
+                success=False,
+                error=ErrorDetail(
+                    code=400,
+                    message="At least 2 reviews are required before approving a session idea"
+                )
             )
-        )
     
     # Make final decision
     updated_idea = await review_service.make_final_decision(
@@ -630,15 +631,16 @@ async def make_incubator_final_decision(
             )
         )
     
-    # Check if enough reviews have been submitted
-    if not existing_idea.incubator_review or existing_idea.incubator_review.review_count < 2:
-        return StandardResponse(
-            success=False,
-            error=ErrorDetail(
-                code=400,
-                message="At least 2 reviews are required before making a final decision"
+    # Check if enough reviews have been submitted (only for APPROVED decisions)
+    if decision.decision.value == "APPROVED":
+        if not existing_idea.incubator_review or existing_idea.incubator_review.review_count < 2:
+            return StandardResponse(
+                success=False,
+                error=ErrorDetail(
+                    code=400,
+                    message="At least 2 reviews are required before approving an incubator idea"
+                )
             )
-        )
     
     # Make final decision
     updated_idea = await review_service.make_final_decision(

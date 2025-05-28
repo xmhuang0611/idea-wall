@@ -285,10 +285,8 @@ export class IdeaIncubatorDetailsComponent implements OnInit {
       return false;
     }
     
-    // Can make final decision if idea is in incubator review and has minimum reviews
-    return this.idea.status === IdeaStatus.IN_INCUBATOR_REVIEW && 
-           !!this.idea.incubator_review && 
-           this.idea.incubator_review.review_count >= 3;
+    // Can make final decision if idea is in incubator review status
+    return this.idea.status === IdeaStatus.IN_INCUBATOR_REVIEW;
   }
 
   getFinalDecisionTooltip(): string {
@@ -305,11 +303,7 @@ export class IdeaIncubatorDetailsComponent implements OnInit {
     }
     
     const reviewCount = this.idea.incubator_review?.review_count || 0;
-    if (reviewCount < 3) {
-      return `Need at least 3 reviews (currently ${reviewCount})`;
-    }
-    
-    return 'Make final decision for this idea';
+    return `Make final decision based on ${reviewCount} reviews`;
   }
 
   onFinalDecisionSubmitted(updatedIdea: Idea): void {
