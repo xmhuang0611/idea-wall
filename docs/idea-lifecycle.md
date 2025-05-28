@@ -31,7 +31,7 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
 
 ### 2. 评审阶段 (Session Review)
 
-最低评审数量为2
+最低评审数量为2（仅适用于通过决定）
 
 #### 数据流
 - 更新Ideas的session_review对象
@@ -56,12 +56,14 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
 4. **提交评审结果（第一步）**:
    - 填写评分和评论 (创新性、价值、可行性、影响力和投资回报率)
    - 提交个人评审结果，系统记录该评审人的意见
-   - 页面显示当前评审数量和最低要求数量
+   - 页面显示当前评审数量
 5. **做出最终决定（第二步）**:
-   - 当评审数量达到最低要求后，页面显示"做出最终决定"选项
-   - 任何评审成员可以点击此选项，进入最终决定页面
-   - 查看所有评审成员的评分和意见
+   - 任何评审成员可以随时做出最终决定
+   - 点击"做出最终决定"选项，进入最终决定页面
+   - 查看所有评审成员的评分和意见（如有）
    - 选择最终决定（APPROVED/REJECTED/NEED_IMPROVEMENT）
+   - **APPROVED决定**：需要至少2名评审成员提交评审结果
+   - **REJECTED和NEED_IMPROVEMENT决定**：无需等待最低评审数量，可随时做出
    - 填写总结性评论
    - 提交最终决定
 
@@ -72,9 +74,9 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
 2. **处理单独评审结果（第一步）**:
    - 接收并保存评审人员提交的评审结果到Idea Review Collection
    - 更新session_review的review_count计数
-   - 检查是否达到min_required_reviews数量
 3. **处理最终决定（第二步）**:
-   - 验证评审数量是否达到最低要求
+   - 对于APPROVED决定：验证评审数量是否达到最低要求（2个）
+   - 对于REJECTED和NEED_IMPROVEMENT决定：无最低评审数量要求
    - 保存最终决定到Final Decision Collection
    - 更新Ideas的status（如SESSION_APPROVED、SESSION_REJECTED等）
    - 发送通知给创意提交者
@@ -82,7 +84,7 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
 
 ### 3. 孵化阶段 (Incubator Review)
 
-最低评估数量为3
+最低评估数量为2（仅适用于通过决定）
 
 #### 数据流
 - 更新Ideas的incubator_review对象
@@ -105,12 +107,14 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
 4. **提交评估结果（第一步）**:
    - 填写评分和评论 (创新性、价值、可行性、影响力和投资回报率)
    - 提交个人评估结果，系统记录该孵化成员的意见
-   - 页面显示当前评估数量和最低要求数量
+   - 页面显示当前评估数量
 5. **做出最终决定（第二步）**:
-   - 当评估数量达到最低要求后，页面显示"做出最终决定"选项
-   - 任何孵化成员可以点击此选项，进入最终决定页面
-   - 查看所有孵化成员的评分和意见
+   - 任何孵化成员可以随时做出最终决定
+   - 点击"做出最终决定"选项，进入最终决定页面
+   - 查看所有孵化成员的评分和意见（如有）
    - 选择最终决定（APPROVED/REJECTED/NEED_IMPROVEMENT）
+   - **APPROVED决定**：需要至少2名孵化成员提交评估结果
+   - **REJECTED和NEED_IMPROVEMENT决定**：无需等待最低评估数量，可随时做出
    - 填写总结性评论
    - 提交最终决定
 
@@ -122,6 +126,8 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
    - 接收并保存孵化成员提交的评估结果到Idea Review Collection
    - 更新incubator_review的review_count计数
 3. **处理最终决定（第二步）**:
+   - 对于APPROVED决定：验证评估数量是否达到最低要求（2个）
+   - 对于REJECTED和NEED_IMPROVEMENT决定：无最低评估数量要求
    - 保存最终决定到Final Decision Collection
    - 更新Ideas的status（如INCUBATOR_APPROVED、INCUBATOR_REJECTED等）
    - 发送通知给创意提交者
@@ -174,30 +180,32 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
 
 ### Session评审机制
 1. **评审结果提交（第一步）**
-   - 需要至少2名评审成员提交个人评审结果
+   - 评审成员可以随时提交个人评审结果
    - 每位评审成员独立评价五个维度：创新性、价值、可行性、影响力和投资回报率
    - 每个维度评分范围为1-5分
    - 评审成员可以为每个维度提供详细评论
    - 系统记录每个评审人的评审结果，但不自动做出决定
 
 2. **最终决定（第二步）**
-   - 当收到至少2份评审结果后，所有评审成员可以做出最终决定
-   - 做出最终决定的评审成员需要综合考虑所有评审意见
-   - 最终决定可以是APPROVED、REJECTED或NEED_IMPROVEMENT
+   - 任何评审成员可以随时做出最终决定，无需等待特定评审数量
+   - **APPROVED决定要求**：必须有至少2名评审成员提交评审结果
+   - **REJECTED和NEED_IMPROVEMENT决定**：无最低评审数量要求，可在任何时候做出
+   - 做出最终决定的评审成员需要综合考虑所有已有评审意见
    - 做出最终决定的评审成员需提供总结性评论
 
 ### Incubator评审机制
 1. **评估结果提交（第一步）**
-   - 需要至少2名孵化成员提交个人评估结果
+   - 孵化成员可以随时提交个人评估结果
    - 每位孵化成员独立评价五个维度：创新性、价值、可行性、影响力和投资回报率
    - 每个维度评分范围为1-5分
    - 孵化成员可以为每个维度提供详细评论
    - 系统记录每个孵化成员的评估结果，但不自动做出决定
 
 2. **最终决定（第二步）**
-   - 当收到至少2份评估结果后，所有孵化成员可以做出最终决定
-   - 做出最终决定的孵化成员需要综合考虑所有评估意见
-   - 最终决定可以是APPROVED、REJECTED或NEED_IMPROVEMENT
+   - 任何孵化成员可以随时做出最终决定，无需等待特定评估数量
+   - **APPROVED决定要求**：必须有至少2名孵化成员提交评估结果
+   - **REJECTED和NEED_IMPROVEMENT决定**：无最低评估数量要求，可在任何时候做出
+   - 做出最终决定的孵化成员需要综合考虑所有已有评估意见
    - 做出最终决定的孵化成员需提供总结性评论
 
 ## 通知机制
@@ -209,34 +217,6 @@ Idea Wall平台提供了一个结构化的创意管理流程，从创意提交�
 4. Incubator最终决定做出后，通知创意提交者
 5. 创意收到新评论时，通知创意提交者
 6. 评论收到回复时，通知评论作者
-
-## API设计
-
-### 创意生命周期API
-
-1. `POST /api/ideas` - 创建新创意
-2. `GET /api/ideas/{id}` - 获取创意详情
-3. `PUT /api/ideas/{id}/session-review` - 提交或更新Session Review
-4. `PUT /api/ideas/{id}/incubator-review` - 提交或更新Incubator Review
-5. `POST /api/ideas/{id}/session-review/reviews` - 提交Session评审结果
-6. `POST /api/ideas/{id}/session-review/final-decision` - 提交Session最终决定
-7. `GET /api/ideas/{id}/session-review/reviews` - 获取Session的所有评审结果
-8. `POST /api/ideas/{id}/incubator-review/reviews` - 提交Incubator评估结果
-9. `POST /api/ideas/{id}/incubator-review/final-decision` - 提交Incubator最终决定
-10. `GET /api/ideas/{id}/incubator-review/reviews` - 获取Incubator的所有评估结果
-
-### 评审任务API
-
-1. `GET /api/reviews/session/pending` - 获取待评审的创意(Session阶段)
-2. `GET /api/reviews/incubator/pending` - 获取待评审的创意(Incubator阶段)
-3. `GET /api/reviews/session/ready-for-decision` - 获取已达最低评审数量的创意(Session阶段)
-4. `GET /api/reviews/incubator/ready-for-decision` - 获取已达最低评审数量的创意(Incubator阶段)
-
-### 统计API
-
-1. `GET /api/stats/ideas` - 获取创意统计
-2. `GET /api/stats/reviews` - 获取评审结果统计
-3. `GET /api/stats/final-decisions` - 获取最终决定统计
 
 ## 最佳实践
 

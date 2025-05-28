@@ -299,17 +299,13 @@ export class IdeaSessionDetailsComponent implements OnInit {
   }
 
   canMakeFinalDecision(): boolean {
-    // Can make final decision if there are at least 2 reviews AND idea is in session review status
-    return this.reviews.length >= 2 && 
-           this.idea?.status === IdeaStatus.IN_SESSION_REVIEW;
+    // Can make final decision if idea is in session review status
+    return this.idea?.status === IdeaStatus.IN_SESSION_REVIEW;
   }
 
   getFinalDecisionTooltip(): string {
     if (this.idea?.status !== IdeaStatus.IN_SESSION_REVIEW) {
       return 'Idea must be in session review status to make final decision';
-    }
-    if (this.reviews.length < 2) {
-      return 'At least 2 reviews required for final decision';
     }
     return `Make final decision based on ${this.reviews.length} reviews`;
   }

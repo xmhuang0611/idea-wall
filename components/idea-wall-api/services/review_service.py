@@ -571,6 +571,7 @@ class ReviewService:
         # Update idea with decision and potentially new status
         update_dict = {
             f"{target_type.value.lower()}_review.status": decision,
+            f"{target_type.value.lower()}_review.review_comments": comments,
             "updater_id": decision_maker_id,
             "updater_name": decision_maker_name,
             "updated_at": datetime.utcnow()

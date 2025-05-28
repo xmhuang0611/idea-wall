@@ -141,6 +141,14 @@
                   </div>
                 </div>
               </div>
+              
+              <!-- Review Comments -->
+              <div class="col-12" *ngIf="idea.session_review.review_comments">
+                <div class="field-group multiline-field">
+                  <div class="field-label">Final Decision Comments</div>
+                  <div class="field-value multiline">{{idea.session_review.review_comments}}</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
