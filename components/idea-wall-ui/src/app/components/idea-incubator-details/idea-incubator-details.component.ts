@@ -15,7 +15,6 @@ import { Idea, IdeaStatus, ReviewStatus } from '../../models/idea.model';
 import { Review, REVIEW_CRITERIA } from '../../models/review.model';
 import { IdeaService } from '../../services/idea.service';
 import { ReviewService } from '../../services/review.service';
-import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 import { ReviewFormComponent } from '../review-form/review-form.component';
 import { ReviewListComponent } from '../review-list/review-list.component';
 import { FinalDecisionComponent } from '../final-decision/final-decision.component';
@@ -59,7 +58,6 @@ export class IdeaIncubatorDetailsComponent implements OnInit {
     private router: Router,
     private ideaService: IdeaService,
     private reviewService: ReviewService,
-    public feelingUtil: FeelingUtilService,
     private authService: AuthService
   ) {}
 

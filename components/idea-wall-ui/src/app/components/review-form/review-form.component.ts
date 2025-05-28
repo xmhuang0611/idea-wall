@@ -306,15 +306,12 @@ import { Review } from '../../models/review.model';
   `,
   styles: [`
     .review-form-container {
-      padding: 1rem;
       max-width: 1000px;
       margin: 0 auto;
     }
 
     .form-header {
       text-align: center;
-      border-bottom: 1px solid var(--surface-200);
-      padding-bottom: 0.75rem;
       margin-bottom: 1rem;
     }
 

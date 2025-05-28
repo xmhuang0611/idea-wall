@@ -59,37 +59,6 @@
                   <div class="field-value multiline">{{idea.description}}</div>
                 </div>
               </div>
-
-              <!-- Feeling -->
-              <div class="col-12 md:col-6">
-                <div class="field-group">
-                  <div class="field-label">Feeling</div>
-                  <div class="field-value">
-                    <div class="flex align-items-center gap-2">
-                      <i [class]="feelingUtil.getFeelingIcon(idea.feeling)" 
-                         [style.color]="feelingUtil.getFeelingColor(idea.feeling)"></i>
-                      <span>{{ feelingUtil.getFeelingLabel(idea.feeling) }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Tags -->
-              <div class="col-12 md:col-6" *ngIf="idea.tag_details && idea.tag_details.length > 0">
-                <div class="field-group">
-                  <div class="field-label">Tags</div>
-                  <div class="field-value">
-                    <div class="flex flex-wrap gap-2">
-                      <p-tag 
-                        *ngFor="let tag of idea.tag_details" 
-                        [value]="tag.tag_name"
-                        severity="info"
-                        [rounded]="true">
-                      </p-tag>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -177,7 +146,7 @@
 
                   <div class="canvas-block metrics-block">
                     <div class="block-header">
-                      <span class="block-number">8</span>
+                      <span class="block-number">7</span>
                       <span class="block-title">Key Metrics</span>
                     </div>
                     <div class="block-content">
@@ -190,7 +159,7 @@
                 <div class="canvas-column">
                   <div class="canvas-block uvp-block full-height">
                     <div class="block-header">
-                      <span class="block-number">3</span>
+                      <span class="block-number">5</span>
                       <span class="block-title">Unique Value Proposition</span>
                     </div>
                     <div class="block-content">
@@ -218,7 +187,7 @@
 
                   <div class="canvas-block channels-block">
                     <div class="block-header">
-                      <span class="block-number">5</span>
+                      <span class="block-number">6</span>
                       <span class="block-title">Channels</span>
                     </div>
                     <div class="block-content">
@@ -251,7 +220,7 @@
                 <!-- Cost Structure -->
                 <div class="canvas-block cost-block">
                   <div class="block-header">
-                    <span class="block-number">7</span>
+                    <span class="block-number">8</span>
                     <span class="block-title">Cost Structure</span>
                   </div>
                   <div class="block-content">
@@ -262,7 +231,7 @@
                 <!-- Revenue Streams -->
                 <div class="canvas-block revenue-block">
                   <div class="block-header">
-                    <span class="block-number">6</span>
+                    <span class="block-number">3</span>
                     <span class="block-title">Revenue Streams</span>
                   </div>
                   <div class="block-content">
