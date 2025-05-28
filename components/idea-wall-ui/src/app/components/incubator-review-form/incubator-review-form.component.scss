@@ -56,22 +56,25 @@
   margin-bottom: 2rem;
 }
 
-.canvas-row {
+.canvas-main-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   gap: 1rem;
-  
-  &:first-child {
-    grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr;
-  }
-  
-  &:nth-child(2) {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  &:last-child {
-    grid-template-columns: 2fr 2fr;
-  }
+  height: 600px; // Fixed height for consistency
+}
+
+.canvas-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+}
+
+.canvas-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .canvas-block {
@@ -80,10 +83,22 @@
   border-radius: var(--border-radius);
   overflow: hidden;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
   
   &:hover {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
     transform: translateY(-1px);
+  }
+  
+  &.full-height {
+    flex: 1;
+    height: 100%;
+  }
+  
+  // For blocks in split columns, they should take equal height
+  .canvas-column > &:not(.full-height) {
+    flex: 1;
   }
 }
 
@@ -96,6 +111,7 @@
   gap: 0.5rem;
   font-weight: 600;
   color: var(--text-color);
+  flex-shrink: 0;
 }
 
 .block-number {
@@ -125,6 +141,14 @@
 
 .block-content {
   padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  
+  .mt-3 {
+    margin-top: 1rem;
+    flex-shrink: 0;
+  }
 }
 
 .sub-field-label {
@@ -320,12 +344,17 @@
   
   // Responsive adjustments
   @media (max-width: 1200px) {
-    .canvas-row {
+    .canvas-main-grid {
       grid-template-columns: 1fr 1fr !important;
-      
-      &:last-child {
-        grid-template-columns: 1fr !important;
-      }
+      height: auto;
+    }
+    
+    .canvas-column {
+      min-height: 400px;
+    }
+    
+    .canvas-bottom-row {
+      grid-template-columns: 1fr !important;
     }
   }
   
@@ -342,7 +371,17 @@
       font-size: 1.5rem;
     }
     
-    .canvas-row {
+    .canvas-main-grid {
+      grid-template-columns: 1fr !important;
+      height: auto;
+      gap: 0.75rem;
+    }
+    
+    .canvas-column {
+      min-height: auto;
+    }
+    
+    .canvas-bottom-row {
       grid-template-columns: 1fr !important;
       gap: 0.75rem;
     }
