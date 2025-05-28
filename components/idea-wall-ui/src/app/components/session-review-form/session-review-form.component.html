@@ -1,8 +1,9 @@
 <div class="container">
+  <!-- Breadcrumb Navigation -->
+  <p-breadcrumb [model]="breadcrumbItems" [home]="homeItem" styleClass="mb-4"></p-breadcrumb>
+
   <!-- Page Header -->
   <div class="page-header">
-    <h1 class="page-title" *ngIf="!isEditMode">Submit to Idea Session</h1>
-    <h1 class="page-title" *ngIf="isEditMode">Resubmit to Idea Session</h1>
     <div *ngIf="ideaTitle" class="idea-title-card">
       <div class="flex align-items-center gap-2">
         <i class="pi pi-lightbulb text-primary"></i>

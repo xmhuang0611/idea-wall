@@ -1,0 +1,11 @@
+:host ::ng-deep {
+  .p-datatable .p-datatable-thead > tr > th {
+    background-color: var(--surface-hover);
+  }
+  
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+} 

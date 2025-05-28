@@ -8,8 +8,11 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { MenuItem } from 'primeng/api';
 import { SessionReview } from '../../models/idea.model';
 import { IdeaService } from '../../services/idea.service';
+import { ReviewService } from '../../services/review.service';
 import { AuthService } from '../../auth/auth.service';
 
 @Component({
@@ -24,7 +27,8 @@ import { AuthService } from '../../auth/auth.service';
     InputTextareaModule,
     CardModule,
     ToastModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    BreadcrumbModule
   ],
   templateUrl: './session-review-form.component.html',
   styleUrls: ['./session-review-form.component.scss']
@@ -40,9 +44,14 @@ export class SessionReviewFormComponent implements OnInit {
   ideaTitle: string = '';
   isEditMode = false;
 
+  // Breadcrumb items
+  breadcrumbItems: MenuItem[] = [];
+  homeItem: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+
   constructor(
     private fb: FormBuilder,
     private ideaService: IdeaService,
+    private reviewService: ReviewService,
     private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router
@@ -96,6 +105,7 @@ export class SessionReviewFormComponent implements OnInit {
         next: (response) => {
           if (response.success && response.data) {
             this.ideaTitle = response.data.title;
+            this.updateBreadcrumb();
             
             // Check if there's existing session review data
             if (response.data.session_review) {
@@ -111,6 +121,16 @@ export class SessionReviewFormComponent implements OnInit {
           console.error('Error fetching idea details:', error);
         }
       });
+    }
+  }
+
+  private updateBreadcrumb(): void {
+    if (this.ideaTitle) {
+      this.breadcrumbItems = [
+        { label: 'Ideas', routerLink: '/' },
+        { label: this.ideaTitle, routerLink: ['/idea', this.ideaId] },
+        { label: this.isEditMode ? 'Resubmit Session Review' : 'Submit Session Review' }
+      ];
     }
   }
 
@@ -136,11 +156,11 @@ export class SessionReviewFormComponent implements OnInit {
 
     // Use different API endpoint based on mode
     const submitObservable = this.isEditMode 
-      ? this.ideaService.resubmitSessionReview(this.ideaId, sessionReviewData)
-      : this.ideaService.submitSessionReview(this.ideaId, sessionReviewData);
+      ? this.reviewService.resubmitSessionReview(this.ideaId, sessionReviewData)
+      : this.reviewService.submitSessionReview(this.ideaId, sessionReviewData);
 
     submitObservable.subscribe({
-      next: (response) => {
+      next: (response: any) => {
         if (response.success) {
           this.router.navigate(['/idea-session']);
         }
@@ -157,7 +177,7 @@ export class SessionReviewFormComponent implements OnInit {
     if (this.isEditMode) {
       this.router.navigate(['/idea-session']);
     } else {
-      this.router.navigate(['/']);
+      this.router.navigate(['/idea', this.ideaId]);
     }
   }
 } 

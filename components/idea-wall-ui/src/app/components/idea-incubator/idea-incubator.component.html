@@ -2,7 +2,6 @@
   <!-- Breadcrumb Navigation -->
   <p-breadcrumb [model]="breadcrumbItems" [home]="homeItem" styleClass="mb-4"></p-breadcrumb>
   
-  
   <!-- Loading Indicator -->
   <div *ngIf="isLoading" class="flex justify-content-center my-6">
     <p-progressSpinner></p-progressSpinner>
@@ -24,12 +23,11 @@
       <ng-template pTemplate="header">
         <tr>
           <th>Title</th>
-          <th>Stream</th>
-          <th>Submitter</th>
-          <th>Submitted At</th>
-          <th>Reviews</th>
-          <th>Avg Score</th>
+          <th>Creator</th>
           <th>Status</th>
+          <th>Score</th>
+          <th>Reviews</th>
+          <th>Submitted</th>
           <th>Action</th>
         </tr>
       </ng-template>
@@ -38,42 +36,12 @@
           <td>
             <div class="font-medium">{{idea.title}}</div>
           </td>
-          <td>
-            <div *ngIf="idea.session_review?.stream">{{idea.session_review?.stream}}</div>
-            <div *ngIf="!idea.session_review?.stream" class="text-500">-</div>
-          </td>
           <td>{{idea.creator_name}}</td>
           <td>
-            <span *ngIf="idea.session_review?.submitted_at">
-              {{idea.session_review?.submitted_at | date:'MMM d, y, h:mm a'}}
-            </span>
-            <span *ngIf="!idea.session_review?.submitted_at" class="text-500">-</span>
-          </td>
-          <td>
-            <div *ngIf="idea.session_review?.review_count; else noReviews">
-              {{idea.session_review?.review_count}}
-            </div>
-            <ng-template #noReviews>
-              <span class="text-500">0</span>
-            </ng-template>
-          </td>
-          <td>
-            <div *ngIf="idea.session_review?.average_score; else noScore">
+            <div *ngIf="idea.incubator_review?.status; else noStatus">
               <p-tag 
-                [value]="idea.session_review?.average_score.toFixed(1)" 
-                [severity]="getScoreSeverity(idea.session_review?.average_score)"
-                [rounded]="true">
-              </p-tag>
-            </div>
-            <ng-template #noScore>
-              <span class="text-500">-</span>
-            </ng-template>
-          </td>
-          <td>
-            <div *ngIf="idea.session_review?.status; else noStatus">
-              <p-tag 
-                [value]="getReviewStatusLabel(idea.session_review.status)" 
-                [severity]="getReviewStatusSeverity(idea.session_review.status)"
+                [value]="getReviewStatusLabel(idea.incubator_review.status)" 
+                [severity]="getReviewStatusSeverity(idea.incubator_review.status)"
                 [rounded]="true">
               </p-tag>
             </div>
@@ -82,24 +50,41 @@
             </ng-template>
           </td>
           <td>
+            <div *ngIf="idea.incubator_review?.average_score; else noScore">
+              <p-tag 
+                [value]="idea.incubator_review?.average_score.toFixed(1)" 
+                [severity]="getScoreSeverity(idea.incubator_review?.average_score)"
+                [rounded]="true">
+              </p-tag>
+            </div>
+            <ng-template #noScore>
+              <span class="text-500">-</span>
+            </ng-template>
+          </td>
+          <td>
+            <div *ngIf="idea.incubator_review?.review_count; else noReviews">
+              {{idea.incubator_review?.review_count}}
+            </div>
+            <ng-template #noReviews>
+              <span class="text-500">0</span>
+            </ng-template>
+          </td>
+          <td>
+            <span *ngIf="idea.incubator_review?.submitted_at">
+              {{idea.incubator_review?.submitted_at | date:'MMM d, y, h:mm a'}}
+            </span>
+            <span *ngIf="!idea.incubator_review?.submitted_at" class="text-500">-</span>
+          </td>
+          <td>
             <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm"
                     (click)="viewIdea(idea.id)" pTooltip="View Details" tooltipPosition="top"></button>
             <button 
-              *ngIf="canEditSessionReview(idea)"
+              *ngIf="canEditIncubatorReview(idea)"
               pButton 
               icon="pi pi-pencil" 
               class="p-button-rounded p-button-text p-button-sm ml-2"
-              (click)="editSessionReview(idea)" 
+              (click)="editIncubatorReview(idea)" 
               pTooltip="Resubmit" 
-              tooltipPosition="top">
-            </button>
-            <button 
-              *ngIf="canSubmitToIncubator(idea)"
-              pButton 
-              icon="pi pi-arrow-right" 
-              class="p-button-rounded p-button-text p-button-sm ml-2"
-              (click)="submitToIncubator(idea)" 
-              pTooltip="Submit to Incubator" 
               tooltipPosition="top">
             </button>
           </td>
@@ -107,11 +92,11 @@
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="8" class="text-center p-4">
+          <td colspan="7" class="text-center p-4">
             <div class="flex flex-column align-items-center">
               <i class="pi pi-info-circle text-500 text-4xl mb-3"></i>
-              <span class="text-lg font-medium">No session ideas found</span>
-              <span class="text-500">Submit ideas from the Idea Wall for review</span>
+              <span class="text-lg font-medium">No incubator ideas found</span>
+              <span class="text-500">Submit approved session ideas for incubator review</span>
             </div>
           </td>
         </tr>
@@ -128,4 +113,4 @@
       </p-paginator>
     </div>
   </p-card>
-</div>
+</div> 

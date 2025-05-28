@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { Idea, SessionReview } from '../models/idea.model';
+import { Idea } from '../models/idea.model';
 import { ApiResponse } from '../shared/models/api-response.model';
 import { ToastService } from '../shared/services/toast.service';
 import { Comment } from '../models/comment.model';
@@ -233,42 +233,6 @@ export class IdeaService {
   }
 
   /**
-   * Submit an idea for session review
-   * @param ideaId Idea ID
-   * @param sessionReviewData Session review data
-   * @returns Observable with operation result
-   */
-  submitSessionReview(ideaId: string, sessionReviewData: Partial<SessionReview>): Observable<ApiResponse<Idea>> {
-    return this.http.put<ApiResponse<Idea>>(`${this.apiUrl}/${ideaId}/session-review`, sessionReviewData)
-      .pipe(
-        tap(response => {
-          if (response.success) {
-            this.toastService.showSuccess('Idea submitted for session review successfully');
-          }
-        }),
-        catchError(this.errorHandler.handleError)
-      );
-  }
-
-  /**
-   * Resubmit an idea for session review when status is NEED_IMPROVEMENT
-   * @param ideaId Idea ID
-   * @param sessionReviewData Updated session review data
-   * @returns Observable with operation result
-   */
-  resubmitSessionReview(ideaId: string, sessionReviewData: Partial<SessionReview>): Observable<ApiResponse<Idea>> {
-    return this.http.put<ApiResponse<Idea>>(`${this.apiUrl}/${ideaId}/session-review/resubmit`, sessionReviewData)
-      .pipe(
-        tap(response => {
-          if (response.success) {
-            this.toastService.showSuccess('Idea resubmitted for session review successfully');
-          }
-        }),
-        catchError(this.errorHandler.handleError)
-      );
-  }
-
-  /**
    * Get ideas submitted for session review
    * @param params Query parameters
    * @returns Observable with session ideas
@@ -316,33 +280,50 @@ export class IdeaService {
   }
 
   /**
-   * Make final decision for session review
-   * @param ideaId Idea ID
-   * @param decision Final decision (APPROVED/REJECTED/NEED_IMPROVEMENT)
-   * @param comments Decision comments
-   * @returns Observable with operation result
+   * Get ideas submitted for incubator review
+   * @param params Query parameters
+   * @returns Observable with incubator ideas
    */
-  makeSessionFinalDecision(
-    ideaId: string, 
-    decision: string, 
-    comments: string
-  ): Observable<ApiResponse<Idea>> {
-    const decisionData = {
-      decision: decision,
-      comments: comments
-    };
+  getIncubatorIdeas(params: {
+    skip?: number;
+    limit?: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    tags?: number[];
+  } = {}): Observable<ApiResponse<Idea[]>> {
+    let httpParams = new HttpParams();
+    
+    if (params.skip !== undefined) {
+      httpParams = httpParams.set('skip', params.skip.toString());
+    }
+    if (params.limit !== undefined) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    if (params.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params.sort_by) {
+      httpParams = httpParams.set('sort_by', params.sort_by);
+    }
+    if (params.sort_order) {
+      httpParams = httpParams.set('sort_order', params.sort_order);
+    }
+    if (params.tags && params.tags.length > 0) {
+      params.tags.forEach(tag => {
+        httpParams = httpParams.append('tags', tag.toString());
+      });
+    }
+    
+    // Add filter for all incubator-related statuses
+    httpParams = httpParams.append('status', 'IN_INCUBATOR_REVIEW');
+    httpParams = httpParams.append('status', 'INCUBATOR_APPROVED');
+    httpParams = httpParams.append('status', 'INCUBATOR_REJECTED');
 
-    return this.http.post<ApiResponse<Idea>>(
-      `${this.apiUrl}/${ideaId}/session-review/final-decision`, 
-      decisionData
-    ).pipe(
-      tap(response => {
-        if (response.success) {
-          this.toastService.showSuccess('Final decision submitted successfully');
-        }
-      }),
-      catchError(this.errorHandler.handleError)
-    );
+    return this.http.get<ApiResponse<Idea[]>>(this.apiUrl, { params: httpParams })
+      .pipe(
+        catchError(this.errorHandler.handleError)
+      );
   }
 
   getHotTopics(params?: HotTopicsParams): Observable<ApiResponse<HotTopic[]>> {

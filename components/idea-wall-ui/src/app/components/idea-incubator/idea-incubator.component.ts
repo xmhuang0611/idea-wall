@@ -15,13 +15,12 @@ import { DialogModule } from 'primeng/dialog';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MenuItem } from 'primeng/api';
 import { IdeaService } from '../../services/idea.service';
-import { ReviewService } from '../../services/review.service';
 import { Idea, ReviewStatus, IdeaStatus } from '../../models/idea.model';
 import { ApiResponse } from '../../shared/models/api-response.model';
 import { AuthService } from '../../auth/auth.service';
 
 @Component({
-  selector: 'app-idea-session',
+  selector: 'app-idea-incubator',
   standalone: true,
   imports: [
     CommonModule,
@@ -38,10 +37,10 @@ import { AuthService } from '../../auth/auth.service';
     DialogModule,
     BreadcrumbModule
   ],
-  templateUrl: './idea-session.component.html',
-  styleUrls: ['./idea-session.component.scss']
+  templateUrl: './idea-incubator.component.html',
+  styleUrls: ['./idea-incubator.component.scss']
 })
-export class IdeaSessionComponent implements OnInit {
+export class IdeaIncubatorComponent implements OnInit {
   ideas: Idea[] = [];
   totalItems = 0;
   pageSize = 10;
@@ -55,23 +54,22 @@ export class IdeaSessionComponent implements OnInit {
 
   constructor(
     private ideaService: IdeaService,
-    private reviewService: ReviewService,
     private router: Router,
     private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.initializeBreadcrumb();
-    this.loadSessionIdeas();
+    this.loadIncubatorIdeas();
   }
 
   private initializeBreadcrumb(): void {
     this.breadcrumbItems = [
-      { label: 'Idea Session', routerLink: '/idea-session' }
+      { label: 'Idea Incubator', routerLink: '/idea-incubator' }
     ];
   }
 
-  loadSessionIdeas(page: number = 1): void {
+  loadIncubatorIdeas(page: number = 1): void {
     this.isLoading = true;
     this.currentPage = page;
     
@@ -83,7 +81,7 @@ export class IdeaSessionComponent implements OnInit {
       sort_order: 'desc' as 'asc' | 'desc'
     };
     
-    this.ideaService.getSessionIdeas(params)
+    this.ideaService.getIncubatorIdeas(params)
       .subscribe({
         next: (response: ApiResponse<Idea[]>) => {
           if (response.success) {
@@ -93,7 +91,7 @@ export class IdeaSessionComponent implements OnInit {
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading session ideas:', error);
+          console.error('Error loading incubator ideas:', error);
           this.isLoading = false;
         }
       });
@@ -101,16 +99,16 @@ export class IdeaSessionComponent implements OnInit {
 
   onPageChange(event: any): void {
     const page = Math.floor(event.first / event.rows) + 1;
-    this.loadSessionIdeas(page);
+    this.loadIncubatorIdeas(page);
   }
 
   onSearch(): void {
-    this.loadSessionIdeas(1);
+    this.loadIncubatorIdeas(1);
   }
 
   clearSearch(): void {
     this.searchQuery = '';
-    this.loadSessionIdeas(1);
+    this.loadIncubatorIdeas(1);
   }
 
   getReviewStatusSeverity(status: ReviewStatus): 'success' | 'info' | 'warning' | 'danger' | 'secondary' {
@@ -121,6 +119,8 @@ export class IdeaSessionComponent implements OnInit {
         return 'danger';
       case ReviewStatus.IN_REVIEW:
         return 'info';
+      case ReviewStatus.NEED_IMPROVEMENT:
+        return 'warning';
       default:
         return 'secondary';
     }
@@ -145,23 +145,22 @@ export class IdeaSessionComponent implements OnInit {
    * Get idea status severity based on overall idea status
    */
   getIdeaStatusSeverity(idea: Idea): 'success' | 'info' | 'warning' | 'danger' | 'secondary' {
-    // Check if the idea has session_review, if not it's probably a different status
-    if (!idea.session_review) {
+    if (!idea.incubator_review) {
       return 'secondary';
     }
     
-    return this.getReviewStatusSeverity(idea.session_review.status);
+    return this.getReviewStatusSeverity(idea.incubator_review.status);
   }
 
   /**
    * Get idea status label based on overall idea status
    */
   getIdeaStatusLabel(idea: Idea): string {
-    if (!idea.session_review) {
-      return 'No Session Review';
+    if (!idea.incubator_review) {
+      return 'No Incubator Review';
     }
     
-    return this.getReviewStatusLabel(idea.session_review.status);
+    return this.getReviewStatusLabel(idea.incubator_review.status);
   }
 
   /**
@@ -180,48 +179,35 @@ export class IdeaSessionComponent implements OnInit {
   }
 
   viewIdea(id: string): void {
-    this.router.navigate(['/idea-session', id]);
+    this.router.navigate(['/idea-incubator', id]);
   }
 
   /**
-   * Check if current user can edit the idea session review
+   * Check if current user can edit the idea incubator review
    */
-  canEditSessionReview(idea: Idea): boolean {
-    // Can edit if:
-    // 1. User is the idea creator
-    // 2. Session review status is NEED_IMPROVEMENT
+  canEditIncubatorReview(idea: Idea): boolean {
     const isCreator = idea.creator_id === this.authService.getId();
-    const isNeedImprovement = idea.session_review?.status === ReviewStatus.NEED_IMPROVEMENT;
+    const isNeedImprovement = idea.incubator_review?.status === ReviewStatus.NEED_IMPROVEMENT;
     
     return isCreator && isNeedImprovement;
   }
 
   /**
-   * Navigate to session review form for editing
+   * Navigate to incubator review form for editing
    */
-  editSessionReview(idea: Idea): void {
-    this.router.navigate(['/idea', idea.id, 'session-review']);
+  editIncubatorReview(idea: Idea): void {
+    this.router.navigate(['/idea-incubator', idea.id, 'edit']);
   }
 
   /**
-   * Check if current user can submit idea to incubator
+   * Format date for display
    */
-  canSubmitToIncubator(idea: Idea): boolean {
-    // Can submit if:
-    // 1. User is the idea creator
-    // 2. Session review status is APPROVED
-    // 3. Idea is not already in incubator review or beyond
-    const isCreator = idea.creator_id === this.authService.getId();
-    const isSessionApproved = idea.session_review?.status === ReviewStatus.APPROVED;
-    const notInIncubator = !idea.incubator_review;
-    
-    return isCreator && isSessionApproved && notInIncubator;
-  }
-
-  /**
-   * Submit idea to incubator review
-   */
-  submitToIncubator(idea: Idea): void {
-    this.router.navigate(['/idea-session', idea.id, 'incubator-review']);
+  formatDate(date: Date): string {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   }
 } 

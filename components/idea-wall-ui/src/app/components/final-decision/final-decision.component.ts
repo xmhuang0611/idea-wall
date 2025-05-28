@@ -6,7 +6,9 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { IdeaService } from '../../services/idea.service';
+import { ReviewService } from '../../services/review.service';
 import { Idea } from '../../models/idea.model';
+import { Review } from '../../models/review.model';
 
 @Component({
   selector: 'app-final-decision',
@@ -44,7 +46,7 @@ import { Idea } from '../../models/idea.model';
               <label for="approved" class="ml-2 cursor-pointer">
                 <span class="font-medium text-green-600">Approve</span>
                 <span class="block text-sm text-500">
-                  Approve for next stage (incubator)
+                  {{ getApprovalText() }}
                 </span>
               </label>
             </div>
@@ -105,16 +107,16 @@ import { Idea } from '../../models/idea.model';
           <div class="grid">
             <div class="col-6">
               <span class="text-sm text-600">Total Reviews:</span>
-              <span class="ml-2 font-medium text-700">{{ reviewCount }}</span>
+              <span class="ml-2 font-medium text-700">{{ getReviewCount() }}</span>
             </div>
             <div class="col-6">
               <span class="text-sm text-600">Average Score:</span>
-              <span class="ml-2 font-medium text-700">{{ averageScore | number:'1.1-1' }}/5</span>
+              <span class="ml-2 font-medium text-700">{{ getAverageScore() | number:'1.1-1' }}/5</span>
             </div>
           </div>
-          <div *ngIf="reviewCount < 2" class="text-orange-600 text-sm mt-2">
+          <div *ngIf="getReviewCount() < getMinimumReviews()" class="text-orange-600 text-sm mt-2">
             <i class="pi pi-exclamation-triangle mr-1"></i>
-            Minimum 2 reviews required for final decision.
+            Minimum {{ getMinimumReviews() }} reviews required for final decision.
           </div>
         </div>
 
@@ -133,7 +135,7 @@ import { Idea } from '../../models/idea.model';
             label="Submit Decision" 
             class="p-button-rounded"
             [loading]="isSubmitting"
-            [disabled]="decisionForm.invalid || reviewCount < 2">
+            [disabled]="decisionForm.invalid || getReviewCount() < getMinimumReviews()">
           </button>
         </div>
       </form>
@@ -142,9 +144,9 @@ import { Idea } from '../../models/idea.model';
   styleUrls: ['./final-decision.component.scss']
 })
 export class FinalDecisionComponent {
-  @Input() ideaId!: string;
-  @Input() reviewCount = 0;
-  @Input() averageScore = 0;
+  @Input() idea!: Idea;
+  @Input() targetType: string = 'Session';
+  @Input() reviews: Review[] = [];
   @Output() decisionSubmitted = new EventEmitter<Idea>();
   @Output() cancelled = new EventEmitter<void>();
 
@@ -153,7 +155,8 @@ export class FinalDecisionComponent {
 
   constructor(
     private fb: FormBuilder,
-    private ideaService: IdeaService
+    private ideaService: IdeaService,
+    private reviewService: ReviewService
   ) {
     this.decisionForm = this.fb.group({
       decision: ['', Validators.required],
@@ -161,8 +164,34 @@ export class FinalDecisionComponent {
     });
   }
 
+  getReviewCount(): number {
+    if (this.targetType === 'Session') {
+      return this.idea.session_review?.review_count || 0;
+    } else {
+      return this.idea.incubator_review?.review_count || 0;
+    }
+  }
+
+  getAverageScore(): number {
+    if (this.targetType === 'Session') {
+      return this.idea.session_review?.average_score || 0;
+    } else {
+      return this.idea.incubator_review?.average_score || 0;
+    }
+  }
+
+  getMinimumReviews(): number {
+    return this.targetType === 'Session' ? 2 : 3;
+  }
+
+  getApprovalText(): string {
+    return this.targetType === 'Session' ? 
+      'Approve for next stage (incubator)' : 
+      'Approve the idea';
+  }
+
   onSubmit(): void {
-    if (this.decisionForm.invalid || this.reviewCount < 2) {
+    if (this.decisionForm.invalid || this.getReviewCount() < this.getMinimumReviews()) {
       this.markFormGroupTouched();
       return;
     }
@@ -170,20 +199,23 @@ export class FinalDecisionComponent {
     this.isSubmitting = true;
     const { decision, comments } = this.decisionForm.value;
 
-    this.ideaService.makeSessionFinalDecision(this.ideaId, decision, comments)
-      .subscribe({
-        next: (response) => {
-          if (response.success && response.data) {
-            this.decisionSubmitted.emit(response.data);
-            this.resetForm();
-          }
-          this.isSubmitting = false;
-        },
-        error: (error) => {
-          console.error('Error submitting decision:', error);
-          this.isSubmitting = false;
+    const decisionObservable = this.targetType === 'Session' 
+      ? this.reviewService.makeSessionFinalDecision(this.idea.id, decision, comments)
+      : this.reviewService.makeIncubatorFinalDecision(this.idea.id, decision, comments);
+
+    decisionObservable.subscribe({
+      next: (response: any) => {
+        if (response.success && response.data) {
+          this.decisionSubmitted.emit(response.data);
+          this.resetForm();
         }
-      });
+        this.isSubmitting = false;
+      },
+      error: (error: any) => {
+        console.error('Error submitting decision:', error);
+        this.isSubmitting = false;
+      }
+    });
   }
 
   onCancel(): void {

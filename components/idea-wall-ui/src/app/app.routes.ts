@@ -10,6 +10,9 @@ import { LogViewComponent } from './components/settings/log-view/log-view.compon
 import { IdeaSessionComponent } from './components/idea-session/idea-session.component';
 import { SessionReviewFormComponent } from './components/session-review-form/session-review-form.component';
 import { IdeaSessionDetailsComponent } from './components/idea-session-details/idea-session-details.component';
+import { IdeaIncubatorComponent } from './components/idea-incubator/idea-incubator.component';
+import { IdeaIncubatorDetailsComponent } from './components/idea-incubator-details/idea-incubator-details.component';
+import { IncubatorReviewFormComponent } from './components/incubator-review-form/incubator-review-form.component';
 
 export const routes: Routes = [
   { path: '', component: IdeaWallComponent },
@@ -28,7 +31,10 @@ export const routes: Routes = [
   { path: 'idea-form', component: IdeaFormComponent, canActivate: [AuthGuard] },
   { path: 'idea-form/:id', component: IdeaFormComponent, canActivate: [AuthGuard] },
   { path: 'idea-session', component: IdeaSessionComponent },
-  { path: 'session-review/:id', component: SessionReviewFormComponent, canActivate: [AuthGuard] },
+  { path: 'idea/:id/session-review', component: SessionReviewFormComponent, canActivate: [AuthGuard] },
   { path: 'idea-session/:id', component: IdeaSessionDetailsComponent },
+  { path: 'idea-incubator', component: IdeaIncubatorComponent },
+  { path: 'idea-incubator/:id', component: IdeaIncubatorDetailsComponent },
+  { path: 'idea-session/:id/incubator-review', component: IncubatorReviewFormComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '' }
 ];
