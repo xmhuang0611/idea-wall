@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }} - Idea Wall</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f4f4f4;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .email-wrapper {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header { 
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white; 
+            padding: 30px 20px; 
+            text-align: center; 
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .header p {
+            margin: 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content { 
+            padding: 30px 20px; 
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .notification { 
+            background-color: #f8f9fa; 
+            margin: 20px 0; 
+            padding: 25px; 
+            border-radius: 8px; 
+            border-left: 4px solid #007bff;
+            position: relative;
+        }
+        .notification.comment { 
+            border-left-color: #28a745; 
+            background-color: #f8fff9;
+        }
+        .notification.vote { 
+            border-left-color: #ffc107; 
+            background-color: #fffef8;
+        }
+        .notification.bookmark { 
+            border-left-color: #17a2b8; 
+            background-color: #f8feff;
+        }
+        .notification-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .notification-icon { 
+            font-size: 24px; 
+            margin-right: 12px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: white;
+        }
+        .notification-type {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .notification-content { 
+            font-size: 16px; 
+            margin: 15px 0;
+            line-height: 1.5;
+            color: #333;
+        }
+        .notification-time { 
+            color: #6c757d; 
+            font-size: 14px; 
+            margin-top: 15px;
+            font-style: italic;
+        }
+        .cta-section {
+            text-align: center; 
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .btn { 
+            display: inline-block; 
+            padding: 14px 28px; 
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+        }
+        .btn:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.4);
+        }
+        .footer { 
+            background-color: #e9ecef; 
+            padding: 20px; 
+            text-align: center; 
+            border-top: 1px solid #dee2e6;
+        }
+        .footer p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            .header {
+                padding: 20px 15px;
+            }
+            .header h1 {
+                font-size: 24px;
+            }
+            .content {
+                padding: 20px 15px;
+            }
+            .notification {
+                padding: 20px 15px;
+            }
+            .btn {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="email-wrapper">
+            <div class="header">
+                <h1>💡 Idea Wall</h1>
+                <p>{{ header_message | default("You have a new notification!") }}</p>
+            </div>
+            
+            <div class="content">
+                <div class="greeting">Hello {{ user_name }}!</div>
+                
+                <div class="notification {{ notification.type }}">
+                    <div class="notification-header">
+                        <div class="notification-icon">
+                            {% if notification.type == 'comment' %}💬
+                            {% elif notification.type == 'vote' %}👍
+                            {% elif notification.type == 'bookmark' %}🔖
+                            {% else %}🔔
+                            {% endif %}
+                        </div>
+                        <div class="notification-type">{{ notification.type.replace('_', ' ').title() }}</div>
+                    </div>
+                    <div class="notification-content">{{ notification.content }}</div>
+                    <div class="notification-time">{{ notification.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                </div>
+                
+                <div class="cta-section">
+                    <p style="margin-bottom: 15px; color: #666;">Click below to view your notifications and engage with your community:</p>
+                    <a href="{{ app_url }}" class="btn">View on Idea Wall</a>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>
+                    You're receiving this email because someone interacted with your content on Idea Wall.<br>
+                    <a href="{{ app_url }}/settings">Manage your notification preferences</a> | 
+                    <a href="{{ app_url }}">Visit Idea Wall</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

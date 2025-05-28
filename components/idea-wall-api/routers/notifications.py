@@ -3,11 +3,15 @@ from typing import List
 from models.notification import Notification
 from models.response import StandardResponse
 from services.notification_service import notification_service
-from services.notification_digest_service import notification_digest_service
+from services.email_template_service import email_template_service
 from core.deps import get_current_user, user_has_role
 from models.user import User, UserRole
+from services.email_service import email_service
+import logging
 
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 @router.get("/notifications", response_model=StandardResponse[List[Notification]])
 async def get_notifications(
@@ -53,36 +57,136 @@ async def get_unread_notification_count(
     count = await notification_service.get_unread_count(current_user.user_id)
     return StandardResponse(success=True, data=count)
 
-@router.post("/notifications/send-digest", response_model=StandardResponse[dict])
-async def send_notification_digest(
+@router.get("/notifications/email-preview", response_model=StandardResponse[dict])
+async def preview_notification_email_template(
     current_user: User = Depends(user_has_role([UserRole.ADMIN]))
 ):
-    """Manually trigger daily notification digest (Admin only)"""
-    results = await notification_digest_service.send_daily_notification_digest()
-    return StandardResponse(success=True, data=results)
-
-@router.get("/notifications/digest-preview/{user_id}", response_model=StandardResponse[str])
-async def preview_notification_digest(
-    user_id: str,
-    current_user: User = Depends(user_has_role([UserRole.ADMIN]))
-):
-    """Preview notification digest email for a user (Admin only)"""
-    from datetime import datetime, timedelta
-    from services.email_service import email_service
-    from services.user_service import user_service
+    """Preview notification email template (Admin only)"""
+    from models.notification import NotificationType
+    from datetime import datetime
     
-    # Get user
-    user = await user_service.get_user(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Get notifications from past 24 hours
-    since = datetime.utcnow() - timedelta(days=1)
-    notifications = await notification_digest_service.get_user_unread_notifications_since(user_id, since)
-    
-    if not notifications:
-        return StandardResponse(success=True, data="<p>No unread notifications for this user.</p>")
+    # Create a sample notification for preview
+    sample_notification = Notification(
+        id="sample_id",
+        user_id=current_user.user_id,
+        type=NotificationType.COMMENT,
+        content="John Doe commented on your idea: Implement AI-powered code review system",
+        related_id="sample_idea_id",
+        is_read=False,
+        created_at=datetime.utcnow(),
+        creator_id="john.doe",
+        creator_name="John Doe"
+    )
     
     # Generate preview
-    html_content = email_service.generate_notification_email_html(user, notifications)
-    return StandardResponse(success=True, data=html_content) 
+    html_content = email_template_service.render_notification_email_html(
+        notification=sample_notification,
+        user=current_user,
+        app_url="http://localhost:4200"
+    )
+    
+    text_content = email_template_service.render_notification_email_text(
+        notification=sample_notification,
+        user=current_user,
+        app_url="http://localhost:4200"
+    )
+    
+    return StandardResponse(success=True, data={
+        "html": html_content,
+        "text": text_content,
+        "subject": email_template_service._generate_email_subject(sample_notification)
+    })
+
+@router.post("/notifications/test-email", response_model=StandardResponse[dict])
+async def test_email_configuration(
+    current_user: User = Depends(user_has_role([UserRole.ADMIN]))
+):
+    """Test email configuration and send a test email (Admin only)"""
+    from models.notification import NotificationType
+    from datetime import datetime
+    
+    # First test the connection
+    connection_test = await email_service.test_email_connection()
+    
+    if not connection_test["success"]:
+        return StandardResponse(
+            success=False, 
+            data=connection_test,
+            error={"code": 500, "message": "Email connection test failed"}
+        )
+    
+    # Create a test notification
+    test_notification = Notification(
+        id="test_id",
+        user_id=current_user.user_id,
+        type=NotificationType.COMMENT,
+        content="This is a test notification to verify your email configuration is working correctly.",
+        related_id="test_idea_id",
+        is_read=False,
+        created_at=datetime.utcnow(),
+        creator_id="system",
+        creator_name="System Test"
+    )
+    
+    # Generate test email
+    try:
+        subject = f"[TEST] {email_template_service._generate_email_subject(test_notification)}"
+        html_content = email_template_service.render_notification_email_html(
+            notification=test_notification,
+            user=current_user,
+            app_url="http://localhost:4200"
+        )
+        text_content = email_template_service.render_notification_email_text(
+            notification=test_notification,
+            user=current_user,
+            app_url="http://localhost:4200"
+        )
+        
+        # Send test email
+        user_email = f"{current_user.user_id}@company.com" if "@" not in current_user.user_id else current_user.user_id
+        email_sent = await email_service.send_email(
+            to_email=user_email,
+            subject=subject,
+            html_content=html_content,
+            text_content=text_content
+        )
+        
+        if email_sent:
+            return StandardResponse(
+                success=True,
+                data={
+                    "message": f"Test email sent successfully to {user_email}",
+                    "connection_test": connection_test,
+                    "email_sent": True
+                }
+            )
+        else:
+            return StandardResponse(
+                success=False,
+                data={
+                    "message": f"Failed to send test email to {user_email}",
+                    "connection_test": connection_test,
+                    "email_sent": False
+                },
+                error={"code": 500, "message": "Test email sending failed"}
+            )
+            
+    except Exception as e:
+        logger.error(f"Error in test email: {str(e)}")
+        return StandardResponse(
+            success=False,
+            data={
+                "message": f"Error generating test email: {str(e)}",
+                "connection_test": connection_test,
+                "email_sent": False
+            },
+            error={"code": 500, "message": "Test email generation failed"}
+        )
+
+@router.get("/notifications/email-config", response_model=StandardResponse[dict])
+async def get_email_configuration(
+    current_user: User = Depends(user_has_role([UserRole.ADMIN]))
+):
+    """Get email configuration details (Admin only)"""
+    config_details = email_service._get_config_details()
+    return StandardResponse(success=True, data=config_details) 

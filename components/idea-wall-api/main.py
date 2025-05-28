@@ -3,7 +3,7 @@ from fastapi.openapi.utils import get_openapi
 from core.database import connect_to_mongo, close_mongo_connection
 from core.oauth2_config import get_oauth2_settings
 from routers import ideas, comments, votes, tags, users, bookmarks, logs, reviews, notifications
-from services.scheduler_service import scheduler_service
+import logging
 
 oauth2_settings = get_oauth2_settings()
 
@@ -52,12 +52,10 @@ app.openapi = custom_openapi
 @app.on_event("startup")
 async def startup_event():
     await connect_to_mongo()
-    scheduler_service.start()  # Start the scheduler
 
 @app.on_event("shutdown")
 async def shutdown_event():
     await close_mongo_connection()
-    scheduler_service.stop()  # Stop the scheduler
 
 # Include routers
 app.include_router(ideas.router, prefix="/api/ideas", tags=["ideas"])
@@ -72,4 +70,25 @@ app.include_router(notifications.router, prefix="/api", tags=["notifications"])
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Idea Wall API"} 
+    return {"message": "Welcome to Idea Wall API"}
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# Set specific loggers to INFO level
+logging.getLogger("services.email_service").setLevel(logging.INFO)
+logging.getLogger("services.notification_service").setLevel(logging.INFO)
+logging.getLogger("services.vote_service").setLevel(logging.INFO)
+logging.getLogger("services.comment_service").setLevel(logging.INFO)
+logging.getLogger("services.idea_service").setLevel(logging.INFO)
+logging.getLogger("services.user_service").setLevel(logging.INFO)
+
+# Suppress noisy third-party loggers
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("asyncio").setLevel(logging.WARNING)
+logging.getLogger("motor").setLevel(logging.WARNING)
+logging.getLogger("pymongo").setLevel(logging.WARNING) 
