@@ -18,271 +18,270 @@
     <p-progressSpinner></p-progressSpinner>
   </div>
 
-  <!-- Form Card -->
-  <p-card *ngIf="!isLoading && idea" styleClass="form-card">
-    <ng-template pTemplate="content">
-      <div class="form-content">
-        <form [formGroup]="leanCanvasForm" (ngSubmit)="onSubmit()" class="p-fluid">
-          <!-- Loading Overlay -->
-          <div *ngIf="isSubmitting" class="submit-overlay">
-            <p-progressSpinner></p-progressSpinner>
-          </div>
-
-          <!-- Problem & Solution Section -->
-          <div class="form-section">
-            <div class="section-header">
-              <i class="pi pi-exclamation-circle section-icon"></i>
-              <span class="section-title">Problem & Solution</span>
-            </div>
-            
-            <div class="section-content">
-              <div class="grid">
-                <!-- Problem -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="problem" class="field-label">Problem <span class="required">*</span></label>
-                    <textarea 
-                      id="problem"
-                      pInputTextarea 
-                      formControlName="problem"
-                      rows="4" 
-                      placeholder="What problem does your idea solve?"
-                      [class.error-input]="leanCanvasForm.get('problem')?.invalid && leanCanvasForm.get('problem')?.touched">
-                    </textarea>
-                    <small 
-                      class="p-error" 
-                      *ngIf="leanCanvasForm.get('problem')?.invalid && leanCanvasForm.get('problem')?.touched">
-                      Problem description is required
-                    </small>
-                  </div>
-                </div>
-
-                <!-- Solution -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="solution" class="field-label">Solution <span class="required">*</span></label>
-                    <textarea 
-                      id="solution"
-                      pInputTextarea 
-                      formControlName="solution"
-                      rows="4" 
-                      placeholder="How does your idea solve the problem?"
-                      [class.error-input]="leanCanvasForm.get('solution')?.invalid && leanCanvasForm.get('solution')?.touched">
-                    </textarea>
-                    <small 
-                      class="p-error" 
-                      *ngIf="leanCanvasForm.get('solution')?.invalid && leanCanvasForm.get('solution')?.touched">
-                      Solution description is required
-                    </small>
-                  </div>
-                </div>
-
-                <!-- Existing Alternatives -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="existing_alternatives" class="field-label">Existing Alternatives</label>
-                    <textarea 
-                      id="existing_alternatives"
-                      pInputTextarea 
-                      formControlName="existing_alternatives"
-                      rows="3" 
-                      placeholder="What alternatives exist today?"
-                      class="w-full">
-                    </textarea>
-                  </div>
-                </div>
-
-                <!-- Unique Value Proposition -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="unique_value" class="field-label">Unique Value Proposition <span class="required">*</span></label>
-                    <textarea 
-                      id="unique_value"
-                      pInputTextarea 
-                      formControlName="unique_value"
-                      rows="3" 
-                      placeholder="What makes your solution unique?"
-                      [class.error-input]="leanCanvasForm.get('unique_value')?.invalid && leanCanvasForm.get('unique_value')?.touched">
-                    </textarea>
-                    <small 
-                      class="p-error" 
-                      *ngIf="leanCanvasForm.get('unique_value')?.invalid && leanCanvasForm.get('unique_value')?.touched">
-                      Unique value proposition is required
-                    </small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Business Model Section -->
-          <div class="form-section">
-            <div class="section-header">
-              <i class="pi pi-chart-line section-icon"></i>
-              <span class="section-title">Business Model</span>
-            </div>
-            
-            <div class="section-content">
-              <div class="grid">
-                <!-- Customer Segments -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="customer_segments" class="field-label">Customer Segments <span class="required">*</span></label>
-                    <textarea 
-                      id="customer_segments"
-                      pInputTextarea 
-                      formControlName="customer_segments"
-                      rows="3" 
-                      placeholder="Who are your target customers?"
-                      [class.error-input]="leanCanvasForm.get('customer_segments')?.invalid && leanCanvasForm.get('customer_segments')?.touched">
-                    </textarea>
-                    <small 
-                      class="p-error" 
-                      *ngIf="leanCanvasForm.get('customer_segments')?.invalid && leanCanvasForm.get('customer_segments')?.touched">
-                      Customer segments description is required
-                    </small>
-                  </div>
-                </div>
-
-                <!-- Early Adopters -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="early_adopters" class="field-label">Early Adopters</label>
-                    <textarea 
-                      id="early_adopters"
-                      pInputTextarea 
-                      formControlName="early_adopters"
-                      rows="3" 
-                      placeholder="Who would be your first customers?">
-                    </textarea>
-                  </div>
-                </div>
-
-                <!-- Channels -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="channels" class="field-label">Channels</label>
-                    <textarea 
-                      id="channels"
-                      pInputTextarea 
-                      formControlName="channels"
-                      rows="3" 
-                      placeholder="How will you reach your customers?">
-                    </textarea>
-                  </div>
-                </div>
-
-                <!-- Revenue Stream -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="revenue_stream" class="field-label">Revenue Stream <span class="required">*</span></label>
-                    <textarea 
-                      id="revenue_stream"
-                      pInputTextarea 
-                      formControlName="revenue_stream"
-                      rows="3" 
-                      placeholder="How will you make money?"
-                      [class.error-input]="leanCanvasForm.get('revenue_stream')?.invalid && leanCanvasForm.get('revenue_stream')?.touched">
-                    </textarea>
-                    <small 
-                      class="p-error" 
-                      *ngIf="leanCanvasForm.get('revenue_stream')?.invalid && leanCanvasForm.get('revenue_stream')?.touched">
-                      Revenue stream description is required
-                    </small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Strategy & Metrics Section -->
-          <div class="form-section">
-            <div class="section-header">
-              <i class="pi pi-cog section-icon"></i>
-              <span class="section-title">Strategy & Metrics</span>
-            </div>
-            
-            <div class="section-content">
-              <div class="grid">
-                <!-- Key Metrics -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="key_metrics" class="field-label">Key Metrics</label>
-                    <textarea 
-                      id="key_metrics"
-                      pInputTextarea 
-                      formControlName="key_metrics"
-                      rows="3" 
-                      placeholder="How will you measure success?">
-                    </textarea>
-                  </div>
-                </div>
-
-                <!-- Unfair Advantage -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="unfair_advantage" class="field-label">Unfair Advantage</label>
-                    <textarea 
-                      id="unfair_advantage"
-                      pInputTextarea 
-                      formControlName="unfair_advantage"
-                      rows="3" 
-                      placeholder="What advantage do you have that can't be easily copied?">
-                    </textarea>
-                  </div>
-                </div>
-
-                <!-- High Level Concept -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="high_level_concept" class="field-label">High Level Concept</label>
-                    <textarea 
-                      id="high_level_concept"
-                      pInputTextarea 
-                      formControlName="high_level_concept"
-                      rows="3" 
-                      placeholder="Describe your concept in simple terms">
-                    </textarea>
-                  </div>
-                </div>
-
-                <!-- Cost Structure -->
-                <div class="col-12 md:col-6">
-                  <div class="field">
-                    <label for="cost_structure" class="field-label">Cost Structure</label>
-                    <textarea 
-                      id="cost_structure"
-                      pInputTextarea 
-                      formControlName="cost_structure"
-                      rows="3" 
-                      placeholder="What are the main costs involved?">
-                    </textarea>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="form-actions">
-            <button 
-              pButton 
-              type="button" 
-              label="Cancel" 
-              class="p-button-rounded p-button-secondary" 
-              (click)="onCancel()"
-              [disabled]="isSubmitting">
-            </button>
-            <button 
-              pButton 
-              type="submit" 
-              label="Submit for Incubator Review" 
-              class="p-button-rounded" 
-              [disabled]="isSubmitting || leanCanvasForm.invalid">
-            </button>
-          </div>
-        </form>
+  <!-- Lean Canvas Form -->
+  <div *ngIf="!isLoading && idea" class="lean-canvas-container">
+    <form [formGroup]="leanCanvasForm" (ngSubmit)="onSubmit()" class="p-fluid">
+      <!-- Loading Overlay -->
+      <div *ngIf="isSubmitting" class="submit-overlay">
+        <p-progressSpinner></p-progressSpinner>
       </div>
-    </ng-template>
-  </p-card>
+
+      <!-- Canvas Title -->
+      <div class="canvas-title">
+        <h2>Lean Canvas</h2>
+        <p class="text-600">Complete your business model canvas to submit for incubator review</p>
+      </div>
+
+      <!-- Lean Canvas Grid -->
+      <div class="lean-canvas-grid">
+        <!-- Row 1 -->
+        <div class="canvas-row">
+          <!-- Problem -->
+          <div class="canvas-block problem-block">
+            <div class="block-header">
+              <span class="block-number">1</span>
+              <span class="block-title">Problem</span>
+              <span class="required-indicator">*</span>
+            </div>
+            <div class="block-content">
+              <textarea 
+                id="problem"
+                pInputTextarea 
+                formControlName="problem"
+                rows="4" 
+                placeholder="List your top 1-3 problems"
+                [class.error-input]="leanCanvasForm.get('problem')?.invalid && leanCanvasForm.get('problem')?.touched">
+              </textarea>
+              <small 
+                class="p-error" 
+                *ngIf="leanCanvasForm.get('problem')?.invalid && leanCanvasForm.get('problem')?.touched">
+                Problem description is required
+              </small>
+              
+              <div class="mt-3">
+                <label class="sub-field-label">Existing Alternatives</label>
+                <textarea 
+                  id="existing_alternatives"
+                  pInputTextarea 
+                  formControlName="existing_alternatives"
+                  rows="3" 
+                  placeholder="List how these problems are solved today">
+                </textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Solution -->
+          <div class="canvas-block solution-block">
+            <div class="block-header">
+              <span class="block-number">4</span>
+              <span class="block-title">Solution</span>
+              <span class="required-indicator">*</span>
+            </div>
+            <div class="block-content">
+              <textarea 
+                id="solution"
+                pInputTextarea 
+                formControlName="solution"
+                rows="6" 
+                placeholder="Outline possible solutions for each problem"
+                [class.error-input]="leanCanvasForm.get('solution')?.invalid && leanCanvasForm.get('solution')?.touched">
+              </textarea>
+              <small 
+                class="p-error" 
+                *ngIf="leanCanvasForm.get('solution')?.invalid && leanCanvasForm.get('solution')?.touched">
+                Solution description is required
+              </small>
+            </div>
+          </div>
+
+          <!-- Unique Value Proposition -->
+          <div class="canvas-block uvp-block">
+            <div class="block-header">
+              <span class="block-number">3</span>
+              <span class="block-title">Unique Value Proposition</span>
+              <span class="required-indicator">*</span>
+            </div>
+            <div class="block-content">
+              <textarea 
+                id="unique_value"
+                pInputTextarea 
+                formControlName="unique_value"
+                rows="4" 
+                placeholder="Single, clear compelling message that states why you are different and worth paying attention"
+                [class.error-input]="leanCanvasForm.get('unique_value')?.invalid && leanCanvasForm.get('unique_value')?.touched">
+              </textarea>
+              <small 
+                class="p-error" 
+                *ngIf="leanCanvasForm.get('unique_value')?.invalid && leanCanvasForm.get('unique_value')?.touched">
+                Unique value proposition is required
+              </small>
+              <div class="mt-3">
+                <label class="sub-field-label">High Level Concept</label>
+                <textarea 
+                  id="high_level_concept"
+                  pInputTextarea 
+                  formControlName="high_level_concept"
+                  rows="2" 
+                  placeholder="List your X for Y analogy e.g. YouTube for B2B">
+                </textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unfair Advantage -->
+          <div class="canvas-block advantage-block">
+            <div class="block-header">
+              <span class="block-number">9</span>
+              <span class="block-title">Unfair Advantage</span>
+            </div>
+            <div class="block-content">
+              <textarea 
+                id="unfair_advantage"
+                pInputTextarea 
+                formControlName="unfair_advantage"
+                rows="6" 
+                placeholder="Can't be easily copied or bought">
+              </textarea>
+            </div>
+          </div>
+
+          <!-- Customer Segments -->
+          <div class="canvas-block customer-block">
+            <div class="block-header">
+              <span class="block-number">6</span>
+              <span class="block-title">Customer Segments</span>
+              <span class="required-indicator">*</span>
+            </div>
+            <div class="block-content">
+              <textarea 
+                id="customer_segments"
+                pInputTextarea 
+                formControlName="customer_segments"
+                rows="4" 
+                placeholder="List your target customers and users"
+                [class.error-input]="leanCanvasForm.get('customer_segments')?.invalid && leanCanvasForm.get('customer_segments')?.touched">
+              </textarea>
+              <small 
+                class="p-error" 
+                *ngIf="leanCanvasForm.get('customer_segments')?.invalid && leanCanvasForm.get('customer_segments')?.touched">
+                Customer segments description is required
+              </small>
+              
+              <div class="mt-3">
+                <label class="sub-field-label">Early Adopters</label>
+                <textarea 
+                  id="early_adopters"
+                  pInputTextarea 
+                  formControlName="early_adopters"
+                  rows="3" 
+                  placeholder="List the characteristics of your ideal customers">
+                </textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="canvas-row">
+          <!-- Key Metrics -->
+          <div class="canvas-block metrics-block">
+            <div class="block-header">
+              <span class="block-number">5</span>
+              <span class="block-title">Key Metrics</span>
+            </div>
+            <div class="block-content">
+              <textarea 
+                id="key_metrics"
+                pInputTextarea 
+                formControlName="key_metrics"
+                rows="4" 
+                placeholder="List the key numbers that tell you how your business is doing">
+              </textarea>
+            </div>
+          </div>
+
+          <!-- Channels -->
+          <div class="canvas-block channels-block">
+            <div class="block-header">
+              <span class="block-number">8</span>
+              <span class="block-title">Channels</span>
+            </div>
+            <div class="block-content">
+              <textarea 
+                id="channels"
+                pInputTextarea 
+                formControlName="channels"
+                rows="4" 
+                placeholder="List your path to customers (inbound or outbound)">
+              </textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="canvas-row">
+          <!-- Cost Structure -->
+          <div class="canvas-block cost-block">
+            <div class="block-header">
+              <span class="block-number">10</span>
+              <span class="block-title">Cost Structure</span>
+            </div>
+            <div class="block-content">
+              <textarea 
+                id="cost_structure"
+                pInputTextarea 
+                formControlName="cost_structure"
+                rows="4" 
+                placeholder="List your fixed and variable costs">
+              </textarea>
+            </div>
+          </div>
+
+          <!-- Revenue Streams -->
+          <div class="canvas-block revenue-block">
+            <div class="block-header">
+              <span class="block-number">11</span>
+              <span class="block-title">Revenue Streams</span>
+              <span class="required-indicator">*</span>
+            </div>
+            <div class="block-content">
+              <textarea 
+                id="revenue_stream"
+                pInputTextarea 
+                formControlName="revenue_stream"
+                rows="4" 
+                placeholder="List your sources of revenue"
+                [class.error-input]="leanCanvasForm.get('revenue_stream')?.invalid && leanCanvasForm.get('revenue_stream')?.touched">
+              </textarea>
+              <small 
+                class="p-error" 
+                *ngIf="leanCanvasForm.get('revenue_stream')?.invalid && leanCanvasForm.get('revenue_stream')?.touched">
+                Revenue stream description is required
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button 
+          pButton 
+          type="button" 
+          label="Cancel" 
+          class="p-button-rounded p-button-secondary" 
+          (click)="onCancel()"
+          [disabled]="isSubmitting">
+        </button>
+        <button 
+          pButton 
+          type="submit" 
+          label="Submit for Incubator Review" 
+          class="p-button-rounded" 
+          [disabled]="isSubmitting || leanCanvasForm.invalid">
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
