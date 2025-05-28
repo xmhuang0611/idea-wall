@@ -191,8 +191,8 @@ class ReviewService:
         Args:
             idea_id: The ID of the idea
             session_review_data: Session review data
-            submitter_id: ID of the submitter
-            submitter_name: Name of the submitter
+            submitter_id: ID of the submitter (creator)
+            submitter_name: Name of the submitter (creator)
             
         Returns:
             The updated Idea object or None if failed
@@ -206,8 +206,6 @@ class ReviewService:
         
         # Prepare session review data
         session_review = SessionReview(
-            submitter_id=submitter_id,
-            submitter_name=submitter_name,
             submitter_job=session_review_data.submitter_job,
             manager=session_review_data.manager,
             stream=session_review_data.stream,
@@ -281,8 +279,6 @@ class ReviewService:
         
         # Prepare updated session review data
         session_review = SessionReview(
-            submitter_id=submitter_id,
-            submitter_name=submitter_name,
             submitter_job=session_review_data.submitter_job,
             manager=session_review_data.manager,
             stream=session_review_data.stream,

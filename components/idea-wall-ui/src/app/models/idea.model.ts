@@ -56,8 +56,6 @@ export enum ReviewStatus {
 }
 
 export interface SessionReview {
-  submitter_id?: string;
-  submitter_name?: string;
   submitter_job?: string;
   manager?: string;
   stream?: string;

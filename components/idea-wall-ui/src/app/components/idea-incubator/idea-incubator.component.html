@@ -13,8 +13,7 @@
     <div class="flex justify-content-between align-items-center mb-4">
       <div class="p-inputgroup" style="width: 50%;">
         <input type="text" pInputText [(ngModel)]="searchQuery" placeholder="Search ideas...">
-        <button pButton icon="pi pi-search" (click)="onSearch()"></button>
-        <button pButton icon="pi pi-times" (click)="clearSearch()" *ngIf="searchQuery"></button>
+        <button pButton icon="pi pi-search" (click)="onSearch()"></button>    
       </div>
     </div>
 
@@ -23,11 +22,11 @@
       <ng-template pTemplate="header">
         <tr>
           <th>Title</th>
-          <th>Creator</th>
-          <th>Status</th>
-          <th>Score</th>
+          <th>Submitter</th>
+          <th>Submitted At</th>
           <th>Reviews</th>
-          <th>Submitted</th>
+          <th>Avg Score</th>
+          <th>Status</th>
           <th>Action</th>
         </tr>
       </ng-template>
@@ -38,15 +37,17 @@
           </td>
           <td>{{idea.creator_name}}</td>
           <td>
-            <div *ngIf="idea.incubator_review?.status; else noStatus">
-              <p-tag 
-                [value]="getReviewStatusLabel(idea.incubator_review.status)" 
-                [severity]="getReviewStatusSeverity(idea.incubator_review.status)"
-                [rounded]="true">
-              </p-tag>
+            <span *ngIf="idea.incubator_review?.submitted_at">
+              {{idea.incubator_review?.submitted_at | date:'MMM d, y, h:mm a'}}
+            </span>
+            <span *ngIf="!idea.incubator_review?.submitted_at" class="text-500">-</span>
+          </td>
+          <td>
+            <div *ngIf="idea.incubator_review?.review_count; else noReviews">
+              {{idea.incubator_review?.review_count}}
             </div>
-            <ng-template #noStatus>
-              <span class="text-500">-</span>
+            <ng-template #noReviews>
+              <span class="text-500">0</span>
             </ng-template>
           </td>
           <td>
@@ -62,18 +63,16 @@
             </ng-template>
           </td>
           <td>
-            <div *ngIf="idea.incubator_review?.review_count; else noReviews">
-              {{idea.incubator_review?.review_count}}
+            <div *ngIf="idea.incubator_review?.status; else noStatus">
+              <p-tag 
+                [value]="getReviewStatusLabel(idea.incubator_review.status)" 
+                [severity]="getReviewStatusSeverity(idea.incubator_review.status)"
+                [rounded]="true">
+              </p-tag>
             </div>
-            <ng-template #noReviews>
-              <span class="text-500">0</span>
+            <ng-template #noStatus>
+              <span class="text-500">-</span>
             </ng-template>
-          </td>
-          <td>
-            <span *ngIf="idea.incubator_review?.submitted_at">
-              {{idea.incubator_review?.submitted_at | date:'MMM d, y, h:mm a'}}
-            </span>
-            <span *ngIf="!idea.incubator_review?.submitted_at" class="text-500">-</span>
           </td>
           <td>
             <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm"
