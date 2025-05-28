@@ -197,9 +197,9 @@
       styleClass="final-decision-dialog">
       <app-final-decision
         *ngIf="showFinalDecisionDialog && idea"
-        [ideaId]="idea.id"
-        [reviewCount]="reviews.length"
-        [averageScore]="idea.session_review?.average_score || 0"
+        [idea]="idea"
+        [targetType]="'Session'"
+        [reviews]="reviews"
         (decisionSubmitted)="onFinalDecisionSubmitted($event)"
         (cancelled)="onFinalDecisionCancelled()">
       </app-final-decision>

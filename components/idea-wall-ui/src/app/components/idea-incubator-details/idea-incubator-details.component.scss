@@ -1,0 +1,92 @@
+.idea-incubator-details-container {
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.lean-canvas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.lean-canvas-item {
+  background: var(--surface-50);
+  border: 1px solid var(--surface-200);
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.lean-canvas-item h5 {
+  margin: 0 0 0.5rem 0;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.lean-canvas-item p {
+  margin: 0;
+  color: var(--text-color-secondary);
+  line-height: 1.5;
+}
+
+:host ::ng-deep {
+  .p-card .p-card-header {
+    border-bottom: 1px solid var(--surface-200);
+  }
+  
+  .p-card .p-card-content {
+    padding-top: 1.5rem;
+  }
+  
+  .p-rating .p-rating-icon {
+    color: var(--yellow-500);
+  }
+  
+  .p-rating .p-rating-icon.p-rating-icon-active {
+    color: var(--yellow-500);
+  }
+  
+  .p-tag {
+    font-weight: 500;
+  }
+  
+  .p-button.p-button-rounded {
+    border-radius: 2rem;
+  }
+  
+  .p-dialog .p-dialog-header {
+    background: var(--primary-color);
+    color: white;
+  }
+  
+  .p-dialog .p-dialog-header .p-dialog-title {
+    color: white;
+  }
+  
+  .p-dialog .p-dialog-header .p-dialog-header-icon {
+    color: white;
+  }
+  
+  .p-dialog .p-dialog-header .p-dialog-header-icon:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  .idea-incubator-details-container {
+    padding: 0.5rem;
+  }
+  
+  .lean-canvas-grid {
+    grid-template-columns: 1fr;
+  }
+} 

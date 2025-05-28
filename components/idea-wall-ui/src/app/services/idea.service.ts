@@ -279,6 +279,53 @@ export class IdeaService {
       );
   }
 
+  /**
+   * Get ideas submitted for incubator review
+   * @param params Query parameters
+   * @returns Observable with incubator ideas
+   */
+  getIncubatorIdeas(params: {
+    skip?: number;
+    limit?: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    tags?: number[];
+  } = {}): Observable<ApiResponse<Idea[]>> {
+    let httpParams = new HttpParams();
+    
+    if (params.skip !== undefined) {
+      httpParams = httpParams.set('skip', params.skip.toString());
+    }
+    if (params.limit !== undefined) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    if (params.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params.sort_by) {
+      httpParams = httpParams.set('sort_by', params.sort_by);
+    }
+    if (params.sort_order) {
+      httpParams = httpParams.set('sort_order', params.sort_order);
+    }
+    if (params.tags && params.tags.length > 0) {
+      params.tags.forEach(tag => {
+        httpParams = httpParams.append('tags', tag.toString());
+      });
+    }
+    
+    // Add filter for all incubator-related statuses
+    httpParams = httpParams.append('status', 'IN_INCUBATOR_REVIEW');
+    httpParams = httpParams.append('status', 'INCUBATOR_APPROVED');
+    httpParams = httpParams.append('status', 'INCUBATOR_REJECTED');
+
+    return this.http.get<ApiResponse<Idea[]>>(this.apiUrl, { params: httpParams })
+      .pipe(
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
   getHotTopics(params?: HotTopicsParams): Observable<ApiResponse<HotTopic[]>> {
     const queryParams = new HttpParams()
       .set('limit', params?.limit?.toString() || '5')

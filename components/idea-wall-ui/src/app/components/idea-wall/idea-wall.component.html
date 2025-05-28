@@ -105,7 +105,7 @@
                   pButton 
                   icon="pi pi-send" 
                   class="p-button-rounded p-button-text p-button-sm"
-                  (click)="$event.stopPropagation(); navigateToSessionReview(idea.id)"
+                  (click)="$event.stopPropagation(); submitToSession(idea.id)"
                   [pTooltip]="getSubmitTooltip(idea)" 
                   tooltipPosition="top">
                 </button>

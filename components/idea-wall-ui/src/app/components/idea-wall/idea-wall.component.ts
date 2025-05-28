@@ -608,7 +608,7 @@ export class IdeaWallComponent implements OnInit {
   /**
    * Navigate to session review page for an idea
    */
-  navigateToSessionReview(ideaId: string): void {
-    this.router.navigate(['/session-review', ideaId]);
+  submitToSession(ideaId: string): void {
+    this.router.navigate(['/idea', ideaId, 'session-review']);
   }
 } 
