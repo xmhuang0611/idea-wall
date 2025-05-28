@@ -66,6 +66,7 @@ export interface SessionReview {
   average_score: number;
   status: ReviewStatus;
   review_count: number;
+  review_comments?: string;
   submitted_at?: Date;
 }
 
@@ -89,5 +90,6 @@ export interface IncubatorReview {
   average_score: number;
   status: ReviewStatus;
   review_count: number;
+  review_comments?: string;
   submitted_at?: Date;
 } 

@@ -26,6 +26,7 @@ class SessionReview(BaseModel):
     average_score: float = 0
     status: ReviewStatus = ReviewStatus.IN_REVIEW
     review_count: int = 0
+    review_comments: Optional[str] = None
     submitted_at: Optional[datetime] = None
 
 class SessionReviewCreate(BaseModel):
@@ -70,6 +71,7 @@ class IncubatorReview(BaseModel):
     average_score: float = 0
     status: ReviewStatus = ReviewStatus.IN_REVIEW
     review_count: int = 0
+    review_comments: Optional[str] = None
     submitted_at: Optional[datetime] = None
 
 class IdeaTag(BaseModel):

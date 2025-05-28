@@ -144,8 +144,9 @@ Store notifications for all users.
   "solutions": "...",
   "values": "...",
   "average_score": 1,
-  "status": review_status,
   "review_count": 1,
+  "status": review_status,
+  "review_comments": "...",
   "submitted_at": "..."
 }
 ```
@@ -156,8 +157,9 @@ Store notifications for all users.
 {
   "lean_canvas": lean_canvas,
   "average_score": 1,
-  "status": review_status,
   "review_count": 1,
+  "status": review_status,
+  "review_comments": "...",
   "submitted_at": "..."
 }
 ```
