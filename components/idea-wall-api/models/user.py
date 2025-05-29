@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, EmailStr
+from typing import List, Optional
 from enum import Enum
 from .audit import AuditModel
 
@@ -12,8 +12,21 @@ class UserRole(str, Enum):
 class User(BaseModel):
     user_id: str
     user_name: str
+    email: Optional[str] = None
     roles: List[UserRole] = []
 
 # Database user model with additional fields
 class UserInDB(User, AuditModel):
-    pass 
+    pass
+
+# User creation/update models
+class UserCreate(BaseModel):
+    user_id: str
+    user_name: str
+    email: Optional[str] = None
+    roles: List[UserRole] = []
+
+class UserUpdate(BaseModel):
+    user_name: Optional[str] = None
+    email: Optional[str] = None
+    roles: Optional[List[UserRole]] = None 

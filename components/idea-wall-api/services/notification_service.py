@@ -5,13 +5,18 @@ from core.database import get_database
 from models.notification import Notification, NotificationCreate, NotificationUpdate, NotificationInDB
 from models.log import ObjectType, OperationType
 from utils.logging_utils import record_operation_log
+import asyncio
+import logging
+import traceback
+
+logger = logging.getLogger(__name__)
 
 class NotificationService:
     def __init__(self):
         self.collection_name = "notifications"
 
     async def create_notification(self, notification: NotificationCreate, creator_id: str, creator_name: str) -> Notification:
-        """Create a new notification"""
+        """Create a new notification and send email immediately"""
         db = await get_database()
         
         now = datetime.utcnow()
@@ -37,10 +42,15 @@ class NotificationService:
             user_name=creator_name
         )
         
-        return Notification(
+        created_notification = Notification(
             id=str(result.inserted_id),
             **notification_in_db.model_dump()
         )
+        
+        # Send email notification immediately (non-blocking)
+        asyncio.create_task(self._send_notification_email(created_notification))
+        
+        return created_notification
 
     async def get_notifications(self, user_id: str, skip: int = 0, limit: int = 20) -> List[Notification]:
         """Get notifications for a user with pagination"""
@@ -117,6 +127,75 @@ class NotificationService:
             return None  # Don't create duplicate notification
             
         return await self.create_notification(notification, creator_id, creator_name)
+
+    async def _send_notification_email(self, notification: Notification):
+        """Send email for a single notification (internal method)"""
+        try:
+            logger.info(f"Starting email notification process for user {notification.user_id}")
+            
+            # Import here to avoid circular imports
+            from services.email_service import email_service
+            from services.email_template_service import email_template_service
+            from services.user_service import user_service
+            
+            # Get user details
+            user = await user_service.get_user(notification.user_id)
+            if not user:
+                logger.warning(f"User {notification.user_id} not found for email notification")
+                return
+            
+            logger.info(f"User found: {user.user_name}")
+            
+            # Generate email content using templates
+            logger.info("Generating email content from templates")
+            try:
+                subject = email_template_service._generate_email_subject(notification)
+                html_content = email_template_service.render_notification_email_html(
+                    notification=notification,
+                    user=user,
+                    app_url="http://localhost:4200"  # Make this configurable
+                )
+                text_content = email_template_service.render_notification_email_text(
+                    notification=notification,
+                    user=user,
+                    app_url="http://localhost:4200"  # Make this configurable
+                )
+                logger.info("Email content generated successfully")
+                
+            except Exception as template_error:
+                logger.error(f"Error generating email templates: {str(template_error)}")
+                return
+            
+            # Get user email
+            user_email = self._get_user_email(user)
+            logger.info(f"Sending email to: {user_email}")
+            
+            # Send email
+            email_sent = await email_service.send_email(
+                to_email=user_email,
+                subject=subject,
+                html_content=html_content,
+                text_content=text_content
+            )
+            
+            if email_sent:
+                logger.info(f"Email notification sent successfully to {user.user_id} ({user_email}) for {notification.type}")
+            else:
+                logger.error(f"Failed to send email notification to {user.user_id} ({user_email}) for {notification.type}")
+                
+        except Exception as e:
+            logger.error(f"Unexpected error in email notification process: {str(e)}")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Notification details: {notification.model_dump_json()}")
+
+    def _get_user_email(self, user) -> str:
+        """Get user email address - modify this based on your user model"""
+        # For now, assuming user_id is email or constructing email
+        # You might need to add an email field to your User model
+        if "@" in user.user_id:
+            return user.user_id
+        else:
+            return user.email
 
 # Create a singleton instance
 notification_service = NotificationService() 

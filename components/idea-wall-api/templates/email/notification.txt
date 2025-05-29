@@ -1,0 +1,13 @@
+Hello {{ user_name }}!
+
+{% if notification.type == 'comment' %}💬{% elif notification.type == 'vote' %}👍{% elif notification.type == 'bookmark' %}🔖{% else %}🔔{% endif %} You have a new {{ notification.type.replace('_', ' ') }}:
+
+{{ notification.content }}
+
+Time: {{ notification.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+
+Visit Idea Wall to see more details: {{ app_url }}
+
+---
+You're receiving this email because someone interacted with your content on Idea Wall.
+To manage your notification preferences, visit: {{ app_url }}/settings 
