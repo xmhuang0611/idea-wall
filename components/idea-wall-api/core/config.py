@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     
     # Email notification settings
     enable_email_notifications: bool = os.getenv("ENABLE_EMAIL_NOTIFICATIONS", "false").lower() == "true"
+    company_email_domain: str = os.getenv("COMPANY_EMAIL_DOMAIN", "@company.com")
 
 @lru_cache()
 def get_settings() -> Settings:

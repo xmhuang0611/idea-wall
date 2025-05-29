@@ -5,12 +5,14 @@ from models.response import StandardResponse
 from services.notification_service import notification_service
 from services.email_template_service import email_template_service
 from core.deps import get_current_user, user_has_role
+from core.config import get_settings
 from models.user import User, UserRole
 from services.email_service import email_service
 import logging
 
 router = APIRouter()
 
+settings = get_settings()
 logger = logging.getLogger(__name__)
 
 @router.get("/notifications", response_model=StandardResponse[List[Notification]])
@@ -143,7 +145,7 @@ async def test_email_configuration(
         )
         
         # Send test email
-        user_email = f"{current_user.user_id}@company.com" if "@" not in current_user.user_id else current_user.user_id
+        user_email = f"{current_user.user_id}{settings.company_email_domain}" if "@" not in current_user.user_id else current_user.user_id
         email_sent = await email_service.send_email(
             to_email=user_email,
             subject=subject,

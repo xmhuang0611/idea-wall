@@ -24,14 +24,14 @@ class EmailTemplateService:
         # Ensure templates directory exists
         self.templates_dir.mkdir(parents=True, exist_ok=True)
         
-    def render_notification_email_html(self, notification: Notification, user: User, **kwargs) -> str:
+    def render_notification_email_html(self, notification: Notification, **kwargs) -> str:
         """Render HTML email template for a notification"""
         try:
             template = self.env.get_template("notification.html")
             
             context = {
                 "notification": notification,
-                "user_name": user.user_name,
+                "user_name": notification.user_id,
                 "subject": self._generate_email_subject(notification),
                 "app_url": kwargs.get("app_url", "http://localhost:4200"),
                 "header_message": self._generate_header_message(notification),
@@ -45,14 +45,14 @@ class EmailTemplateService:
             # Fallback to simple HTML
             return self._generate_fallback_html(notification, user)
     
-    def render_notification_email_text(self, notification: Notification, user: User, **kwargs) -> str:
+    def render_notification_email_text(self, notification: Notification, **kwargs) -> str:
         """Render plain text email template for a notification"""
         try:
             template = self.env.get_template("notification.txt")
             
             context = {
                 "notification": notification,
-                "user_name": user.user_name,
+                "user_name": notification.user_id,
                 "app_url": kwargs.get("app_url", "http://localhost:4200"),
                 **kwargs
             }

@@ -2,6 +2,7 @@ from typing import List, Optional
 from datetime import datetime
 from bson import ObjectId
 from core.database import get_database
+from core.config import get_settings
 from models.notification import Notification, NotificationCreate, NotificationUpdate, NotificationInDB
 from models.log import ObjectType, OperationType
 from utils.logging_utils import record_operation_log
@@ -9,6 +10,7 @@ import asyncio
 import logging
 import traceback
 
+settings = get_settings()
 logger = logging.getLogger(__name__)
 
 class NotificationService:
@@ -31,16 +33,6 @@ class NotificationService:
         )
         
         result = await db[self.collection_name].insert_one(notification_in_db.model_dump())
-        
-        # Log the notification creation
-        await record_operation_log(
-            object_type=ObjectType.USER,
-            object_id=notification.user_id,
-            object_data=notification.model_dump_json(),
-            operation_type=OperationType.CREATE,
-            user_id=creator_id,
-            user_name=creator_name
-        )
         
         created_notification = Notification(
             id=str(result.inserted_id),
@@ -138,26 +130,16 @@ class NotificationService:
             from services.email_template_service import email_template_service
             from services.user_service import user_service
             
-            # Get user details
-            user = await user_service.get_user(notification.user_id)
-            if not user:
-                logger.warning(f"User {notification.user_id} not found for email notification")
-                return
-            
-            logger.info(f"User found: {user.user_name}")
-            
             # Generate email content using templates
             logger.info("Generating email content from templates")
             try:
                 subject = email_template_service._generate_email_subject(notification)
                 html_content = email_template_service.render_notification_email_html(
                     notification=notification,
-                    user=user,
                     app_url="http://localhost:4200"  # Make this configurable
                 )
                 text_content = email_template_service.render_notification_email_text(
                     notification=notification,
-                    user=user,
                     app_url="http://localhost:4200"  # Make this configurable
                 )
                 logger.info("Email content generated successfully")
@@ -167,7 +149,7 @@ class NotificationService:
                 return
             
             # Get user email
-            user_email = self._get_user_email(user)
+            user_email = notification.user_id + settings.company_email_domain
             logger.info(f"Sending email to: {user_email}")
             
             # Send email
@@ -179,23 +161,14 @@ class NotificationService:
             )
             
             if email_sent:
-                logger.info(f"Email notification sent successfully to {user.user_id} ({user_email}) for {notification.type}")
+                logger.info(f"Email notification sent successfully to {notification.user_id} ({user_email}) for {notification.type}")
             else:
-                logger.error(f"Failed to send email notification to {user.user_id} ({user_email}) for {notification.type}")
+                logger.error(f"Failed to send email notification to {notification.user_id} ({user_email}) for {notification.type}")
                 
         except Exception as e:
             logger.error(f"Unexpected error in email notification process: {str(e)}")
             logger.error(f"Error type: {type(e).__name__}")
             logger.error(f"Notification details: {notification.model_dump_json()}")
-
-    def _get_user_email(self, user) -> str:
-        """Get user email address - modify this based on your user model"""
-        # For now, assuming user_id is email or constructing email
-        # You might need to add an email field to your User model
-        if "@" in user.user_id:
-            return user.user_id
-        else:
-            return user.email
 
 # Create a singleton instance
 notification_service = NotificationService() 

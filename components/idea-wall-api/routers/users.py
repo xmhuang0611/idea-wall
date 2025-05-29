@@ -2,19 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from pydantic import BaseModel
 from core.deps import user_has_role, get_current_user
-from models.user import User, UserRole
+from models.user import User, UserCreate, UserRole, UserUpdate
 from services.user_service import user_service
 from models.response import StandardResponse, ErrorDetail
 
 router = APIRouter()
-
-class UpdateUserRolesRequest(BaseModel):
-    roles: List[UserRole]
-
-class CreateUserRequest(BaseModel):
-    user_id: str
-    user_name: str
-    roles: List[UserRole] = []
 
 @router.get("", response_model=StandardResponse[List[User]])
 async def list_users(current_user: User = Depends(user_has_role(UserRole.ADMIN))):
@@ -23,7 +15,7 @@ async def list_users(current_user: User = Depends(user_has_role(UserRole.ADMIN))
 
 @router.post("", response_model=StandardResponse[User])
 async def create_user(
-    request: CreateUserRequest,
+    request: UserCreate,
     current_user: User = Depends(user_has_role(UserRole.ADMIN))
 ):
     """
@@ -78,7 +70,7 @@ async def create_user(
 @router.put("/{user_id}/roles", response_model=StandardResponse[User])
 async def update_user_roles(
     user_id: str,
-    request: UpdateUserRolesRequest,
+    request: UserUpdate,
     current_user: User = Depends(user_has_role(UserRole.ADMIN))
 ):
     """

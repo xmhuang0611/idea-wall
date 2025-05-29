@@ -5,8 +5,10 @@ from services.email_service import email_service
 from services.user_service import user_service
 from models.notification import Notification
 from models.user import User
+from core.config import get_settings
 import logging
 
+settings = get_settings()
 logger = logging.getLogger(__name__)
 
 class NotificationDigestService:
@@ -94,7 +96,7 @@ class NotificationDigestService:
                 
                 # Send email (assuming user_id is email for now, you might need to add email field to User model)
                 email_sent = await email_service.send_email(
-                    to_email=f"{user_id}@company.com",  # You'll need to modify this based on your user model
+                    to_email=f"{user_id}{settings.company_email_domain}",  # You'll need to modify this based on your user model
                     subject=subject,
                     html_content=html_content,
                     text_content=text_content
