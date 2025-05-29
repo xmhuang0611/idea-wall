@@ -5,12 +5,14 @@ from models.response import StandardResponse
 from services.notification_service import notification_service
 from services.email_template_service import email_template_service
 from core.deps import get_current_user, user_has_role
+from core.config import get_settings
 from models.user import User, UserRole
 from services.email_service import email_service
 import logging
 
 router = APIRouter()
 
+settings = get_settings()
 logger = logging.getLogger(__name__)
 
 @router.get("/notifications", response_model=StandardResponse[List[Notification]])
@@ -80,15 +82,11 @@ async def preview_notification_email_template(
     
     # Generate preview
     html_content = email_template_service.render_notification_email_html(
-        notification=sample_notification,
-        user=current_user,
-        app_url="http://localhost:4200"
+        notification=sample_notification
     )
     
     text_content = email_template_service.render_notification_email_text(
-        notification=sample_notification,
-        user=current_user,
-        app_url="http://localhost:4200"
+        notification=sample_notification
     )
     
     return StandardResponse(success=True, data={
@@ -132,18 +130,14 @@ async def test_email_configuration(
     try:
         subject = f"[TEST] {email_template_service._generate_email_subject(test_notification)}"
         html_content = email_template_service.render_notification_email_html(
-            notification=test_notification,
-            user=current_user,
-            app_url="http://localhost:4200"
+            notification=test_notification
         )
         text_content = email_template_service.render_notification_email_text(
-            notification=test_notification,
-            user=current_user,
-            app_url="http://localhost:4200"
+            notification=test_notification
         )
         
         # Send test email
-        user_email = f"{current_user.user_id}@company.com" if "@" not in current_user.user_id else current_user.user_id
+        user_email = f"{test_notification.user_id}{settings.company_email_domain}"
         email_sent = await email_service.send_email(
             to_email=user_email,
             subject=subject,
