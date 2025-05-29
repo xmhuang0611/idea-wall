@@ -69,7 +69,6 @@ class EmailService:
                 logger.info("Using SSL connection (port 465)")
                 return await self._send_with_ssl_safe(message, to_email)
             else:
-                logger.info("STARTTLS failed, trying plain SMTP connection")
                 return await self._send_with_plain_smtp_safe(message, to_email)
                     
         except Exception as e:
