@@ -33,7 +33,7 @@ class EmailTemplateService:
                 "notification": notification,
                 "user_name": notification.user_id,
                 "subject": self._generate_email_subject(notification),
-                "app_url": kwargs.get("app_url", "http://localhost:4200"),
+                "app_url": self.settings.app_url,
                 "header_message": self._generate_header_message(notification),
                 **kwargs
             }
@@ -53,7 +53,7 @@ class EmailTemplateService:
             context = {
                 "notification": notification,
                 "user_name": notification.user_id,
-                "app_url": kwargs.get("app_url", "http://localhost:4200"),
+                "app_url": self.settings.app_url,
                 **kwargs
             }
             
@@ -62,7 +62,7 @@ class EmailTemplateService:
         except Exception as e:
             logger.error(f"Error rendering text email template: {str(e)}")
             # Fallback to simple text
-            return self._generate_fallback_text(notification, user)
+            return self._generate_fallback_text(notification)
     
     def _generate_email_subject(self, notification: Notification) -> str:
         """Generate email subject for a notification"""
@@ -102,26 +102,24 @@ class EmailTemplateService:
                     <p>{notification.content}</p>
                     <p><small>Time: {notification.created_at.strftime('%Y-%m-%d %H:%M')}</small></p>
                 </div>
-                <p><a href="http://localhost:4200" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View on Idea Wall</a></p>
+                <p><a href="{self.settings.app_url}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View on Idea Wall</a></p>
             </div>
         </body>
         </html>
         """
     
-    def _generate_fallback_text(self, notification: Notification, user: User) -> str:
+    def _generate_fallback_text(self, notification: Notification) -> str:
         """Generate fallback text when template loading fails"""
         notification_type = notification.type.title()
         
         return f"""
-Hello {user.user_name}!
-
 You have a new {notification_type}:
 
 {notification.content}
 
 Time: {notification.created_at.strftime('%Y-%m-%d %H:%M')}
 
-Visit Idea Wall: http://localhost:4200
+Visit Idea Wall: {self.settings.app_url}
 """
 
     def _get_base_html_template(self) -> str:

@@ -135,12 +135,10 @@ class NotificationService:
             try:
                 subject = email_template_service._generate_email_subject(notification)
                 html_content = email_template_service.render_notification_email_html(
-                    notification=notification,
-                    app_url="http://localhost:4200"  # Make this configurable
+                    notification=notification
                 )
                 text_content = email_template_service.render_notification_email_text(
-                    notification=notification,
-                    app_url="http://localhost:4200"  # Make this configurable
+                    notification=notification
                 )
                 logger.info("Email content generated successfully")
                 

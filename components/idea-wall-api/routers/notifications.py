@@ -82,15 +82,11 @@ async def preview_notification_email_template(
     
     # Generate preview
     html_content = email_template_service.render_notification_email_html(
-        notification=sample_notification,
-        user=current_user,
-        app_url="http://localhost:4200"
+        notification=sample_notification
     )
     
     text_content = email_template_service.render_notification_email_text(
-        notification=sample_notification,
-        user=current_user,
-        app_url="http://localhost:4200"
+        notification=sample_notification
     )
     
     return StandardResponse(success=True, data={
@@ -134,18 +130,14 @@ async def test_email_configuration(
     try:
         subject = f"[TEST] {email_template_service._generate_email_subject(test_notification)}"
         html_content = email_template_service.render_notification_email_html(
-            notification=test_notification,
-            user=current_user,
-            app_url="http://localhost:4200"
+            notification=test_notification
         )
         text_content = email_template_service.render_notification_email_text(
-            notification=test_notification,
-            user=current_user,
-            app_url="http://localhost:4200"
+            notification=test_notification
         )
         
         # Send test email
-        user_email = f"{current_user.user_id}{settings.company_email_domain}" if "@" not in current_user.user_id else current_user.user_id
+        user_email = f"{test_notification.user_id}{settings.company_email_domain}"
         email_sent = await email_service.send_email(
             to_email=user_email,
             subject=subject,

@@ -90,7 +90,7 @@ class EmailService:
             server.set_debuglevel(0)
             
             logger.info("Authenticating with SMTP server")
-            server.login(self.settings.smtp_username, self.settings.smtp_password)
+            server.login(self.settings.smtp_username, self.settings.smtp_key)
             
             logger.info(f"Sending email from {self.settings.email_from} to {to_email}")
             server.sendmail(self.settings.email_from, to_email, message.as_string())
@@ -187,7 +187,7 @@ class EmailService:
             server.starttls(context=context)
             
             logger.info("Authenticating with SMTP server")
-            server.login(self.settings.smtp_username, self.settings.smtp_password)
+            server.login(self.settings.smtp_username, self.settings.smtp_key)
             
             logger.info(f"Sending email from {self.settings.email_from} to {to_email}")
             server.sendmail(self.settings.email_from, to_email, message.as_string())
@@ -287,8 +287,8 @@ class EmailService:
         if not self.settings.smtp_username:
             return {"valid": False, "error": "SMTP_USERNAME not configured"}
         
-        if not self.settings.smtp_password:
-            return {"valid": False, "error": "SMTP_PASSWORD not configured"}
+        if not self.settings.smtp_key:
+            return {"valid": False, "error": "SMTP_KEY not configured"}
         
         if not self.settings.smtp_server:
             return {"valid": False, "error": "SMTP_SERVER not configured"}
@@ -333,7 +333,7 @@ class EmailService:
             logger.info("Testing SSL connection...")
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL(self.settings.smtp_server, 465, context=context, timeout=30) as server:
-                server.login(self.settings.smtp_username, self.settings.smtp_password)
+                server.login(self.settings.smtp_username, self.settings.smtp_key)
                 
                 logger.info("Email connection test successful using SSL")
                 return {
@@ -360,7 +360,7 @@ class EmailService:
             "email_from": self.settings.email_from,
             "email_from_name": self.settings.email_from_name,
             "enable_email_notifications": self.settings.enable_email_notifications,
-            "smtp_password_configured": bool(self.settings.smtp_password)
+            "smtp_key_configured": bool(self.settings.smtp_key)
         }
 
 # Create a singleton instance
