@@ -69,15 +69,8 @@ class EmailService:
                 logger.info("Using SSL connection (port 465)")
                 return await self._send_with_ssl_safe(message, to_email)
             else:
-                # Try STARTTLS first, fallback to plain SMTP if not supported
-                logger.info(f"Trying STARTTLS connection (port {self.settings.smtp_port})")
-                starttls_result = await self._send_with_starttls_safe(message, to_email)
-                
-                if not starttls_result:
-                    logger.warning("STARTTLS failed, trying plain SMTP connection")
-                    return await self._send_with_plain_smtp_safe(message, to_email)
-                
-                return starttls_result
+                logger.info("STARTTLS failed, trying plain SMTP connection")
+                return await self._send_with_plain_smtp_safe(message, to_email)
                     
         except Exception as e:
             logger.error(f"Unexpected error in email service: {str(e)}")
@@ -176,98 +169,6 @@ class EmailService:
                         server.close()
                     except Exception:
                         pass  # Ignore close errors
-    
-    async def _send_with_starttls_safe(self, message, to_email: str) -> bool:
-        """Send email using STARTTLS connection with mail specific error handling"""
-        server = None
-        email_sent = False
-        
-        try:
-            server = smtplib.SMTP(self.settings.smtp_server, self.settings.smtp_port, timeout=30)
-            
-            # Disable debug output
-            server.set_debuglevel(0)
-            
-            logger.info("Starting TLS...")
-            context = ssl.create_default_context()
-            server.starttls(context=context)
-            
-            logger.info("Authenticating with SMTP server")
-            server.login(self.settings.smtp_username, self.settings.smtp_key)
-            
-            logger.info(f"Sending email from {self.settings.email_from} to {to_email}")
-            server.sendmail(self.settings.email_from, to_email, message.as_string())
-            
-            # Mark email as sent successfully
-            email_sent = True
-            logger.info(f"Email sent successfully to {to_email}")
-            
-            return True
-            
-        except smtplib.SMTPAuthenticationError as e:
-            logger.error(f"SMTP Authentication failed: {str(e)}")
-            return False
-            
-        except smtplib.SMTPRecipientsRefused as e:
-            logger.error(f"SMTP Recipients refused: {str(e)}")
-            return False
-            
-        except smtplib.SMTPSenderRefused as e:
-            logger.error(f"SMTP Sender refused: {str(e)}")
-            return False
-            
-        except smtplib.SMTPDataError as e:
-            logger.error(f"SMTP Data error: {str(e)}")
-            return False
-            
-        except smtplib.SMTPConnectError as e:
-            logger.error(f"SMTP Connection error: {str(e)}")
-            return False
-            
-        except smtplib.SMTPServerDisconnected as e:
-            if email_sent:
-                logger.warning(f"Email sent successfully, but server disconnected during cleanup: {str(e)}")
-                return True
-            logger.error(f"SMTP Server disconnected: {str(e)}")
-            return False
-            
-        except smtplib.SMTPResponseException as e:
-            if email_sent and e.smtp_code == -1:
-                logger.warning(f"Email sent successfully, but mail server returned connection close error (this is normal): {str(e)}")
-                return True
-            logger.error(f"SMTP Response Exception: {str(e)}")
-            return False
-            
-        except ssl.SSLError as e:
-            logger.error(f"SSL Error: {str(e)}")
-            return False
-            
-        except socket.timeout as e:
-            logger.error(f"Connection timeout: {str(e)}")
-            return False
-            
-        except Exception as e:
-            if email_sent:
-                logger.warning(f"Email sent successfully, but error during cleanup: {str(e)}")
-                return True
-            logger.error(f"Error in STARTTLS email sending: {str(e)}")
-            return False
-            
-        finally:
-            # Safely close the connection
-            if server:
-                try:
-                    server.quit()
-                except Exception as quit_error:
-                    if email_sent:
-                        logger.debug(f"Expected mail quit error (email was sent successfully): {quit_error}")
-                    else:
-                        logger.warning(f"Error during SMTP quit: {quit_error}")
-                    
-                    try:
-                        server.close()
-                    except Exception:
-                        pass
     
     async def _send_with_plain_smtp_safe(self, message, to_email: str) -> bool:
         """Send email using plain SMTP connection (no encryption) for servers that don't support STARTTLS"""
@@ -372,11 +273,6 @@ class EmailService:
     
     def _validate_email_config(self) -> Dict[str, Any]:
         """Validate email configuration"""
-        if not self.settings.smtp_username:
-            return {"valid": False, "error": "SMTP_USERNAME not configured"}
-        
-        if not self.settings.smtp_key:
-            return {"valid": False, "error": "SMTP_KEY not configured"}
         
         if not self.settings.smtp_server:
             return {"valid": False, "error": "SMTP_SERVER not configured"}
