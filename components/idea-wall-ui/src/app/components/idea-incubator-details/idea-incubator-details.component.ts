@@ -252,8 +252,11 @@ export class IdeaIncubatorDetailsComponent implements OnInit {
       return false;
     }
 
-    // Check if idea is in incubator review status
-    return this.idea.status === IdeaStatus.IN_INCUBATOR_REVIEW;
+    const currentUserId = this.authService.getId();
+    const hasExistingReview = this.reviews.some(review => review.creator_id === currentUserId);
+    const isInIncubatorReview = this.idea.status === IdeaStatus.IN_INCUBATOR_REVIEW;
+
+    return !hasExistingReview && isInIncubatorReview;
   }
 
   getAddReviewTooltip(): string {
@@ -267,6 +270,13 @@ export class IdeaIncubatorDetailsComponent implements OnInit {
     
     if (this.idea.status !== IdeaStatus.IN_INCUBATOR_REVIEW) {
       return 'Idea must be in incubator review status to add reviews';
+    }
+    
+    const currentUserId = this.authService.getId();
+    const hasExistingReview = this.reviews.some(review => review.creator_id === currentUserId);
+    
+    if (hasExistingReview) {
+      return 'You have already submitted a review for this idea';
     }
     
     return 'Add a new incubator review for this idea';

@@ -90,61 +90,6 @@
   }
 }
 
-// Dialog Customizations
-:host ::ng-deep {
-  .review-edit-dialog,
-  .review-add-dialog {
-    .p-dialog-header {
-      background: var(--primary-color);
-      color: white;
-      
-      .p-dialog-title {
-        color: white;
-      }
-      
-      .p-dialog-header-icon {
-        color: white;
-        
-        &:hover {
-          background: rgba(255, 255, 255, 0.1);
-        }
-      }
-    }
-    
-    .p-dialog-content {
-      padding: 0;
-    }
-  }
-  
-  // Table Customizations
-  .p-datatable {
-    .p-datatable-thead > tr > th {
-      background: var(--surface-100);
-      border-bottom: 2px solid var(--primary-color);
-      color: var(--text-color);
-      font-weight: 600;
-      font-size: 0.9rem;
-      padding: 0.75rem;
-    }
-    
-    .p-datatable-tbody > tr > td {
-      padding: 1rem 0.75rem;
-      border-bottom: 1px solid var(--surface-200);
-      vertical-align: top;
-    }
-    
-    .p-datatable-tbody > tr:hover {
-      background: var(--surface-50);
-    }
-  }
-  
-  .p-tooltip .p-tooltip-text {
-    max-width: 300px;
-    line-height: 1.4;
-    white-space: pre-line;
-  }
-}
-
 // Responsive Design
 @media (max-width: 768px) {
   .review-list-container {
