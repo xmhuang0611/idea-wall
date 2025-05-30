@@ -193,13 +193,11 @@
       </p-card>
     </ng-container>
 
-    <!-- Pagination Card -->
-    <p-card *ngIf="!isLoading" styleClass="mt-4">
-      <p-paginator [rows]="pageSize" [totalRecords]="totalItems" [rowsPerPageOptions]="pageSizeOptions"
-        [showCurrentPageReport]="true" currentPageReportTemplate="{first}-{last} of {totalRecords}"
-        [first]="(currentPage - 1) * pageSize" styleClass="border-none" (onPageChange)="onPageChange($event)">
-      </p-paginator>
-    </p-card>
+    <!-- Pagination -->
+    <p-paginator *ngIf="!isLoading" styleClass="mt-4" [rows]="pageSize" [totalRecords]="totalItems" [rowsPerPageOptions]="pageSizeOptions"
+      [showCurrentPageReport]="true" currentPageReportTemplate="{first}-{last} of {totalRecords}"
+      [first]="(currentPage - 1) * pageSize" styleClass="border-none" (onPageChange)="onPageChange($event)">
+    </p-paginator>
   </div>
   <!-- Right Column (25%) -->
   <div class="col-3">

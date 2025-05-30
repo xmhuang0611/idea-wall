@@ -183,8 +183,7 @@ import { AuthService } from 'src/app/auth/auth.service';
         [style]="{width: '90vw', maxWidth: '800px'}"
         [closable]="true"
         [draggable]="false"
-        [resizable]="false"
-        styleClass="review-edit-dialog">
+        [resizable]="false">
         <app-review-form
           *ngIf="showEditDialog && selectedReview"
           [ideaId]="ideaId"
@@ -226,10 +225,12 @@ export class ReviewListComponent implements OnInit {
   }
 
   canEditReview(review: Review): boolean {
-    // Allow editing if current user is the reviewer AND idea is in session review status
+    // Allow editing if current user is the reviewer AND idea is in appropriate review status
     const isOwner = review.creator_id === this.authService.getId();
     const isInSessionReview = this.ideaStatus === 'IN_SESSION_REVIEW';
-    return isOwner && isInSessionReview;
+    const isInIncubatorReview = this.ideaStatus === 'IN_INCUBATOR_REVIEW';
+    
+    return isOwner && (isInSessionReview || isInIncubatorReview);
   }
 
   editReview(review: Review): void {
@@ -251,13 +252,14 @@ export class ReviewListComponent implements OnInit {
   getEditReviewTooltip(review: Review): string {
     const isOwner = review.creator_id === this.authService.getId();
     const isInSessionReview = this.ideaStatus === 'IN_SESSION_REVIEW';
+    const isInIncubatorReview = this.ideaStatus === 'IN_INCUBATOR_REVIEW';
     
     if (!isOwner) {
       return 'You can only edit your own reviews';
     }
     
-    if (!isInSessionReview) {
-      return 'Reviews can only be edited when idea is in session review status';
+    if (!isInSessionReview && !isInIncubatorReview) {
+      return 'Reviews can only be edited when idea is in review status';
     }
     
     return 'Edit Review';
