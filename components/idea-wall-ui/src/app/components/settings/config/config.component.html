@@ -1,0 +1,98 @@
+<div class="flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">System Configurations</h2>
+    <div class="flex gap-2">
+        <button pButton pRipple label="Add Configuration" icon="pi pi-plus" class="p-button-rounded"
+            (click)="openConfigModal()" [disabled]="isSubmitting">
+        </button>
+    </div>
+</div>
+
+<div *ngIf="loading" class="flex justify-content-center align-items-center py-5">
+    <p-progressSpinner [style]="{width: '50px', height: '50px'}" strokeWidth="4" fill="var(--surface-ground)"
+        animationDuration=".5s">
+    </p-progressSpinner>
+</div>
+
+
+<p-table *ngIf="!loading" [value]="filteredConfigs" styleClass="p-datatable-sm" [showCurrentPageReport]="false"
+    [paginator]="false" [tableStyle]="{'min-width': '50rem'}" [rowHover]="true">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Key</th>
+            <th>Description</th>
+            <th>Value</th>
+            <th style="width: 120px">Actions</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-config>
+        <tr>
+            <td>{{ config.key }}</td>
+            <td>{{ config.description }}</td>
+            <td>{{ config.value }}</td>
+            <td>
+                <div class="flex gap-2 justify-content-center">
+                    <p-button icon="pi pi-pencil" styleClass="p-button-text p-button-rounded"
+                        (onClick)="openConfigModal(config)" [disabled]="isSubmitting">
+                    </p-button>
+                    <p-button icon="pi pi-trash" styleClass="p-button-text p-button-rounded p-button-danger"
+                        (onClick)="confirmDeleteConfig(config)" [disabled]="isSubmitting">
+                    </p-button>
+                </div>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-confirmDialog [style]="{width: '450px'}" styleClass="delete-confirm-dialog"></p-confirmDialog>
+
+<p-dialog [(visible)]="displayModal" [style]="{width: '450px'}"
+    [header]="isEditing ? 'Edit Configuration' : 'Add Configuration'" [modal]="true" [draggable]="false"
+    [resizable]="false" [closable]="!isSubmitting" (onHide)="handleCancel()">
+    <form [formGroup]="configForm" (ngSubmit)="handleOk()" class="p-fluid">
+        <div class="field">
+            <label for="key" [class.required]="!isEditing">Key</label>
+            <input id="key" type="text" pInputText formControlName="key" [readonly]="isEditing"
+                [class.ng-invalid]="configForm.get('key')?.invalid && configForm.get('key')?.touched"
+                [class.ng-dirty]="configForm.get('key')?.dirty" placeholder="Enter configuration key">
+            <small class="p-error" *ngIf="configForm.get('key')?.invalid && configForm.get('key')?.touched">
+                {{ configForm.get('key')?.errors?.['required']
+                ? 'Key is required'
+                : configForm.get('key')?.errors?.['pattern']
+                ? 'Key can only contain letters, numbers, dots, underscores and hyphens'
+                : '' }}
+            </small>
+        </div>
+
+        <div class="field">
+            <label for="description" class="required">Description</label>
+            <input id="description" type="text" pInputText formControlName="description"
+                [class.ng-invalid]="configForm.get('description')?.invalid && configForm.get('description')?.touched"
+                [class.ng-dirty]="configForm.get('description')?.dirty" placeholder="Enter configuration description">
+            <small class="p-error"
+                *ngIf="configForm.get('description')?.invalid && configForm.get('description')?.touched">
+                Description is required
+            </small>
+        </div>
+
+        <div class="field">
+            <label for="value" class="required">Value</label>
+            <input id="value" type="text" pInputText formControlName="value"
+                [class.ng-invalid]="configForm.get('value')?.invalid && configForm.get('value')?.touched"
+                [class.ng-dirty]="configForm.get('value')?.dirty" placeholder="Enter configuration value">
+            <small class="p-error" *ngIf="configForm.get('value')?.invalid && configForm.get('value')?.touched">
+                Value is required
+            </small>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2">
+            <button pButton type="button" label="Cancel" class="p-button-text" (click)="handleCancel()"
+                [disabled]="isSubmitting">
+            </button>
+            <button pButton type="button" label="{{ isEditing ? 'Update' : 'Create' }}" class="p-button-primary"
+                (click)="handleOk()" [disabled]="configForm.invalid || isSubmitting" [loading]="isSubmitting">
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>

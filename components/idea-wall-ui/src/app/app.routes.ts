@@ -7,6 +7,7 @@ import { SettingsComponent } from './components/settings/settings.component';
 import { UserManagementComponent } from './components/settings/user-management/user-management.component';
 import { TagManagementComponent } from './components/settings/tag-management/tag-management.component';
 import { LogViewComponent } from './components/settings/log-view/log-view.component';
+import { ConfigComponent } from './components/settings/config/config.component';
 import { IdeaSessionComponent } from './components/idea-session/idea-session.component';
 import { SessionReviewFormComponent } from './components/session-review-form/session-review-form.component';
 import { IdeaSessionDetailsComponent } from './components/idea-session-details/idea-session-details.component';
@@ -25,7 +26,8 @@ export const routes: Routes = [
       { path: '', redirectTo: 'users', pathMatch: 'full' },
       { path: 'users', component: UserManagementComponent },
       { path: 'tags', component: TagManagementComponent },
-      { path: 'logs', component: LogViewComponent }
+      { path: 'logs', component: LogViewComponent },
+      { path: 'configs', component: ConfigComponent }
     ]
   },
   { path: 'idea-form', component: IdeaFormComponent, canActivate: [AuthGuard] },

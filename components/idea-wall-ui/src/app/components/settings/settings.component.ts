@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { UserManagementComponent } from './user-management/user-management.component';
 import { TagManagementComponent } from './tag-management/tag-management.component';
 import { LogViewComponent } from './log-view/log-view.component';
+import { ConfigComponent } from './config/config.component';
 
 interface MenuItem {
   label: string;
@@ -19,7 +20,8 @@ interface MenuItem {
     RouterModule,
     UserManagementComponent,
     TagManagementComponent,
-    LogViewComponent
+    LogViewComponent,
+    ConfigComponent
   ],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss']
@@ -35,6 +37,11 @@ export class SettingsComponent {
       label: 'Tag Management',
       icon: 'pi pi-tags',
       routerLink: '/settings/tags'
+    },
+    {
+      label: 'Configuration',
+      icon: 'pi pi-cog',
+      routerLink: '/settings/configs'
     },
     {
       label: 'System Logs',
