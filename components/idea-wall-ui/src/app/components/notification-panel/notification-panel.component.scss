@@ -1,0 +1,114 @@
+.notification-trigger {
+  display: inline-block;
+}
+
+.notification-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+
+  .notification-avatar {
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--surface-100);
+    }
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+  }
+}
+
+.notification-panel {
+  .notification-header {
+    h4 {
+      color: var(--text-color);
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+  }
+
+  .notification-list {
+    max-height: 300px;
+    overflow-y: auto;
+
+    .notification-item {
+      border-radius: 6px;
+      margin-bottom: 8px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+
+      &:hover {
+        background: var(--surface-100);
+        border-color: var(--surface-200);
+      }
+
+      &.unread {
+        background: var(--primary-50);
+        border-color: var(--primary-100);
+
+        &:hover {
+          background: var(--primary-100);
+        }
+      }
+
+      .notification-icon {
+        i {
+          font-size: 1.2rem;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      .notification-content {
+        .notification-text {
+          color: var(--text-color);
+          font-size: 0.9rem;
+          line-height: 1.4;
+          word-break: break-word;
+        }
+
+        .unread-indicator {
+          width: 8px;
+          height: 8px;
+          background: var(--primary-color);
+          border-radius: 50%;
+          display: inline-block;
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    i {
+      opacity: 0.5;
+    }
+  }
+}
+
+:host ::ng-deep {
+  .p-overlaypanel {
+    .p-overlaypanel-content {
+      padding: 1rem;
+    }
+  }
+} 

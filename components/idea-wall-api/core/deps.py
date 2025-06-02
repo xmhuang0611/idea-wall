@@ -61,6 +61,26 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+# WebSocket authentication
+async def get_current_user_websocket(token: str = None) -> Optional[User]:
+    """
+    Get current user from token for WebSocket connections
+    """
+    if not token:
+        return None
+        
+    try:
+        # Parse the JWT token
+        payload = decode_oauth2_token(token)
+        
+        # User ID may be stored in different fields depending on the OAuth provider
+        user_id: str = payload.get("sub") or payload.get("user_id") or payload.get("userid")
+        user_name: str = payload.get("name") or payload.get("username") or payload.get("user_name")
+            
+        return User(user_id=user_id.lower(), user_name=user_name)
+    except JWTError:
+        return None
+
 # Optional authentication dependency
 class OptionalOAuth2ImplicitBearer:
     async def __call__(self, request: Request) -> Optional[str]:

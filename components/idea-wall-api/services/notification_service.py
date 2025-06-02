@@ -42,6 +42,9 @@ class NotificationService:
         # Send email notification immediately (non-blocking)
         asyncio.create_task(self._send_notification_email(created_notification))
         
+        # Send real-time notification via WebSocket (non-blocking)
+        asyncio.create_task(self._send_realtime_notification(created_notification))
+        
         return created_notification
 
     async def get_notifications(self, user_id: str, skip: int = 0, limit: int = 20) -> List[Notification]:
@@ -72,6 +75,10 @@ class NotificationService:
         
         if result:
             result["id"] = str(result.pop("_id"))
+            
+            # Send updated unread count via WebSocket
+            asyncio.create_task(self._send_unread_count_update(user_id))
+            
             return Notification(**result)
         return None
 
@@ -83,6 +90,10 @@ class NotificationService:
             {"user_id": user_id, "is_read": False},
             {"$set": {"is_read": True, "updated_at": datetime.utcnow()}}
         )
+        
+        # Send updated unread count via WebSocket
+        if result.modified_count > 0:
+            asyncio.create_task(self._send_unread_count_update(user_id))
         
         return result.modified_count > 0
 
@@ -119,6 +130,37 @@ class NotificationService:
             return None  # Don't create duplicate notification
             
         return await self.create_notification(notification, creator_id, creator_name)
+
+    async def _send_realtime_notification(self, notification: Notification):
+        """Send real-time notification via WebSocket"""
+        try:
+            # Import here to avoid circular imports
+            from routers.websocket import send_notification_to_user
+            
+            # Send the notification data to the user
+            await send_notification_to_user(
+                user_id=notification.user_id,
+                notification_data=notification.model_dump()
+            )
+            
+            logger.info(f"Real-time notification sent to user {notification.user_id}")
+            
+        except Exception as e:
+            logger.error(f"Error sending real-time notification: {str(e)}")
+
+    async def _send_unread_count_update(self, user_id: str):
+        """Send updated unread count via WebSocket"""
+        try:
+            # Import here to avoid circular imports
+            from routers.websocket import send_unread_count_update
+            
+            # Send the updated unread count
+            await send_unread_count_update(user_id)
+            
+            logger.info(f"Unread count update sent to user {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Error sending unread count update: {str(e)}")
 
     async def _send_notification_email(self, notification: Notification):
         """Send email for a single notification (internal method)"""

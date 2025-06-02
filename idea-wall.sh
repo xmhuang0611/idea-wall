@@ -7,32 +7,6 @@ PID_DIR="logs"
 # Create log directory
 mkdir -p $LOG_DIR
 
-# Main program
-if [ -z "$1" ]; then
-    show_help
-    exit 0
-fi
-
-case "$1" in
-    "start")
-        start_services
-        ;;
-    "stop")
-        stop_services
-        ;;
-    "status")
-        check_status
-        ;;
-    "help")
-        show_help
-        ;;
-    *)
-        echo "Unknown command: $1"
-        show_help
-        exit 1
-        ;;
-esac
-
 # Start services function
 start_services() {
     echo "Starting Idea Wall Project..."
@@ -88,7 +62,7 @@ start_services() {
     echo "Frontend: http://localhost:4200"
     echo
     echo "To stop the services, run:"
-    echo "./app.sh stop"
+    echo "./idea-wall.sh stop"
     echo
     echo "Logs are available in:"
     echo "$LOG_DIR/backend.log"
@@ -154,7 +128,7 @@ check_status() {
 # Show help information
 show_help() {
     echo "Usage:"
-    echo "  ./app.sh <command>"
+    echo "  ./idea-wall.sh <command>"
     echo
     echo "Commands:"
     echo "  start   - Start all services"
@@ -162,3 +136,29 @@ show_help() {
     echo "  status  - Check service status"
     echo "  help    - Show this help message"
 }
+
+# Main program
+if [ -z "$1" ]; then
+    show_help
+    exit 0
+fi
+
+case "$1" in
+    "start")
+        start_services
+        ;;
+    "stop")
+        stop_services
+        ;;
+    "status")
+        check_status
+        ;;
+    "help")
+        show_help
+        ;;
+    *)
+        echo "Unknown command: $1"
+        show_help
+        exit 1
+        ;;
+esac
