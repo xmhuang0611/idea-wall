@@ -31,6 +31,7 @@ import { FeelingUtilService } from '../../shared/services/feeling-util.service';
 import { ApiResponse } from '../../shared/models/api-response.model';
 import { SessionReviewFormComponent } from '../session-review-form/session-review-form.component';
 import { IdeaStatus } from '../../models/idea.model';
+import { SystemConfigService } from '../../services/system-config.service';
 
 interface Topic {
   name: string;
@@ -111,6 +112,10 @@ export class IdeaWallComponent implements OnInit {
   sessionReviewDialogVisible = false;
   selectedSessionIdeaId: string | null = null;
 
+  private readonly DEFAULT_HOT_TOPICS_COUNT = 5;
+  private readonly DEFAULT_HOT_TOPICS_DAYS = 90;
+  private readonly DEFAULT_NEWEST_IDEAS_COUNT = 10;
+
   constructor(
     private ideaService: IdeaService,
     private router: Router,
@@ -121,7 +126,8 @@ export class IdeaWallComponent implements OnInit {
     private tagUtilService: TagUtilService,
     private userService: UserService,
     private confirmationService: ConfirmationService,
-    public feelingUtil: FeelingUtilService
+    public feelingUtil: FeelingUtilService,
+    private configService: SystemConfigService
   ) {}
 
   ngOnInit(): void {
@@ -481,17 +487,40 @@ export class IdeaWallComponent implements OnInit {
 
   private loadHotTopics() {
     this.hotTopicsLoading = true;
-    this.ideaService.getHotTopics({limit: 5, days: 90}).subscribe({
+    
+    // First get system configurations
+    this.configService.getConfigs().subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.hotTopics = response.data;
+          const configs = response.data;
+          
+          // Get configuration values, use defaults if not found
+          const countConfig = configs.find(c => c.key === 'HOT_TOPICS_COUNT');
+          const daysConfig = configs.find(c => c.key === 'HOT_TOPICS_DAYS');
+          
+          const limit = countConfig ? parseInt(countConfig.value, 10) : this.DEFAULT_HOT_TOPICS_COUNT;
+          const days = daysConfig ? parseInt(daysConfig.value, 10) : this.DEFAULT_HOT_TOPICS_DAYS;
+          
+          // Load hot topics using configuration values
+          this.ideaService.getHotTopics({ limit, days }).subscribe({
+            next: (response) => {
+              if (response.success && response.data) {
+                this.hotTopics = response.data;
+              }
+            },
+            error: (error) => {
+              console.error('Error loading hot topics:', error);
+              this.toastService.showError('Failed to load hot topics');
+            },
+            complete: () => {
+              this.hotTopicsLoading = false;
+            }
+          });
         }
       },
       error: (error) => {
-        console.error('Error loading hot topics:', error);
-        this.toastService.showError('Failed to load hot topics');
-      },
-      complete: () => {
+        console.error('Error loading configurations:', error);
+        this.toastService.showError('Failed to load configurations');
         this.hotTopicsLoading = false;
       }
     });
@@ -499,20 +528,41 @@ export class IdeaWallComponent implements OnInit {
 
   private loadNewestIdeas(): void {
     this.newestIdeasLoading = true;
-    this.ideaService.getIdeas({
-      limit: 10,
-      sort_by: 'created_at',
-      sort_order: 'desc'
-    }).subscribe({
-      next: (response: ApiResponse<Idea[]>) => {
+
+    // Get system configurations first
+    this.configService.getConfigs().subscribe({
+      next: (response) => {
         if (response.success && response.data) {
-          this.newestIdeas = response.data;
+          const configs = response.data;
+          
+          // Get configuration value, use default if not found
+          const countConfig = configs.find(c => c.key === 'NEWEST_IDEAS_COUNT');
+          const limit = countConfig ? parseInt(countConfig.value, 10) : this.DEFAULT_NEWEST_IDEAS_COUNT;
+          
+          // Load newest ideas using configuration value
+          this.ideaService.getIdeas({
+            limit,
+            sort_by: 'created_at',
+            sort_order: 'desc'
+          }).subscribe({
+            next: (response: ApiResponse<Idea[]>) => {
+              if (response.success && response.data) {
+                this.newestIdeas = response.data;
+              }
+            },
+            error: (error: any) => {
+              console.error('Error loading newest ideas:', error);
+              this.toastService.showError('Failed to load newest ideas');
+            },
+            complete: () => {
+              this.newestIdeasLoading = false;
+            }
+          });
         }
       },
-      error: (error: any) => {
-        console.error('Error loading newest ideas:', error);
-      },
-      complete: () => {
+      error: (error) => {
+        console.error('Error loading configurations:', error);
+        this.toastService.showError('Failed to load configurations');
         this.newestIdeasLoading = false;
       }
     });
