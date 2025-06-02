@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from core.database import connect_to_mongo, close_mongo_connection
 from core.oauth2_config import get_oauth2_settings
-from routers import ideas, comments, votes, tags, users, bookmarks, logs, reviews, notifications, configs
+from routers import ideas, comments, votes, tags, users, bookmarks, logs, reviews, notifications, configs, websocket
 import logging
 
 oauth2_settings = get_oauth2_settings()
@@ -68,6 +68,7 @@ app.include_router(logs.router, prefix="/api/logs", tags=["logs"])
 app.include_router(reviews.router, prefix="/api/reviews", tags=["reviews"])
 app.include_router(notifications.router, prefix="/api", tags=["notifications"])
 app.include_router(configs.router, prefix="/api/configs", tags=["configs"])
+app.include_router(websocket.router, prefix="/api", tags=["websocket"])
 
 @app.get("/")
 async def root():

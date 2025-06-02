@@ -12,10 +12,14 @@
       </div>
 
       <!-- Right Side -->
-      <div class="flex">
+      <div class="flex align-items-center gap-2">
         <p-avatar *ngIf="isAdmin" icon="pi pi-cog" shape="circle" [style]="{'color': 'var(--primary-color)'}"
-          class="cursor-pointer mr-2" (click)="goToSettings()">
+          class="cursor-pointer" (click)="goToSettings()">
         </p-avatar>
+        
+        <!-- Notification Panel - only show when logged in -->
+        <app-notification-panel *ngIf="isLoggedIn"></app-notification-panel>
+        
         <ng-container *ngIf="!isLoggedIn; else userIcon">
           <button pButton label="Login" class="p-button-rounded p-button-sm" (click)="login()">
           </button>

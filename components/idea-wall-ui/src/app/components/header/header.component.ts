@@ -5,12 +5,13 @@ import { AuthService } from '../../auth/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { NotificationPanelComponent } from '../notification-panel/notification-panel.component';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterModule, CommonModule, ButtonModule, AvatarModule, OverlayPanelModule],
+  imports: [RouterModule, CommonModule, ButtonModule, AvatarModule, OverlayPanelModule, NotificationPanelComponent],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })

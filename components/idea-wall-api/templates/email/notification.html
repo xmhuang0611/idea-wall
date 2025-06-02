@@ -1,215 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ subject }} - Idea Wall</title>
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            line-height: 1.6; 
-            color: #333; 
-            margin: 0; 
-            padding: 0; 
-            background-color: #f4f4f4;
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style type="text/css">
+        /* Reset styles */
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
         }
-        .container { 
-            max-width: 600px; 
-            margin: 0 auto; 
-            padding: 20px; 
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
         }
-        .email-wrapper {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .header { 
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white; 
-            padding: 30px 20px; 
-            text-align: center; 
-        }
-        .header h1 {
-            margin: 0 0 10px 0;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .header p {
-            margin: 0;
-            font-size: 16px;
-            opacity: 0.9;
-        }
-        .content { 
-            padding: 30px 20px; 
-        }
-        .greeting {
-            font-size: 18px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .notification { 
-            background-color: #f8f9fa; 
-            margin: 20px 0; 
-            padding: 25px; 
-            border-radius: 8px; 
-            border-left: 4px solid #007bff;
-            position: relative;
-        }
-        .notification.comment { 
-            border-left-color: #28a745; 
-            background-color: #f8fff9;
-        }
-        .notification.vote { 
-            border-left-color: #ffc107; 
-            background-color: #fffef8;
-        }
-        .notification.bookmark { 
-            border-left-color: #17a2b8; 
-            background-color: #f8feff;
-        }
-        .notification-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .notification-icon { 
-            font-size: 24px; 
-            margin-right: 12px;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background-color: white;
-        }
-        .notification-type {
-            font-weight: bold;
-            color: #007bff;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .notification-content { 
-            font-size: 16px; 
-            margin: 15px 0;
-            line-height: 1.5;
-            color: #333;
-        }
-        .notification-time { 
-            color: #6c757d; 
-            font-size: 14px; 
-            margin-top: 15px;
-            font-style: italic;
-        }
-        .cta-section {
-            text-align: center; 
-            margin: 30px 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-        .btn { 
-            display: inline-block; 
-            padding: 14px 28px; 
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white; 
-            text-decoration: none; 
-            border-radius: 6px; 
-            font-weight: bold;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,123,255,0.3);
-        }
-        .btn:hover { 
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,123,255,0.4);
-        }
-        .footer { 
-            background-color: #e9ecef; 
-            padding: 20px; 
-            text-align: center; 
-            border-top: 1px solid #dee2e6;
-        }
-        .footer p {
-            margin: 0;
-            color: #6c757d;
-            font-size: 12px;
-            line-height: 1.4;
-        }
-        .footer a {
-            color: #007bff;
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
             text-decoration: none;
         }
-        .footer a:hover {
-            text-decoration: underline;
+        
+        /* Client-specific styles */
+        .ReadMsgBody { width: 100%; }
+        .ExternalClass { width: 100%; }
+        .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+            line-height: 100%;
         }
         
-        /* Responsive design */
-        @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-            }
-            .header {
-                padding: 20px 15px;
-            }
-            .header h1 {
-                font-size: 24px;
-            }
-            .content {
-                padding: 20px 15px;
-            }
-            .notification {
-                padding: 20px 15px;
-            }
-            .btn {
-                padding: 12px 24px;
-                font-size: 14px;
-            }
+        /* Mobile styles */
+        @media only screen and (max-width: 600px) {
+            .container { width: 100% !important; }
+            .mobile-padding { padding: 10px !important; }
+            .mobile-text-center { text-align: center !important; }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="email-wrapper">
-            <div class="header">
-                <h1>💡 Idea Wall</h1>
-                <p>{{ header_message | default("You have a new notification!") }}</p>
-            </div>
-            
-            <div class="content">
-                <div class="greeting">Hello {{ user_name }}!</div>
-                
-                <div class="notification {{ notification.type }}">
-                    <div class="notification-header">
-                        <div class="notification-icon">
-                            {% if notification.type == 'comment' %}💬
-                            {% elif notification.type == 'vote' %}👍
-                            {% elif notification.type == 'bookmark' %}🔖
-                            {% else %}🔔
-                            {% endif %}
-                        </div>
-                        <div class="notification-type">{{ notification.type.replace('_', ' ').title() }}</div>
-                    </div>
-                    <div class="notification-content">{{ notification.content }}</div>
-                    <div class="notification-time">{{ notification.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
-                </div>
-                
-                <div class="cta-section">
-                    <p style="margin-bottom: 15px; color: #666;">Click below to view your notifications and engage with your community:</p>
-                    <a href="{{ app_url }}" class="btn">View on Idea Wall</a>
-                </div>
-            </div>
-            
-            <div class="footer">
-                <p>
-                    You're receiving this email because someone interacted with your content on Idea Wall.<br>
-                    <a href="{{ app_url }}/settings">Manage your notification preferences</a> | 
-                    <a href="{{ app_url }}">Visit Idea Wall</a>
-                </p>
-            </div>
-        </div>
-    </div>
+<body style="margin: 0; padding: 0; background-color: #ffffff; font-family: Arial, sans-serif;">
+    <!-- Main Container -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #ffffff;">
+        <tr>
+            <td align="center" style="padding: 20px;">
+                <!-- Outer Border Table -->
+                <table role="presentation" cellspacing="0" cellpadding="1" border="0" width="600" style="background-color: #eeeeee;">
+                    <tr>
+                        <td>
+                            <!-- Email Wrapper -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" class="container" style="background-color: #ffffff;">
+                                
+                                <!-- Header -->
+                                <tr>
+                                    <td style="background-color: #1976D2; padding: 30px 20px; text-align: center;">
+                                        <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 600; color: #ffffff; font-family: Arial, Helvetica, sans-serif;">💡 Idea Wall</h1>
+                                        <p style="margin: 0; font-size: 16px; color: #ffffff; font-family: Arial, Helvetica, sans-serif; font-weight: 400;">{{ header_message | default("Someone commented on your idea!") }}</p>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Content -->
+                                <tr>
+                                    <td style="padding: 20px;" class="mobile-padding">
+                                        
+                                        <!-- Greeting -->
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom: 20px;">
+                                                    <p style="margin: 0; font-size: 18px; color: #333333; font-family: Arial, Helvetica, sans-serif; font-weight: 400;">Hello {{ user_name }}!</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- Notification Box -->
+                                        {% set bg_color = '#f8f9fa' if notification.type == 'comment' else '#fffef8' if notification.type == 'vote' else '#f8feff' if notification.type == 'bookmark' else '#f8f9fa' %}
+                                        {% set border_color = '#1976D2' if notification.type == 'comment' else '#FF9800' if notification.type == 'vote' else '#00BCD4' if notification.type == 'bookmark' else '#1976D2' %}
+                                        {% set type_color = '#1976D2' if notification.type == 'comment' else '#FF9800' if notification.type == 'vote' else '#00BCD4' if notification.type == 'bookmark' else '#1976D2' %}
+                                        {% set icon = '💬' if notification.type == 'comment' else '👍' if notification.type == 'vote' else '🔖' if notification.type == 'bookmark' else '🔔' %}
+                                        
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 20px 0;">
+                                            <tr>
+                                                <td style="background-color: {{ bg_color }}; padding: 20px; border-left: 4px solid {{ border_color }};">
+                                                    
+                                                    <!-- Notification Header -->
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                        <tr>
+                                                            <td style="padding-bottom: 15px;">
+                                                                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                                                                    <tr>
+                                                                        <td style="width: 24px; height: 24px; text-align: center; vertical-align: middle; padding-right: 8px;">
+                                                                            <span style="font-size: 16px; line-height: 24px;">{{ icon }}</span>
+                                                                        </td>
+                                                                        <td style="vertical-align: middle;">
+                                                                            <span style="font-weight: 600; color: {{ type_color }}; font-size: 12px; text-transform: uppercase; font-family: Arial, Helvetica, sans-serif; letter-spacing: 0.5px;">{{ notification.type.replace('_', ' ') }}</span>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    
+                                                    <!-- Notification Content -->
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                        <tr>
+                                                            <td style="padding-bottom: 15px;">
+                                                                <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #424242; font-family: Arial, Helvetica, sans-serif; font-weight: 400;">{{ notification.content }}</p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    
+                                                    <!-- Notification Time -->
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                        <tr>
+                                                            <td>
+                                                                <p style="margin: 0; color: #757575; font-size: 14px; font-style: italic; font-family: Arial, Helvetica, sans-serif; font-weight: 400;">{{ notification.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- Spacer -->
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="height: 10px; line-height: 10px;">&nbsp;</td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- CTA Section -->
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 20px 0;">
+                                            <tr>
+                                                <td style="text-align: center; padding: 20px; background-color: #f8f9fa;">
+                                                    <p style="margin: 0 0 15px 0; color: #666666; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: 400;">Click below to view your notifications and engage with your community:</p>
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                                                        <tr>
+                                                            <td style="background-color: #1976D2; text-align: center;">
+                                                                <a href="{{ app_url }}" style="display: block; padding: 12px 24px; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; font-family: Arial, Helvetica, sans-serif; line-height: 1.2;">View on Idea Wall</a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                    </td>
+                                </tr>
+                                
+                                <!-- Footer -->
+                                <tr>
+                                    <td style="background-color: #f5f5f5; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
+                                        <p style="margin: 0; color: #757575; font-size: 12px; line-height: 1.4; font-family: Arial, Helvetica, sans-serif; font-weight: 400;">
+                                            You're receiving this email because someone interacted with your content on Idea Wall.<br>
+                                            <a href="{{ app_url }}/settings" style="color: #1976D2; text-decoration: none; font-weight: 500;">Manage your notification preferences</a> | 
+                                            <a href="{{ app_url }}" style="color: #1976D2; text-decoration: none; font-weight: 500;">Visit Idea Wall</a>
+                                        </p>
+                                    </td>
+                                </tr>
+                                
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html> 
